@@ -1,5 +1,6 @@
 import { db } from '../config/firebase.js';
 import { CollectionReference, Query } from 'firebase-admin/firestore';
+import { QueryOptions } from '../types/query-option.js';
 
 export class EntityCrudService<T extends { id?: string }> {
   protected collection: CollectionReference;
@@ -31,14 +32,46 @@ export class EntityCrudService<T extends { id?: string }> {
     return { id: doc.id, ...doc.data() } as T;
   }
 
-  async find(filters?: Partial<T>, limit: number = 10): Promise<T[]> {
+  async find(queryOptions?: QueryOptions): Promise<T[]> {
     let query: Query = this.collection;
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        query = query.where(key, '==', value);
-      });
+
+    // Handle WHERE conditions
+    if (queryOptions?.where) {
+      const whereConditions = Array.isArray(queryOptions.where)
+        ? queryOptions.where
+        : [queryOptions.where];
+
+      for (const condition of whereConditions) {
+        query = query.where(condition.field, condition.operator, condition.value);
+      }
     }
-    query = query.limit(limit);
+
+    // Handle ORDER BY conditions
+    if (queryOptions?.orderBy) {
+      const orderByConditions = Array.isArray(queryOptions.orderBy)
+        ? queryOptions.orderBy
+        : [queryOptions.orderBy];
+
+      for (const condition of orderByConditions) {
+        query = query.orderBy(condition.field, condition.direction);
+      }
+    }
+
+    // Handle LIMIT
+    if (queryOptions?.limit) {
+      query = query.limit(queryOptions.limit);
+    }
+
+    // Handle pagination (startAfter)
+    if (queryOptions?.startAfter) {
+      query = query.startAfter(queryOptions.startAfter);
+    }
+
+    // Handle pagination (endBefore)
+    if (queryOptions?.endBefore) {
+      query = query.endBefore(queryOptions.endBefore);
+    }
+
     const snapshot = await query.get();
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as T);
   }
