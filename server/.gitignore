@@ -32,3 +32,6 @@ Thumbs.db
 # Optional: temporary files
 tmp/
 temp/
+
+# Ignore json for firebase service account file
+serviceAccountKey.json
