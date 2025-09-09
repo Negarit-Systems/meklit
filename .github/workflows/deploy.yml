@@ -3,13 +3,25 @@ name: Deploy to VPS
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'client/**'
-      - 'server/**'
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            frontend: 'client/**'
+            backend: 'server/**'
+
   deploy-frontend:
-    if: contains(github.event.head_commit.modified_files, 'client/')
+    needs: check-changes
+    if: needs.check-changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +51,8 @@ jobs:
           target: "/var/www/meklit/frontend"
 
   deploy-backend:
-    if: contains(github.event.head_commit.modified_files, 'server/')
+    needs: check-changes
+    if: needs.check-changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
