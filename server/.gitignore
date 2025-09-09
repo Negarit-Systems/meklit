@@ -34,4 +34,4 @@ tmp/
 temp/
 
 # Ignore json for firebase service account file
-*.json
+serviceAccountKey.json
