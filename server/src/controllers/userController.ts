@@ -1,4 +1,4 @@
-import { sendSuccess } from '../utils/apiResponse';
+import { sendSuccess, sendError } from '../utils/apiResponse';
 import { Request, Response } from 'express';
 
 export const getUsers = (req: Request, res: Response): void => {
@@ -22,6 +22,6 @@ export const getUserById = (req: Request, res: Response): void => {
   if (user) {
     sendSuccess(res, 'User fetched successfully', user);
   } else {
-    sendSuccess(res, 'User not found', null, 404);
+    sendError(res, 'User not found', 404);
   }
 };
