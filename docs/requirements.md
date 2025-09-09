@@ -105,3 +105,23 @@ Office Administrator (OA):
 *   As an Office Administrator, I can navigate an intuitive and visually appealing interface so that I can use the dashboard without extensive training.
     
 *   As an Office Administrator, I can interact with modern UI elements (e.g., dropdowns, sliders for durations) so that filtering and selection feel natural and efficient.
+
+## 5 Dashboard Structure
+Dashboard Page (Main Analytics View)
+- Central page for administrators.
+Contains:
+- Filter Panel (by Center, Class, Child, Curriculum, plus extra like symptoms, nap
+duration, meals consumed).
+- Data Type Selector (Daily Logs, Health Records, or both).
+- Dynamic Visualizations (charts that respond to filters).
+
+Comparison Page
+- Allows admins to compare data across: Children, Classes, Centers
+- Example: compare nap durations between two children, or incident reports between classes.
+- Visualization: side-by-side bar charts, line graphs, or tables.
+
+Detail Page
+- Opens when an admin selects a specific child or staff from the dashboard.
+- Shows detailed history of: Daily log entries (meals, naps, moods, activities). And Health records
+(incidents, medications, actions taken).
+- Can include a simple timeline or list view
