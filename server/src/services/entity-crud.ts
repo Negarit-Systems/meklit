@@ -32,6 +32,15 @@ export class EntityCrudService<T extends { id?: string }> {
     return { id: doc.id, ...doc.data() } as T;
   }
 
+  async findByEmail(email: string): Promise<T | null> {
+    const querySnapshot = await this.collection
+      .where('email', '==', email)
+      .get();
+    if (querySnapshot.empty) return null;
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as T;
+  }
+
   async find(queryOptions?: QueryOptions): Promise<T[]> {
     const {
       where,
@@ -46,13 +55,19 @@ export class EntityCrudService<T extends { id?: string }> {
       const whereConditions = Array.isArray(where) ? where : [where];
 
       for (const condition of whereConditions) {
-        query = query.where(condition.field, condition.operator, condition.value);
+        query = query.where(
+          condition.field,
+          condition.operator,
+          condition.value,
+        );
       }
     }
 
     // Handle ORDER BY conditions
     if (orderBy) {
-      const orderByConditions = Array.isArray(orderBy) ? orderBy : [orderBy];
+      const orderByConditions = Array.isArray(orderBy)
+        ? orderBy
+        : [orderBy];
 
       for (const condition of orderByConditions) {
         query = query.orderBy(condition.field, condition.direction);
@@ -70,6 +85,8 @@ export class EntityCrudService<T extends { id?: string }> {
     }
 
     const snapshot = await query.get();
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as T);
+    return snapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() }) as T,
+    );
   }
 }
