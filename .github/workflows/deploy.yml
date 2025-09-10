@@ -65,32 +65,29 @@ jobs:
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
   
-      - name: Install, build and test backend
+      - name: Install and test backend
         run: |
           cd server
           npm ci
-          npm run build
           npm test --if-present || true
         env:
           CI: true
   
-      - name: Deploy Built Backend
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "server/dist/*,server/package.json,server/package-lock.json,server/node_modules/**"
-          target: "/var/www/meklit/backend/server"
-          strip_components: 1
+      - name: Build backend
+        run: |
+          cd server
+          npm run build
   
-      - name: Restart Backend on Server
+      - name: Deploy Backend
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/meklit/backend/server
+            cd /var/www/meklit/backend
+            git pull origin main
+            cd server
             npm ci --production
+            npm run build
             pm2 restart meklit-backend --update-env || pm2 start npm --name "meklit-backend" -- start
