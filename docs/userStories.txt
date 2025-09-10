@@ -1,0 +1,44 @@
+1. Login / Authentication Page
+● As an administrator, I want to log in with my email and password, so that I can securely
+access the system.
+● As an administrator, I want the system to verify my role, so that only authorized users
+(office administrators) can access the dashboard.
+● As an administrator, I want to be redirected to the dashboard after a successful login,
+so that I can immediately see key insights.
+● As an unauthorized user, I want to be denied access, so that sensitive data remains
+protected.
+2. Dashboard (Main Analytics View)
+● As an administrator, I want to filter data by center, class, child, or curriculum, so that I
+can focus on the information most relevant to my needs.
+● As an administrator, I want to apply additional filters (symptoms, nap duration, meals
+consumed, activity types), so that I can analyze specific health and activity trends.
+● As an administrator, I want to select the type of data (daily logs, health records, or
+both), so that I can tailor the dashboard to my current analysis needs.
+● As an administrator, I want to see dynamic charts and graphs that update when filters
+are applied, so that I can instantly visualize insights.
+● As an administrator, I want to view time-based trend analyses, so that I can identify
+changes over days, weeks, or months.
+● As an administrator, I want to see aggregated summaries (like average nap duration or
+incident frequency), so that I can quickly understand high-level metrics.
+● As an administrator, I want the dashboard to be responsive, so that I can access it
+easily from both desktop and mobile devices.
+3. Comparison Page
+● As an administrator, I want to compare data between children, classes, or centers, so
+that I can identify patterns or differences.
+● As an administrator, I want to compare nap durations between two children, so that I
+can spot sleep behavior differences.
+● As an administrator, I want to compare incident reports between classes, so that I can
+evaluate safety and health outcomes.
+● As an administrator, I want visualizations such as side-by-side bar charts, line graphs,
+or tables, so that comparisons are clear and easy to understand.
+4. Detail Page
+● As an administrator, I want to view detailed history for a selected child, so that I can
+track their meals, naps, moods, activities, and health records.
+● As an administrator, I want to view detailed history for a selected staff member, so that I
+can monitor their logged activities and incidents.
+● As an administrator, I want to see information displayed as a timeline or list view, so
+that I can easily review and interpret past data.
+● As an administrator, I want data on this page to be read-only, so that the records
+remain accurate and tamper-proof.
+● As an administrator, I want to view activities performed by a staff member, so that I can
+assess their engagement and responsibilities.
