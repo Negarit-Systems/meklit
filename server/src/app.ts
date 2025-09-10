@@ -1,10 +1,10 @@
-import router from './routes';
+import router from './routes/index.js';
 import express from 'express';
-import { logger, errorHandler } from './middlewares';
+import { logger, errorHandler } from './middlewares/index.js';
 const app = express();
 
 app.use(logger);
 app.use(router);
 app.use(errorHandler);
 
-export default app;
+export { app };
