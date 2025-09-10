@@ -3,12 +3,8 @@ name: Deploy to VPS
 on:
   push:
     branches: [ main ]
-  pull_request_target:
-    branches: [ main ]
-
-permissions:
-  pull-requests: read
-  contents: read
+  # pull_request_target:
+  #   branches: [ main ]
 
 jobs:
   check-changes:
@@ -18,17 +14,12 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Filter changes
-        uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v2
         id: filter
         with:
           filters: |
             frontend: 'client/**'
             backend: 'server/**'
-          base: ${{ github.event_name == 'pull_request' && github.base_ref || 'HEAD~1' }}
 
   deploy-frontend:
     needs: check-changes
