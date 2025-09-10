@@ -88,6 +88,6 @@ jobs:
             cd /var/www/meklit/backend
             git pull origin main
             cd server
-            npm ci --production
+            npm ci
             npm run build
             pm2 restart meklit-backend --update-env || pm2 start npm --name "meklit-backend" -- start
