@@ -1,5 +1,5 @@
-import { sendSuccess, sendError } from '../utils/apiResponse';
-import { Request, Response } from 'express';
+import { sendSuccess, sendError } from '../utils/apiResponse.js';
+import type { Request, Response } from 'express';
 
 export const getUsers = (req: Request, res: Response): void => {
   const count = parseInt(req.query.count as string) || 5;

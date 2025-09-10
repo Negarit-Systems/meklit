@@ -1,4 +1,4 @@
-import logger from './logger';
-import errorHandler from './errorHandler';
+import logger from './logger.js';
+import errorHandler from './errorHandler.js';
 
 export { logger, errorHandler };
