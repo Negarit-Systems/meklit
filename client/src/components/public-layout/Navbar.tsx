@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext } from "react"
 import { Button } from "@/components/ui/button"
 import { Settings, User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3 } from "lucide-react"
 import {
@@ -12,6 +12,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { ThemeContext } from "@/context/ThemeContext"
 
 interface NavbarProps {
   className?: string
@@ -22,6 +23,7 @@ export function Navbar({ className }: NavbarProps) {
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const isMdUp = useMediaQuery("(min-width: 768px)")
+  const { theme, toggleTheme } = useContext(ThemeContext)
 
   // Close mobile menu when viewport becomes >= md
   useEffect(() => {
@@ -68,7 +70,14 @@ export function Navbar({ className }: NavbarProps) {
 
           {/* Right: theme + profile */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 p-0 relative"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+           >
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
