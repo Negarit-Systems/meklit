@@ -3,7 +3,7 @@ import { OrderByDirection, WhereFilterOp } from 'firebase-admin/firestore';
 export type WhereCondition = {
   field: string;
   operator: WhereFilterOp;
-  value: any;
+  value: unknown;
 };
 
 export type OrderByCondition = {
@@ -11,10 +11,9 @@ export type OrderByCondition = {
   direction?: OrderByDirection;
 };
 
-export interface QueryOptions {
+export type QueryOptions = {
   where?: WhereCondition | WhereCondition[];
   orderBy?: OrderByCondition | OrderByCondition[];
   limit?: number;
-  startAfter?: any;
-  endBefore?: any;
-}
+  startAfter?: unknown;
+};

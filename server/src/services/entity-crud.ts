@@ -33,13 +33,17 @@ export class EntityCrudService<T extends { id?: string }> {
   }
 
   async find(queryOptions?: QueryOptions): Promise<T[]> {
+    const {
+      where,
+      orderBy = { field: 'createdAt', direction: 'desc' },
+      limit = 10,
+      startAfter,
+    } = queryOptions ?? {};
     let query: Query = this.collection;
 
     // Handle WHERE conditions
-    if (queryOptions?.where) {
-      const whereConditions = Array.isArray(queryOptions.where)
-        ? queryOptions.where
-        : [queryOptions.where];
+    if (where) {
+      const whereConditions = Array.isArray(where) ? where : [where];
 
       for (const condition of whereConditions) {
         query = query.where(condition.field, condition.operator, condition.value);
@@ -47,10 +51,8 @@ export class EntityCrudService<T extends { id?: string }> {
     }
 
     // Handle ORDER BY conditions
-    if (queryOptions?.orderBy) {
-      const orderByConditions = Array.isArray(queryOptions.orderBy)
-        ? queryOptions.orderBy
-        : [queryOptions.orderBy];
+    if (orderBy) {
+      const orderByConditions = Array.isArray(orderBy) ? orderBy : [orderBy];
 
       for (const condition of orderByConditions) {
         query = query.orderBy(condition.field, condition.direction);
@@ -58,18 +60,13 @@ export class EntityCrudService<T extends { id?: string }> {
     }
 
     // Handle LIMIT
-    if (queryOptions?.limit) {
-      query = query.limit(queryOptions.limit);
+    if (limit) {
+      query = query.limit(limit);
     }
 
     // Handle pagination (startAfter)
-    if (queryOptions?.startAfter) {
-      query = query.startAfter(queryOptions.startAfter);
-    }
-
-    // Handle pagination (endBefore)
-    if (queryOptions?.endBefore) {
-      query = query.endBefore(queryOptions.endBefore);
+    if (startAfter) {
+      query = query.startAfter(startAfter);
     }
 
     const snapshot = await query.get();
