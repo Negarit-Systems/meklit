@@ -1,16 +1,23 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config } from './config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const serviceAccountKeyPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+const { firebaseServiceAccountPath } = config();
 
-if (!serviceAccountKeyPath) {
-  throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH is not defined in environment variables');
+if (!firebaseServiceAccountPath) {
+  throw new Error(
+    'FIREBASE_SERVICE_ACCOUNT_PATH is not defined in environment variables',
+  );
 }
 
-const serviceAccountPath = path.resolve(__dirname, '..', serviceAccountKeyPath);
+const serviceAccountPath = path.resolve(
+  __dirname,
+  '..',
+  firebaseServiceAccountPath,
+);
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
