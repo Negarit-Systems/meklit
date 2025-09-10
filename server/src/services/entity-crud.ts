@@ -1,5 +1,6 @@
 import { db } from '../config/firebase.js';
 import { CollectionReference, Query } from 'firebase-admin/firestore';
+import { QueryOptions } from '../types/query-option.js';
 
 export class EntityCrudService<T extends { id?: string }> {
   protected collection: CollectionReference;
@@ -31,14 +32,43 @@ export class EntityCrudService<T extends { id?: string }> {
     return { id: doc.id, ...doc.data() } as T;
   }
 
-  async find(filters?: Partial<T>, limit: number = 10): Promise<T[]> {
+  async find(queryOptions?: QueryOptions): Promise<T[]> {
+    const {
+      where,
+      orderBy = { field: 'createdAt', direction: 'desc' },
+      limit = 10,
+      startAfter,
+    } = queryOptions ?? {};
     let query: Query = this.collection;
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        query = query.where(key, '==', value);
-      });
+
+    // Handle WHERE conditions
+    if (where) {
+      const whereConditions = Array.isArray(where) ? where : [where];
+
+      for (const condition of whereConditions) {
+        query = query.where(condition.field, condition.operator, condition.value);
+      }
     }
-    query = query.limit(limit);
+
+    // Handle ORDER BY conditions
+    if (orderBy) {
+      const orderByConditions = Array.isArray(orderBy) ? orderBy : [orderBy];
+
+      for (const condition of orderByConditions) {
+        query = query.orderBy(condition.field, condition.direction);
+      }
+    }
+
+    // Handle LIMIT
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    // Handle pagination (startAfter)
+    if (startAfter) {
+      query = query.startAfter(startAfter);
+    }
+
     const snapshot = await query.get();
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as T);
   }
