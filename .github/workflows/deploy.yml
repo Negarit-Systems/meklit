@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches: [ main ]
-  pull_request_target:
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -17,12 +17,17 @@ jobs:
       backend: ${{ steps.filter.outputs.backend }}
     steps:
       - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v2
+        with:
+          fetch-depth: 0
+
+      - name: Filter changes
+        uses: dorny/paths-filter@v2
         id: filter
         with:
           filters: |
             frontend: 'client/**'
             backend: 'server/**'
+          base: ${{ github.event_name == 'pull_request' && github.base_ref || 'HEAD~1' }}
 
   deploy-frontend:
     needs: check-changes
@@ -62,14 +67,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-  
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
-  
+
       - name: Install and test backend
         run: |
           cd server
@@ -77,12 +82,12 @@ jobs:
           npm test --if-present || true
         env:
           CI: true
-  
+
       - name: Build backend
         run: |
           cd server
           npm run build
-  
+
       - name: Deploy Backend
         uses: appleboy/ssh-action@v1.0.3
         with:
