@@ -7,9 +7,17 @@ const { n8nWebHookURL } = config();
 export async function sendEmail(
   payload: EmailPayload,
 ): Promise<void> {
-  await axios.post(n8nWebHookURL, {
-    to: payload.to,
-    subject: payload.subject,
-    body: payload.body,
-  });
+  try {
+    await axios.post(n8nWebHookURL, {
+      to: payload.to,
+      subject: payload.subject,
+      body: payload.body,
+    });
+  } catch (error) {
+    console.error(
+      `Failed to send email via webhook to ${payload.to}:`,
+      error instanceof Error ? error.message : error,
+    );
+    throw error;
+  }
 }

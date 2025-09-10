@@ -1,7 +1,10 @@
 const ORGANIZATION_NAME = 'Meklit.Life';
-const LOGO_URL = 'https://i.postimg.cc/XqXPxxNM/Screenshot-from-2025-09-11-01-39-35.png';
-const SECONDARY_LOGO = 'https://i.postimg.cc/25wXDgVR/Screenshot-from-2025-09-11-01-46-57.png';
+const LOGO_URL =
+  'https://i.postimg.cc/XqXPxxNM/Screenshot-from-2025-09-11-01-39-35.png';
+const SECONDARY_LOGO =
+  'https://i.postimg.cc/25wXDgVR/Screenshot-from-2025-09-11-01-46-57.png';
 const ADDRESS = 'Addis Ababa, Ethiopia';
+const HELP_CENTER_URL = 'https://www.meklit.life';
 const SUPPORT_EMAIL = 'negarit.system.tech@gmail.com';
 const FACEBOOK_URL = 'https://facebook.com';
 const YOUTUBE_URL = 'https://youtube.com';
@@ -14,7 +17,11 @@ const TWITTER_ICON_URL =
 const YOUTUBE_ICON_URL =
   'https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661503195931_210869/email-template-icon-youtube';
 
-export const otpTemplate = (fullName: string, key: string, duration: number) => {
+export const otpTemplate = (
+  fullName: string,
+  key: string,
+  duration: number,
+) => {
   return `<!DOCTYPE html>
   <html lang="en">
     <head>
@@ -141,11 +148,11 @@ export const otpTemplate = (fullName: string, key: string, duration: number) => 
           "
         >
           Need help? Ask at
-          <a href="mailto:{{SUPPORT_EMAIL}}" style="color: #499fb6; text-decoration: none;">
+          <a href="mailto:${SUPPORT_EMAIL}" style="color: #499fb6; text-decoration: none;">
             ${SUPPORT_EMAIL}
           </a>
           or visit our
-          <a href="{{HELP_CENTER_URL}}" target="_blank" style="color: #499fb6; text-decoration: none;">
+          <a href="${HELP_CENTER_URL}" target="_blank" style="color: #499fb6; text-decoration: none;">
             Help Center
           </a>
         </p>
