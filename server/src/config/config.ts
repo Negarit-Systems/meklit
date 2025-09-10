@@ -6,6 +6,7 @@ export const config = () => {
   return {
     port: process.env.PORT || 4001,
     dbUri: process.env.DB_URI,
-    jwtSecret: process.env.JWT_SECRET,
+    jwtSecret: process.env.JWT_SECRET!,
+    refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET!,
   };
 };

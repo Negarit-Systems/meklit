@@ -4,8 +4,8 @@ import type { ApiResponse } from '../types/types.js';
 export const sendSuccess = <T>(
   res: Response,
   message: string,
-  data?: T,
   statusCode: number = 200,
+  data?: T,
 ): void => {
   const response: ApiResponse<T> = {
     success: true,
