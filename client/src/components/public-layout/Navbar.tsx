@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { Settings, User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3 } from "lucide-react"
 import {
@@ -21,6 +22,7 @@ interface NavbarProps {
 export function Navbar({ className }: NavbarProps) {
   const navigate = useNavigate()
   const location = useLocation()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const isMdUp = useMediaQuery("(min-width: 768px)")
   const { theme, toggleTheme } = useContext(ThemeContext)
@@ -39,6 +41,28 @@ export function Navbar({ className }: NavbarProps) {
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [open])
+
+  const handleLogout = async () => {
+    try {
+      // Optional: Call a logout API endpoint to invalidate the session
+      // await fetch("/api/logout", {
+      //   method: "POST",
+      //   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      // });
+
+      // Clear authentication token
+      localStorage.removeItem("token")
+
+      // Invalidate all queries to reset cached data
+      await queryClient.invalidateQueries()
+
+      // Navigate to sign-in page
+      navigate("/sign-in")
+    } catch (err) {
+      console.error("Logout failed:", err)
+      // Optionally show an error message to the user
+    }
+  }
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -77,7 +101,7 @@ export function Navbar({ className }: NavbarProps) {
               onClick={toggleTheme}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-           >
+            >
               <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             </Button>
@@ -102,13 +126,12 @@ export function Navbar({ className }: NavbarProps) {
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Log out</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </div>
-
 
       {/* Mobile slide-over menu */}
       <AnimatePresence>
