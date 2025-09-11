@@ -14,6 +14,9 @@ const doc = {
     {
       url: `http://localhost:${PORT}/api`,
     },
+    {
+      url: `https://meklit-api.negaritsystems.com.et/api`,
+    },
   ],
   security: [
     {
