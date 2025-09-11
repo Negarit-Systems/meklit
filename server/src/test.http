@@ -1,2 +1,48 @@
+@accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlpMMEcxbXIxNHFSQ1YzcTZtUEZjIiwiaWF0IjoxNzU3NTc5MDAxLCJleHAiOjE3NTc1Nzk5MDF9.-V8wAOHa2nzYuf2maKupnDxO34pQg0HTwHwqfAp5FjM"
+
 ### get all users
 GET http://localhost:4000/api/v1/users
+
+### auth: register
+POST http://localhost:4000/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "yonatantizazu12@gmail.com",
+  "password": "P@ssw0rd@P"
+}
+
+### auth: verify
+POST http://localhost:4000/api/v1/auth/verify
+Content-Type: application/json
+
+{
+  "email": "yonatantizazu12@gmail.com",
+  "otp": "461395"
+}
+
+### auth: login
+POST http://localhost:4000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "yonatantizazu12@gmail.com",
+  "password": "P@ssw0rd!"
+}
+
+### auth: refresh token
+POST http://localhost:4000/api/v1/auth/refresh-token
+Content-Type: application/json
+
+{
+
+}
+
+### auth: logout
+POST http://localhost:4000/api/v1/auth/logout
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+}
