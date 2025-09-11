@@ -3,6 +3,7 @@ import express from 'express';
 import { logger, errorHandler } from './middlewares/index.js';
 const app = express();
 
+app.use(express.json());
 app.use(logger);
 app.use(router);
 app.use(errorHandler);
