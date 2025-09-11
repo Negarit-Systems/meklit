@@ -28,13 +28,3 @@ export const userLoginSchema = z.object({
       .min(8, 'Password must be at least 8 characters'),
   }),
 });
-
-export type CreateUserInputSchema = z.infer<
-  typeof userRegisterSchema
->['body'];
-export type UserVerifyInputSchema = z.infer<
-  typeof userVerifySchema
->['body'];
-export type UserLoginInputSchema = z.infer<
-  typeof userLoginSchema
->['body'];

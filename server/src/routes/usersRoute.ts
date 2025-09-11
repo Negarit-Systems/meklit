@@ -14,24 +14,24 @@ import {
   userVerifySchema,
 } from '../models/schema/user.schema.js';
 
-const route = Router();
+const usersRoute = Router();
 
-route.post(
+usersRoute.post(
   '/auth/register',
   validateResource(userRegisterSchema),
   registerUser,
 );
-route.post(
+usersRoute.post(
   '/auth/verify',
   validateResource(userVerifySchema),
   verifyUser,
 );
-route.post(
+usersRoute.post(
   '/auth/login',
   validateResource(userLoginSchema),
   loginUser,
 );
-route.post('/auth/refresh-token', refreshToken);
-route.post('/auth/logout', logoutUser);
+usersRoute.post('/auth/refresh-token', refreshToken);
+usersRoute.post('/auth/logout', logoutUser);
 
-export default route;
+export default usersRoute;

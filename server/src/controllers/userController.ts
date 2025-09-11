@@ -4,11 +4,6 @@ import { UsersService } from '../services/users.js';
 import admin from 'firebase-admin';
 
 import * as bcrypt from 'bcrypt';
-import {
-  CreateUserInputSchema,
-  UserLoginInputSchema,
-  UserVerifyInputSchema,
-} from '../models/schema/user.schema.js';
 import generateOtp from '../utils/otpGenerator.js';
 import { sendEmail } from '../utils/email.js';
 import {
@@ -16,8 +11,8 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from '../utils/auth/jwt.utils.js';
-import { config } from 'src/config/config.js';
-import { otpTemplate } from 'src/utils/email-templates.js';
+import { config } from '../config/config.js';
+import { otpTemplate } from '../utils/email-templates.js';
 
 const userService = new UsersService();
 const { maxAge, nodeEnv } = config();
@@ -26,7 +21,7 @@ export const registerUser = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { name, email, password }: CreateUserInputSchema = req.body;
+  const { name, email, password } = req.body;
 
   const user = await userService.findByEmail(email);
   if (user) {
@@ -64,7 +59,7 @@ export const verifyUser = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
-  const { email, otp }: UserVerifyInputSchema = req.body;
+  const { email, otp } = req.body;
 
   const user = await userService.findByEmail(email);
   if (!user) {
@@ -117,7 +112,7 @@ export const verifyUser = async (
 };
 
 export const loginUser = async (req: Request, res: Response) => {
-  const { email, password }: UserLoginInputSchema = req.body;
+  const { email, password } = req.body;
 
   const user = await userService.findByEmail(email);
   if (!user || !bcrypt.compareSync(password, user.password)) {
