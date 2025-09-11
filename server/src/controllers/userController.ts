@@ -113,7 +113,7 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password }: UserLoginInputSchema = req.body;
 
   const user = await userService.findByEmail(email);
-  if (!user || bcrypt.compareSync(password, user.password)) {
+  if (!user || !bcrypt.compareSync(password, user.password)) {
     return sendError(res, 'Invalid Credential', 401);
   }
 

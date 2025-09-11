@@ -1,4 +1,4 @@
-@accessToken="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IlpMMEcxbXIxNHFSQ1YzcTZtUEZjIiwiaWF0IjoxNzU3NTc5MDAxLCJleHAiOjE3NTc1Nzk5MDF9.-V8wAOHa2nzYuf2maKupnDxO34pQg0HTwHwqfAp5FjM"
+@accessToken="your access token"
 
 ### get all users
 GET http://localhost:4000/api/v1/users
@@ -9,8 +9,8 @@ Content-Type: application/json
 
 {
   "name": "John Doe",
-  "email": "yonatantizazu12@gmail.com",
-  "password": "P@ssw0rd@P"
+  "email": "test@gmail.com",
+  "password": "P@ssw0rd"
 }
 
 ### auth: verify
@@ -18,7 +18,7 @@ POST http://localhost:4000/api/v1/auth/verify
 Content-Type: application/json
 
 {
-  "email": "yonatantizazu12@gmail.com",
+  "email": "test@gmail.com",
   "otp": "461395"
 }
 
@@ -28,7 +28,7 @@ Content-Type: application/json
 
 {
   "email": "yonatantizazu12@gmail.com",
-  "password": "P@ssw0rd!"
+  "password": "P@ssw0rd"
 }
 
 ### auth: refresh token
