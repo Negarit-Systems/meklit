@@ -16,8 +16,11 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from '../utils/auth/jwt.utils.js';
+import { config } from 'src/config/config.js';
+import { otpTemplate } from 'src/utils/email-templates.js';
 
 const userService = new UsersService();
+const { maxAge, nodeEnv } = config();
 
 export const registerUser = async (
   req: Request,
@@ -25,8 +28,8 @@ export const registerUser = async (
 ): Promise<void> => {
   const { name, email, password }: CreateUserInputSchema = req.body;
 
-  const userExists = await userService.findByEmail(email);
-  if (userExists) {
+  const user = await userService.findByEmail(email);
+  if (user) {
     return sendError(res, 'User already exists', 400);
   }
 
@@ -46,10 +49,12 @@ export const registerUser = async (
     updatedAt: admin.firestore.Timestamp.now(),
   });
 
+  const body = otpTemplate(name, String(otp), 10);
+
   await sendEmail({
     to: email,
-    subject: 'Your OTP Code',
-    body: `Your OTP code is ${otp}. It will expire in 10 minutes.`,
+    subject: 'Your OTP Code - Meklit.Life',
+    body,
   });
 
   sendSuccess(res, 'User registered successfully', 201);
@@ -99,9 +104,11 @@ export const verifyUser = async (
 
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: nodeEnv === 'production',
     sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: maxAge
+      ? parseInt(maxAge) * 24 * 60 * 60 * 1000
+      : 7 * 24 * 60 * 60 * 1000,
   });
 
   sendSuccess(res, 'User verified successfully', 200, {

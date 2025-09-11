@@ -10,5 +10,7 @@ export const config = () => {
     firebaseServiceAccountPath:
       process.env.FIREBASE_SERVICE_ACCOUNT_PATH!,
     n8nWebHookURL: process.env.N8N_WEBHOOK_URL!,
+    maxAge: process.env.MAX_AGE,
+    nodeEnv: process.env.NODE_ENV || 'development',
   };
 };
