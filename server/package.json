@@ -12,7 +12,7 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "lint:watch": "eslint . --ext .ts --watch",
     "test": "jest",
-    "seed": "npx ts-node src/utils/seed.ts",
+    "seed": "npx tsc && node dist/utils/seed.js",
     "firebase-emulator": "firebase emulators:start --only firestore",
     "firebase-login": "firebase login",
     "firebase-reauth": "firebase --reauth",
