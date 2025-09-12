@@ -10,14 +10,14 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/api"
+      "url": "http://localhost:5000/api/v1"
     },
     {
       "url": "https://meklit-api.negaritsystems.com.et/api"
     }
   ],
   "paths": {
-    "/users/auth/register": {
+    "/auth/register": {
       "post": {
         "description": "",
         "responses": {
@@ -47,7 +47,7 @@
         }
       }
     },
-    "/users/auth/verify": {
+    "/auth/verify": {
       "post": {
         "description": "",
         "responses": {
@@ -74,7 +74,7 @@
         }
       }
     },
-    "/users/auth/login": {
+    "/auth/login": {
       "post": {
         "description": "",
         "responses": {
@@ -101,7 +101,7 @@
         }
       }
     },
-    "/users/auth/refresh-token": {
+    "/auth/refresh-token": {
       "post": {
         "description": "",
         "responses": {
@@ -111,7 +111,7 @@
         }
       }
     },
-    "/users/auth/logout": {
+    "/auth/logout": {
       "post": {
         "description": "",
         "responses": {
