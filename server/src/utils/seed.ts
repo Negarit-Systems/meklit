@@ -1,3 +1,4 @@
+import { Timestamp } from 'firebase-admin/firestore';
 import { db } from '../config/firebase.js';
 import { Child } from '../models/child.js';
 import { DailyLog, DailyLogEnum } from '../models/daily-log.js';
@@ -78,9 +79,11 @@ async function seedDailyLogs(childIds: string[]) {
     const entry: Omit<DailyLog, 'id'> = {
       childId: childIds[Math.floor(Math.random() * childIds.length)],
       staffId: staff[Math.floor(Math.random() * staff.length)],
-      timestamp: new Date(
-        Date.now() -
-          Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
+      timestamp: Timestamp.fromDate(
+        new Date(
+          Date.now() -
+            Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
+        ),
       ),
       type,
       details: {},
