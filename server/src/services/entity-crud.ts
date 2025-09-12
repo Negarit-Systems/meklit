@@ -44,7 +44,7 @@ export class EntityCrudService<T extends { id?: string }> {
   async find(queryOptions?: QueryOptions): Promise<T[]> {
     const {
       where,
-      orderBy = { field: 'createdAt', direction: 'desc' },
+      orderBy,
       limit = 10,
       startAfter,
     } = queryOptions ?? {};
