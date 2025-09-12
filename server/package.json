@@ -16,7 +16,7 @@
     "firebase-emulator": "firebase emulators:start --only firestore",
     "firebase-login": "firebase login",
     "firebase-reauth": "firebase --reauth",
-    "swagger": "ts-node ./docs/swagger.ts"
+    "swagger": "tsx ./docs/swagger.ts"
   },
   "dependencies": {
     "axios": "^1.11.0",
