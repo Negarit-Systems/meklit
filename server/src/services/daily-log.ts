@@ -1,5 +1,5 @@
 import { CollectionReference } from 'firebase-admin/firestore';
-import { DailyLog } from '../models/daily-log.js';
+import { DailyLog, DailyLogEnum } from '../models/daily-log.js';
 import { EntityCrudService } from './entity-crud.js';
 import { db } from '../config/firebase.js';
 import {
@@ -18,47 +18,6 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
     this.dailyLogsRef = db.collection('dailyLogEntries');
   }
 
-  // Activity Frequency Report
-  async activityFrequencyReport(
-    startDate: string,
-    endDate: string,
-    filter: { childId?: string; classId?: string } = {},
-  ): Promise<Record<string, number>> {
-    let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
-
-    if (filter.childId) q = q.where('childId', '==', filter.childId);
-
-    const querySnapshot = await q.get();
-    const counts: Record<string, number> = {};
-
-    // If filtering by classId, we need to check each log's child class
-    if (filter.classId) {
-      for (const doc of querySnapshot.docs) {
-        const log = doc.data() as DailyLog;
-        const childInfo = await this.childService.findOne(
-          log.childId,
-        );
-
-        if (!childInfo) {
-          throw new Error('Child not found');
-        }
-
-        if (childInfo.classId === filter.classId) {
-          counts[log.type] = (counts[log.type] || 0) + 1;
-        }
-      }
-    } else {
-      querySnapshot.forEach((doc) => {
-        const log = doc.data() as DailyLog;
-        counts[log.type] = (counts[log.type] || 0) + 1;
-      });
-    }
-
-    return counts;
-  }
-
   // Trend Over Time Report
   async trendOverTimeReport(
     startDate: string,
@@ -70,8 +29,8 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
     } = {},
   ): Promise<TrendData[]> {
     let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
 
     if (filter.childId) q = q.where('childId', '==', filter.childId);
 
@@ -120,7 +79,7 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
           continue;
       }
 
-      const dateStr = log.timestamp.toISOString().split('T')[0];
+      const dateStr = log.timestamp.toDate().toDateString();
 
       if (!dailyData[dateStr]) {
         dailyData[dateStr] = {
@@ -137,7 +96,7 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
       }
 
       switch (log.type) {
-        case 'Nap':
+        case DailyLogEnum.Nap:
           if (log.details?.sleepDuration !== undefined) {
             dailyData[dateStr].napDurations.push(
               log.details.sleepDuration,
@@ -146,7 +105,7 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
           }
           break;
 
-        case 'Meal':
+        case DailyLogEnum.Meal:
           dailyData[dateStr].mealCount++;
           if (log.details?.mealStatus) {
             const mealStatus = log.details.mealStatus;
@@ -156,7 +115,7 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
           }
           break;
 
-        case 'Mood':
+        case DailyLogEnum.Mood:
           dailyData[dateStr].moodCount++;
           if (log.details?.mood) {
             const mood = log.details.mood;
@@ -165,7 +124,7 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
           }
           break;
 
-        case 'General Activity':
+        case DailyLogEnum.GeneralActivity:
           dailyData[dateStr].activityCount++;
           if (log.details?.activityEngagementLevel) {
             const engagement = log.details.activityEngagementLevel;
@@ -207,8 +166,8 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
     centerId?: string,
   ): Promise<StaffPerformance[]> {
     let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
 
     const querySnapshot = await q.get();
     const staffData: Record<string, StaffPerformance> = {};
@@ -277,8 +236,8 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
     centerId?: string,
   ): Promise<ComparativeData[]> {
     let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
 
     const querySnapshot = await q.get();
     const groupData: Record<string, any> = {};

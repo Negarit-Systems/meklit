@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import {
-  activityFrequencyReport,
   comparativeReport,
+  findDailyLogs,
   staffPerformanceReport,
   trendOverTimeReport,
 } from '../controllers/dailyLogController.js';
@@ -15,12 +15,9 @@ import {
 
 const dailyLogRoute = Router();
 
-dailyLogRoute.get(
-  '/activity-frequency',
-  validateResource(activityFrequencySchema),
-  activityFrequencyReport,
-);
+dailyLogRoute.get('/', findDailyLogs);
 
+// Report Routes
 dailyLogRoute.get(
   '/trend-over-time',
   validateResource(trendOverTimeSchema),

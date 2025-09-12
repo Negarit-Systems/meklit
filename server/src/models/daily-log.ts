@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase-admin/firestore';
+
 export enum DailyLogEnum {
   Meal = 'Meal',
   Nap = 'Nap',
@@ -10,7 +12,7 @@ export interface DailyLog {
   id?: string;
   childId: string;
   staffId: string;
-  timestamp: Date;
+  timestamp: Timestamp;
   type: DailyLogEnum | string;
   details: {
     mealStatus?: string;

@@ -1,5 +1,8 @@
 import { CollectionReference } from 'firebase-admin/firestore';
-import { HealthRecordEntry } from '../models/health-record.js';
+import {
+  HealthRecordEntry,
+  HealthRecordEnum,
+} from '../models/health-record.js';
 import { EntityCrudService } from './entity-crud.js';
 import { db } from '../config/firebase.js';
 import { ChildService } from './child-service.js';
@@ -26,8 +29,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
     centerId?: string,
   ): Promise<IncidentFrequencyData[]> {
     let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
 
     const querySnapshot = await q.get();
     const typeCounts: Record<string, number> = {};
@@ -75,8 +78,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
     centerId?: string,
   ): Promise<TimelineEvent[]> {
     let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string))
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate))
       .orderBy('timestamp', 'asc');
 
     if (childId) q = q.where('childId', '==', childId);
@@ -140,8 +143,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
   ): Promise<ChildHealthProfile> {
     const q = this.healthRecordRef
       .where('childId', '==', childId)
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string))
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate))
       .orderBy('timestamp', 'desc')
       .limit(limit);
 
@@ -159,14 +162,14 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
     querySnapshot.forEach((doc) => {
       const record = doc.data() as HealthRecordEntry;
 
-      if (record.type === 'Incident') {
+      if (record.type === HealthRecordEnum.Incident) {
         profile.totalIncidents++;
         const incidentText = record.details.incident as string;
         profile.incidentDistribution[incidentText] =
           (profile.incidentDistribution[incidentText] || 0) + 1;
       }
 
-      if (record.type === 'Medication Administered') {
+      if (record.type === HealthRecordEnum.MedicationAdministered) {
         profile.totalMedications++;
         const medicationText = record.details.medication as string;
         profile.medicationDistribution[medicationText] =
@@ -197,8 +200,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
     centerId?: string,
   ): Promise<StaffAnalysis[]> {
     let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
 
     const querySnapshot = await q.get();
     const staffData: Record<string, StaffAnalysis> = {};
@@ -233,11 +236,13 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
           staffData[staffId].totalRecords++;
 
-          if (record.type === 'Incident') {
+          if (record.type === HealthRecordEnum.Incident) {
             staffData[staffId].incidentsReported++;
           }
 
-          if (record.type === 'Medication Administered') {
+          if (
+            record.type === HealthRecordEnum.MedicationAdministered
+          ) {
             staffData[staffId].medicationsReported++;
           }
         }
@@ -258,11 +263,11 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
         staffData[staffId].totalRecords++;
 
-        if (record.type === 'Incident') {
+        if (record.type === HealthRecordEnum.Incident) {
           staffData[staffId].incidentsReported++;
         }
 
-        if (record.type === 'Medication Administered') {
+        if (record.type === HealthRecordEnum.MedicationAdministered) {
           staffData[staffId].medicationsReported++;
         }
       });
@@ -278,8 +283,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
     centerId?: string,
   ): Promise<Record<string, number>> {
     let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate as string))
-      .where('timestamp', '<=', new Date(endDate as string));
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
 
     const querySnapshot = await q.get();
     const actionCounts: Record<string, number> = {};

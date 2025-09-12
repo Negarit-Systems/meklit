@@ -4,22 +4,12 @@ import { DailyLogService } from '../services/daily-log.js';
 
 const dailyLogService = new DailyLogService();
 
-export const activityFrequencyReport = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const { startDate, endDate, childId, classId } = req.query;
-  const result = await dailyLogService.activityFrequencyReport(
-    startDate as string,
-    endDate as string,
-    { childId: childId as string, classId: classId as string },
-  );
-  sendSuccess(
-    res,
-    'Activity frequency report generated',
-    200,
-    result,
-  );
+export const findDailyLogs = async (req: Request, res: Response) => {
+  const dailyLogs = await dailyLogService.find();
+  if (!dailyLogs) {
+    return sendError(res, 'Failed to fetch dailyLogs.', 500);
+  }
+  sendSuccess(res, 'Daily logs fetched', 200, dailyLogs);
 };
 
 export const trendOverTimeReport = async (

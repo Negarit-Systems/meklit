@@ -17,6 +17,7 @@ import {
 
 const healthRecordRoute = Router();
 
+// Report Routes
 healthRecordRoute.get(
   '/incident-frequency',
   validateResource(incidentFrequencySchema),
