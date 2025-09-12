@@ -7,7 +7,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "npm run swagger && node dist/server.js",
-    "start:dev": "npm run swagger && nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm src/server.ts'",
+    "start:dev": "npm run swagger && tsx watch src/server.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "lint:watch": "eslint . --ext .ts --watch",

@@ -6,7 +6,7 @@ import {
   loginUser,
   refreshToken,
   logoutUser,
-} from '../controllers/userController.js';
+} from '../controllers/authController.js';
 import validateResource from '../middlewares/validateResource.js';
 import {
   userLoginSchema,
@@ -14,24 +14,24 @@ import {
   userVerifySchema,
 } from '../models/schema/user.schema.js';
 
-const usersRoute = Router();
+const authRoute = Router();
 
-usersRoute.post(
-  '/auth/register',
+authRoute.post(
+  '/register',
   validateResource(userRegisterSchema),
   registerUser,
 );
-usersRoute.post(
-  '/auth/verify',
+authRoute.post(
+  '/verify',
   validateResource(userVerifySchema),
   verifyUser,
 );
-usersRoute.post(
-  '/auth/login',
+authRoute.post(
+  '/login',
   validateResource(userLoginSchema),
   loginUser,
 );
-usersRoute.post('/auth/refresh-token', refreshToken);
-usersRoute.post('/auth/logout', logoutUser);
+authRoute.post('/refresh-token', refreshToken);
+authRoute.post('/logout', logoutUser);
 
-export default usersRoute;
+export default authRoute;
