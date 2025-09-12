@@ -11,11 +11,12 @@ import { ChildService } from './child-service.js';
 
 export class DailyLogService extends EntityCrudService<DailyLog> {
   private dailyLogsRef: CollectionReference;
-  private childService = new ChildService();
+  private childService: ChildService;
 
   constructor() {
     super('dailyLogEntries');
     this.dailyLogsRef = db.collection('dailyLogEntries');
+    this.childService = new ChildService();
   }
 
   // Trend Over Time Report
@@ -55,17 +56,20 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
       { classId?: string; centerId?: string }
     > = {};
     if (childIds.size > 0) {
-      await Promise.all(
-        Array.from(childIds).map(async (childId) => {
-          const childInfo = await this.childService.findOne(childId);
+      const childDocs = await this.childService.find({
+        where: {
+          field: 'id',
+          operator: 'in',
+          value: Array.from(childIds),
+        },
+      });
 
-          if (!childInfo) {
-            throw new Error('Child not found');
-          }
-
-          childInfoMap[childId] = childInfo;
-        }),
-      );
+      for (const childInfo of childDocs) {
+        if (!childInfo || !childInfo.id) {
+          throw new Error('Child not found');
+        }
+        childInfoMap[childInfo.id] = childInfo;
+      }
     }
 
     // Process each log
@@ -174,27 +178,40 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
 
     // If filtering by center, we need to check each log's child center
     if (centerId) {
+      // Collect all childIds from logs with staffId
+      const childIds = new Set<string>();
+      for (const doc of querySnapshot.docs) {
+        const log = doc.data() as DailyLog;
+        if (log.staffId) {
+          childIds.add(log.childId);
+        }
+      }
+
+      // Batch fetch all child info
       const childInfoMap: Record<string, { centerId?: string }> = {};
+      if (childIds.size > 0) {
+        const childDocs = await this.childService.find({
+          where: {
+            field: 'id',
+            operator: 'in',
+            value: Array.from(childIds),
+          },
+        });
+
+        for (const childInfo of childDocs) {
+          if (!childInfo || !childInfo.id) {
+            throw new Error('Child not found');
+          }
+          childInfoMap[childInfo.id] = childInfo;
+        }
+      }
 
       for (const doc of querySnapshot.docs) {
         const log = doc.data() as DailyLog;
         if (!log.staffId) continue;
 
-        // Get child info if not already cached
-        if (!childInfoMap[log.childId]) {
-          const childInfo = await this.childService.findOne(
-            log.childId,
-          );
-
-          if (!childInfo) {
-            throw new Error('Child not found');
-          }
-
-          childInfoMap[log.childId] = childInfo;
-        }
-
         const childInfo = childInfoMap[log.childId];
-        if (childInfo.centerId === centerId) {
+        if (childInfo && childInfo.centerId === centerId) {
           if (!staffData[log.staffId]) {
             staffData[log.staffId] = {
               staffId: log.staffId,
@@ -252,21 +269,27 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
       childIds.add(log.childId);
     });
 
+    // Batch fetch all child info to avoid N + 1 queries
     const childInfoMap: Record<
       string,
       { classId?: string; centerId?: string }
     > = {};
-    await Promise.all(
-      Array.from(childIds).map(async (childId) => {
-        const childInfo = await this.childService.findOne(childId);
+    if (childIds.size > 0) {
+      const childDocs = await this.childService.find({
+        where: {
+          field: 'id',
+          operator: 'in',
+          value: Array.from(childIds),
+        },
+      });
 
-        if (!childInfo) {
+      for (const childInfo of childDocs) {
+        if (!childInfo || !childInfo.id) {
           throw new Error('Child not found');
         }
-
-        childInfoMap[childId] = childInfo;
-      }),
-    );
+        childInfoMap[childInfo.id] = childInfo;
+      }
+    }
 
     // Process each log
     for (const log of logs) {

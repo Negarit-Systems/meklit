@@ -7,6 +7,10 @@ import {
   HealthRecordEnum,
 } from '../models/health-record.js';
 
+const N_CHILDREN = 15;
+const N_DAILY_LOGS = 100;
+const N_HEALTH_RECORDS = 100;
+
 // Variables defined at the top
 const firstNames = [
   'Meklit',
@@ -118,7 +122,7 @@ const actions = [
 async function seedChildren() {
   const collection = db.collection('children');
   const children: Omit<Child, 'id'>[] = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < N_CHILDREN; i++) {
     const birthYear = 2020 + Math.floor(Math.random() * 3);
     const birthDate = new Date(
       birthYear,
@@ -142,13 +146,13 @@ async function seedChildren() {
     const docRef = await collection.add(child);
     childIds.push(docRef.id);
   }
-  console.log('Seeded 8 Child entries');
+  console.log(`Seeded ${N_CHILDREN} Child entries`);
   return childIds;
 }
 
 async function seedDailyLogs(childIds: string[]) {
   const collection = db.collection('dailyLogEntries');
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < N_DAILY_LOGS; i++) {
     const type =
       Object.values(DailyLogEnum)[
         Math.floor(Math.random() * Object.values(DailyLogEnum).length)
@@ -198,12 +202,12 @@ async function seedDailyLogs(childIds: string[]) {
 
     await collection.add(entry);
   }
-  console.log('Seeded 50 DailyLogEntries');
+  console.log(`Seeded ${N_DAILY_LOGS} DailyLogEntries`);
 }
 
 async function seedHealthRecords(childIds: string[]) {
   const collection = db.collection('healthRecordEntries');
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < N_HEALTH_RECORDS; i++) {
     const type =
       Object.values(HealthRecordEnum)[
         Math.floor(
@@ -239,7 +243,7 @@ async function seedHealthRecords(childIds: string[]) {
 
     await collection.add(entry);
   }
-  console.log('Seeded 30 HealthRecordEntries');
+  console.log(`Seeded ${N_HEALTH_RECORDS} HealthRecordEntries`);
 }
 
 async function isCollectionEmpty(collectionName: string) {
