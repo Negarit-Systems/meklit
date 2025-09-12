@@ -38,7 +38,7 @@ jobs:
       - name: Install and build frontend
         run: |
           cd client
-          echo "VITE_API_URL=https://meklit-api.negaritsystems.com.et" > .env.production
+          echo "VITE_API_URL=https://meklit-api.negaritsystems.com.et/api" > .env.production
           npm ci
           npx tsc -b
           npx vite build --mode production
