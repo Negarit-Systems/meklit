@@ -15,11 +15,12 @@ import {
 
 export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
   private healthRecordRef: CollectionReference;
-  private childService = new ChildService();
+  private childService: ChildService;
 
   constructor() {
     super('healthRecordEntries');
     this.healthRecordRef = db.collection('healthRecordEntries');
+    this.childService = new ChildService();
   }
 
   // Incident Frequency Report
@@ -37,22 +38,32 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
     // If filtering by center, check each record's child center
     if (centerId) {
+      // Collect all childIds from the records
+      const childIds = Array.from(
+        new Set(
+          querySnapshot.docs.map(
+            (doc) => (doc.data() as HealthRecordEntry).childId,
+          ),
+        ),
+      );
+
+      // Batch fetch all child infos
+      const childInfos = await this.childService.find({
+        where: [{ field: 'id', operator: 'in', value: childIds }],
+      });
+
+      // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
+      for (const childInfo of childInfos) {
+        if (childInfo && childInfo.id) {
+          childInfoMap[childInfo.id] = childInfo;
+        }
+      }
 
       for (const doc of querySnapshot.docs) {
         const record = doc.data() as HealthRecordEntry;
-
-        // Get child info if not already cached
-        if (!childInfoMap[record.childId]) {
-          const childInfo = await this.childService.findOne(
-            record.childId,
-          );
-          if (!childInfo) continue;
-          childInfoMap[record.childId] = childInfo;
-        }
-
         const childInfo = childInfoMap[record.childId];
-        if (childInfo.centerId === centerId) {
+        if (childInfo && childInfo.centerId === centerId) {
           typeCounts[record.type] =
             (typeCounts[record.type] || 0) + 1;
         }
@@ -89,22 +100,32 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
     // If filtering by center, we need to check each record's child center
     if (centerId) {
+      // Collect all childIds from the records
+      const childIds = Array.from(
+        new Set(
+          querySnapshot.docs.map(
+            (doc) => (doc.data() as HealthRecordEntry).childId,
+          ),
+        ),
+      );
+
+      // Batch fetch all child infos
+      const childInfos = await this.childService.find({
+        where: [{ field: 'id', operator: 'in', value: childIds }],
+      });
+
+      // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
+      for (const childInfo of childInfos) {
+        if (childInfo && childInfo.id) {
+          childInfoMap[childInfo.id] = childInfo;
+        }
+      }
 
       for (const doc of querySnapshot.docs) {
         const record = doc.data() as HealthRecordEntry;
-
-        // Get child info if not already cached
-        if (!childInfoMap[record.childId]) {
-          const childInfo = await this.childService.findOne(
-            record.childId,
-          );
-          if (!childInfo) continue; // Skip if child not found
-          childInfoMap[record.childId] = childInfo;
-        }
-
         const childInfo = childInfoMap[record.childId];
-        if (childInfo.centerId === centerId) {
+        if (childInfo && childInfo.centerId === centerId) {
           events.push({
             id: doc.id,
             childId: record.childId,
@@ -208,23 +229,34 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
     // If filtering by center, we check each record's child center
     if (centerId) {
+      // Collect all childIds from the records
+      const childIds = Array.from(
+        new Set(
+          querySnapshot.docs.map(
+            (doc) => (doc.data() as HealthRecordEntry).childId,
+          ),
+        ),
+      );
+
+      // Batch fetch all child infos
+      const childInfos = await this.childService.find({
+        where: [{ field: 'id', operator: 'in', value: childIds }],
+      });
+
+      // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
+      for (const childInfo of childInfos) {
+        if (childInfo && childInfo.id) {
+          childInfoMap[childInfo.id] = childInfo;
+        }
+      }
 
       for (const doc of querySnapshot.docs) {
         const record = doc.data() as HealthRecordEntry;
         const staffId = record.recordedByUserId;
-
-        // Get child info
-        if (!childInfoMap[record.childId]) {
-          const childInfo = await this.childService.findOne(
-            record.childId,
-          );
-          if (!childInfo) continue;
-          childInfoMap[record.childId] = childInfo;
-        }
-
         const childInfo = childInfoMap[record.childId];
-        if (childInfo.centerId === centerId) {
+
+        if (childInfo && childInfo.centerId === centerId) {
           if (!staffData[staffId]) {
             staffData[staffId] = {
               staffId,
@@ -291,22 +323,32 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
     // If filtering by center, check each record's child center
     if (centerId) {
+      // Collect all childIds from the records
+      const childIds = Array.from(
+        new Set(
+          querySnapshot.docs.map(
+            (doc) => (doc.data() as HealthRecordEntry).childId,
+          ),
+        ),
+      );
+
+      // Batch fetch all child infos
+      const childInfos = await this.childService.find({
+        where: [{ field: 'id', operator: 'in', value: childIds }],
+      });
+
+      // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
+      for (const childInfo of childInfos) {
+        if (childInfo && childInfo.id) {
+          childInfoMap[childInfo.id] = childInfo;
+        }
+      }
 
       for (const doc of querySnapshot.docs) {
         const record = doc.data() as HealthRecordEntry;
-
-        // Get child info
-        if (!childInfoMap[record.childId]) {
-          const childInfo = await this.childService.findOne(
-            record.childId,
-          );
-          if (!childInfo) continue;
-          childInfoMap[record.childId] = childInfo;
-        }
-
         const childInfo = childInfoMap[record.childId];
-        if (childInfo.centerId === centerId) {
+        if (childInfo && childInfo.centerId === centerId) {
           actionCounts[record.actionTaken] =
             (actionCounts[record.actionTaken] || 0) + 1;
         }
