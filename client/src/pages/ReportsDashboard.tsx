@@ -262,23 +262,6 @@ const ReportsDashboard: React.FC = () => {
       }));
   };
 
-  const processDetailedTrendData = (filters?: { childId?: string; classId?: string; centerId?: string }): ChartData[] => {
-    const dataSource = (filters && (filters.childId || filters.classId || filters.centerId) && filteredTrendData.length > 0) 
-      ? filteredTrendData 
-      : reportData.trendOverTime;
-    
-    if (!Array.isArray(dataSource) || dataSource.length === 0) {
-      return [];
-    }
-    
-    return dataSource
-      .slice(-14)
-      .map((item, index) => ({
-        name: item.date ? new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : `Day ${index + 1}`,
-        value: (item.totalMeals || 0) + (item.totalMoods || 0) + (item.napCount || 0),
-        color: getColor(index)
-      }));
-  };
 
   const processStaffPerformance = (): ChartData[] => {
     if (!Array.isArray(reportData.staffPerformance) || reportData.staffPerformance.length === 0) {

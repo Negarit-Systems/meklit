@@ -185,10 +185,40 @@ async function seedHealthRecords(childIds: string[]) {
   console.log('Seeded 30 HealthRecordEntries');
 }
 
+async function isCollectionEmpty(collectionName: string) {
+  const snapshot = await db.collection(collectionName).limit(1).get();
+  return snapshot.empty;
+}
+
 async function seed() {
-  const childIds = await seedChildren();
-  await seedDailyLogs(childIds);
-  await seedHealthRecords(childIds);
+  const childrenEmpty = await isCollectionEmpty('children');
+  const dailyLogsEmpty = await isCollectionEmpty('dailyLogEntries');
+  const healthRecordsEmpty = await isCollectionEmpty(
+    'healthRecordEntries',
+  );
+
+  let childIds: string[] = [];
+
+  if (childrenEmpty) {
+    childIds = await seedChildren();
+  } else {
+    console.log('Children already seeded, skipping...');
+    // fetch childIds if you still need them for logs/records
+    const snapshot = await db.collection('children').get();
+    childIds = snapshot.docs.map((doc) => doc.id);
+  }
+
+  if (dailyLogsEmpty) {
+    await seedDailyLogs(childIds);
+  } else {
+    console.log('Daily logs already seeded, skipping...');
+  }
+
+  if (healthRecordsEmpty) {
+    await seedHealthRecords(childIds);
+  } else {
+    console.log('Health records already seeded, skipping...');
+  }
 }
 
 seed().catch(console.error);
