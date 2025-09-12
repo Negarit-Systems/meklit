@@ -88,6 +88,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/meklit/backend
+            git reset --hard origin/main
             git pull origin main
             cd server
             npm ci
