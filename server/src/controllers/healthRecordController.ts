@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { HealthRecordService } from '../services/health-record.js';
-import { sendSuccess } from 'src/utils/apiResponse.js';
-import { QueryOptions } from 'src/types/query-option.js';
+import { sendSuccess } from '../utils/apiResponse.js';
+import { QueryOptions } from '../types/query-option.js';
 
 const healthRecordService = new HealthRecordService();
 

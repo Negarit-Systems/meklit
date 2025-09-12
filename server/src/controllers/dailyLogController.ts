@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { DailyLogService } from '../services/daily-log.js';
-import { QueryOptions } from 'src/types/query-option.js';
+import { QueryOptions } from '../types/query-option.js';
 
 const dailyLogService = new DailyLogService();
 
