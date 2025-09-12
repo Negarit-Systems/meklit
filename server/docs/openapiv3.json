@@ -89,7 +89,7 @@
                 "type": "object",
                 "properties": {
                   "email": {
-                    "example": "test@gmail.com"
+                    "example": "any"
                   }
                 }
               }
