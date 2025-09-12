@@ -9,12 +9,13 @@ const app = express();
 app.use(
   cors({
     origin: [
-      'http://localhost:3000',
+      'http://localhost:5173',
       'https://meklit-api.negaritsystems.com.et',
       'https://meklit.negaritsystems.com.et',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   }),
 );
 
