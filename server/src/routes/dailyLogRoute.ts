@@ -7,7 +7,6 @@ import {
 } from '../controllers/dailyLogController.js';
 import validateResource from '../middlewares/validateResource.js';
 import {
-  activityFrequencySchema,
   comparativeReportSchema,
   staffPerformanceSchema,
   trendOverTimeSchema,

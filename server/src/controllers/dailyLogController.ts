@@ -1,14 +1,21 @@
 import { Request, Response } from 'express';
 import { sendSuccess, sendError } from '../utils/apiResponse.js';
 import { DailyLogService } from '../services/daily-log.js';
+import { QueryOptions } from 'src/types/query-option.js';
 
 const dailyLogService = new DailyLogService();
 
 export const findDailyLogs = async (req: Request, res: Response) => {
-  const dailyLogs = await dailyLogService.find();
-  if (!dailyLogs) {
-    return sendError(res, 'Failed to fetch dailyLogs.', 500);
-  }
+  const { where, orderBy, limit, startAfter } = req.query;
+
+  // Parse query parameters if needed
+  let queryOptions: QueryOptions = {};
+  if (where) queryOptions.where = JSON.parse(where as string);
+  if (orderBy) queryOptions.orderBy = JSON.parse(orderBy as string);
+  if (limit) queryOptions.limit = Number(limit);
+  if (startAfter) queryOptions.startAfter = startAfter;
+
+  const dailyLogs = await dailyLogService.find(queryOptions);
   sendSuccess(res, 'Daily logs fetched', 200, dailyLogs);
 };
 
