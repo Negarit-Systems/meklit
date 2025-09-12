@@ -29,7 +29,7 @@ apiClient.interceptors.response.use(
 
       isRefreshing = true;
       try {
-        await apiClient.post("/users/auth/refresh-token");
+        await apiClient.post("/auth/refresh-token");
         pendingRequests.forEach((cb) => cb(true));
         pendingRequests = [];
         return apiClient(originalRequest);
