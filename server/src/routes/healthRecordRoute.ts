@@ -10,12 +10,15 @@ import {
 import {
   actionDistributionReport,
   childHealthProfile,
+  findHealthRecords,
   incidentFrequencyReport,
   staffAnalysisReport,
   timelineReport,
 } from '../controllers/healthRecordController.js';
 
 const healthRecordRoute = Router();
+
+healthRecordRoute.get('/', findHealthRecords);
 
 // Report Routes
 healthRecordRoute.get(

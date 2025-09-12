@@ -1,14 +1,5 @@
 import { z } from 'zod';
 
-export const activityFrequencySchema = z.object({
-  query: z.object({
-    startDate: z.string(),
-    endDate: z.string(),
-    childId: z.string().optional(),
-    classId: z.string().optional(),
-  }),
-});
-
 export const trendOverTimeSchema = z.object({
   query: z.object({
     startDate: z.string(),
