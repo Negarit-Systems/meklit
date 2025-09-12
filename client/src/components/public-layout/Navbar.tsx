@@ -14,6 +14,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { ThemeContext } from "@/context/ThemeContext"
+import { useLogout } from "@/services/auth"
 
 interface NavbarProps {
   className?: string
@@ -42,26 +43,15 @@ export function Navbar({ className }: NavbarProps) {
     return () => window.removeEventListener("keydown", onKey)
   }, [open])
 
-  const handleLogout = async () => {
-    try {
-      // Optional: Call a logout API endpoint to invalidate the session
-      // await fetch("/api/logout", {
-      //   method: "POST",
-      //   headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      // });
-
-      // Clear authentication token
-      localStorage.removeItem("token")
-
-      // Invalidate all queries to reset cached data
+  const { mutate: logout } = useLogout({
+    onSuccess: async () => {
       await queryClient.invalidateQueries()
-
-      // Navigate to sign-in page
       navigate("/sign-in")
-    } catch (err) {
-      console.error("Logout failed:", err)
-      // Optionally show an error message to the user
-    }
+    },
+  })
+
+  const handleLogout = async () => {
+    logout()
   }
 
   const menuItems = [

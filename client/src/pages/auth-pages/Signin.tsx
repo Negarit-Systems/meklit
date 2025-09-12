@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AuthCard } from "@/components/auth/AuthCard"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { useLogin } from "@/services/auth"
+import type { AxiosError } from "axios"
+import ErrorMessage from "@/components/status/ErrorMessage"
+import SuccessMessage from "@/components/status/SuccessMessage"
+import Spinner from "@/components/status/Spinner"
 
 export function SignIn() {
   const navigate = useNavigate()
@@ -13,10 +18,15 @@ export function SignIn() {
     password: "",
   })
 
+  const { mutate: login, isPending, isSuccess, isError, error } = useLogin({
+    onSuccess: () => {
+      navigate("/dashboard")
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Add API call here for sign in
-    navigate("/dashboard")
+    login({ email: formData.email, password: formData.password })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +39,10 @@ export function SignIn() {
       description="Sign in to access your Meklit dashboard and manage your learning center"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {isError && (
+          <ErrorMessage message={(error as AxiosError<{ message?: string }>)?.response?.data?.message || "Sign in failed"} />
+        )}
+        {isSuccess && <SuccessMessage message="Signed in successfully" />}
         <div className="space-y-2">
           <label htmlFor="email" className="block text-sm font-medium text-foreground">
             Email Address
@@ -86,8 +100,11 @@ export function SignIn() {
         <Button
           type="submit"
           className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+          disabled={isPending}
         >
-          Sign In to Dashboard
+          <span className="inline-flex items-center gap-2">
+            {isPending && <Spinner spin property="h-4 w-4" />} Sign In to Dashboard
+          </span>
         </Button>
 
         <div className="text-center pt-4 border-t border-border">

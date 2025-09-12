@@ -1,12 +1,19 @@
 import * as React from "react"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AuthCard } from "@/components/auth/AuthCard"
+import { useVerifyUser } from "@/services/auth"
+import ErrorMessage from "@/components/status/ErrorMessage"
+import SuccessMessage from "@/components/status/SuccessMessage"
+import Spinner from "@/components/status/Spinner"
+import type { AxiosError } from "axios"
 
 export function OtpVerification() {
   const navigate = useNavigate()
+  const location = useLocation() as { state?: { email?: string } }
   const [otp, setOtp] = React.useState(["", "", "", "", "", ""])
+  const email = location?.state?.email ?? ""
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const newOtp = [...otp]
@@ -20,10 +27,17 @@ export function OtpVerification() {
     }
   }
 
+  const { mutate: verifyUser, isPending, isSuccess, isError, error } = useVerifyUser({
+    onSuccess: () => {
+      navigate("/sign-in")
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Add API call here for OTP verification
-    navigate("/dashboard")
+    const code = otp.join("")
+    if (code.length !== 6 || !email) return
+    verifyUser({ otp: code, email })
   }
 
   return (
@@ -32,6 +46,13 @@ export function OtpVerification() {
       description="Enter the 6-digit code sent to your email"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {email === "" && (
+          <ErrorMessage message="Missing email context. Please register again." />
+        )}
+        {isError && (
+          <ErrorMessage message={(error as AxiosError<{ message?: string }>)?.response?.data?.message || "Verification failed"} />
+        )}
+        {isSuccess && <SuccessMessage message="Account verified successfully. You can sign in now." />}
         <div className="flex justify-between">
           {otp.map((digit, index) => (
             <Input
@@ -46,8 +67,10 @@ export function OtpVerification() {
             />
           ))}
         </div>
-        <Button type="submit" className="w-full">
-          Verify OTP
+        <Button type="submit" className="w-full" disabled={isPending || email === ""}>
+          <span className="inline-flex items-center gap-2">
+            {isPending && <Spinner spin property="h-4 w-4" />} Verify OTP
+          </span>
         </Button>
         <p className="text-center text-sm text-muted-foreground">
           Didn't receive a code?{" "}
