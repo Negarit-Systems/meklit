@@ -1,7 +1,7 @@
 import swaggerAutogen from 'swagger-autogen';
+import { config } from '../src/config/config.js';
 
-const PORT = process.env.PORT || 5000;
-
+const { port } = config();
 const doc = {
   info: {
     title: 'Meklit API',
@@ -12,7 +12,7 @@ const doc = {
   },
   servers: [
     {
-      url: `http://localhost:${PORT}/api/v1`,
+      url: `http://localhost:${port}/api/v1`,
     },
     {
       url: `https://meklit-api.negaritsystems.com.et/api`,
