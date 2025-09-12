@@ -1,4 +1,3 @@
-import * as React from "react"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,13 +5,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
-import { Calendar, Filter, X } from "lucide-react"
-import { Bar as BarChart, Line as LineChart, Pie } from "react-chartjs-2"
+import { Filter } from "lucide-react"
+import { Bar as BarChart, Pie } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -29,16 +26,18 @@ import { useMediaQuery } from "@/hooks/use-media-query"
 
 // Placeholder for apiService
 const apiService = {
-  getDailyLogs: async (filters: any) => {
+  getDailyLogs: async (filters: FilterState) => {
     // Mock API call
+    console.log("Fetching daily logs with filters:", filters)
     return {
       meals: { total: 150, data: [20, 25, 30, 25, 20, 15, 15] },
       naps: { total: 80, data: [10, 12, 15, 13, 10, 10, 10] },
       diapers: { total: 100, data: [15, 15, 20, 15, 15, 10, 10] },
     }
   },
-  getHealthRecords: async (filters: any) => {
+  getHealthRecords: async (filters: FilterState) => {
     // Mock API call
+    console.log("Fetching health records with filters:", filters)
     return {
       incidents: { total: 30, data: { fever: 10, rash: 8, other: 12 } },
     }
@@ -98,6 +97,7 @@ export function Dashboard() {
           apiService.getHealthRecords(filters),
         ])
         setData({ dailyLogs, healthRecords })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         setError("Failed to fetch data. Please try again.")
       } finally {

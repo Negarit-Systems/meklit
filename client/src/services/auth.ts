@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/axios";
 import type { LoginUser, RegisterUser, VerifyUser } from "@/types/auth";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse } from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 export const USER_KEY = "users";
 
