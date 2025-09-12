@@ -19,6 +19,12 @@ const serviceAccountPath = path.resolve(
   firebaseServiceAccountPath,
 );
 
+// Conditionally configure Firestore emulator for development
+if (process.env.NODE_ENV === 'development') {
+  process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
+  console.log('Using Firestore emulator at localhost:8080');
+}
+
 // Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccountPath),

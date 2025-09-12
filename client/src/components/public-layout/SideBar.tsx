@@ -7,6 +7,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   BarChart3,
+  FileText,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { useLocation, useNavigate } from "react-router-dom"
@@ -28,6 +29,7 @@ export function SideBar({ className }: SidebarProps) {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
     { icon: BarChart3, label: "Compare Analytics", href: "/comparision" },
+    { icon: FileText, label: "Reports", href: "/reports" },
   ]
 
   return (
