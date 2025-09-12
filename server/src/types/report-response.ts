@@ -26,6 +26,8 @@ export type ComparativeData = {
   moodCounts: Record<string, number>;
   mealCount: number;
   napCount: number;
+  totalIncidents: number;
+  incidentDistribution: Record<string, number>;
 };
 
 export type IncidentFrequencyData = {
@@ -58,4 +60,21 @@ export type StaffAnalysis = {
   totalRecords: number;
   incidentsReported: number;
   medicationsReported: number;
+};
+
+export type ActivityEngagementData = {
+  activityName: string;
+  engagementCounts: Record<string, number>;
+};
+
+export type ClassComparisonData = {
+  classId: string;
+  averageNapDuration: number;
+  totalIncidents: number;
+};
+
+
+export type ClassActivityEngagement = {
+  classId: string;
+  activities: ActivityEngagementData[];
 };
