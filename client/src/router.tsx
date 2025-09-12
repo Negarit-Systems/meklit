@@ -5,8 +5,9 @@ import { Dashboard } from "./pages/main-dashboard-page/Dashboard";
 import Comparision from "./pages/comparision-page/Comparision";
 import ChildDetail from "./pages/child-detail-page/ChildDetail";
 import ReportsDashboard from "./pages/ReportsDashboard";
-import Signin from "./pages/auth-pages/Signin";
-import Signup from "./pages/auth-pages/Signup";
+import { SignIn } from "./pages/auth-pages/Signin";
+import { SignUp } from "./pages/auth-pages/Signup";
+import { OtpVerification } from "./pages/auth-pages/OtpVerfication";
 
 
 export const router = createBrowserRouter([
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
   {
     path: "/sign-up",
     element: <SignUp />,
+  },
+  {
+    path: "/otp-verification",
+    element: <OtpVerification />,
   },
   {
       path: "",
