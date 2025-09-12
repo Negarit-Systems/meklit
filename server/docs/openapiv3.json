@@ -74,6 +74,30 @@
         }
       }
     },
+    "/auth/resend-otp": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "test@gmail.com"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "description": "",
@@ -522,24 +546,16 @@
   },
   "components": {
     "securitySchemes": {
-      "oauth2": {
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "https://<AUTHSERVERURL>/protocol/openid-connect/auth",
-            "scopes": {
-              "roles": "roles",
-              "read": "read",
-              "write": "write"
-            }
-          }
-        }
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   },
   "security": [
     {
-      "oauth2": []
+      "bearerAuth": []
     }
   ]
 }

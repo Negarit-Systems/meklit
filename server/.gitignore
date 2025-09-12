@@ -35,4 +35,3 @@ temp/
 
 # Ignore json for firebase service account file
 serviceAccountKey.json
-docs/openapiv3.json

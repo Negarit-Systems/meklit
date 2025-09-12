@@ -1,7 +1,6 @@
 import swaggerAutogen from 'swagger-autogen';
 
-const PORT = process.env.PORT || 5000;
-
+const PORT = 5000;
 const doc = {
   info: {
     title: 'Meklit API',
@@ -12,7 +11,7 @@ const doc = {
   },
   servers: [
     {
-      url: `http://localhost:${PORT}/api`,
+      url: `http://localhost:${PORT}/api/v1`,
     },
     {
       url: `https://meklit-api.negaritsystems.com.et/api`,
@@ -20,24 +19,15 @@ const doc = {
   ],
   security: [
     {
-      oauth2: [],
+      bearerAuth: [],
     },
   ],
   components: {
     securitySchemes: {
-      oauth2: {
-        type: 'oauth2',
-        flows: {
-          implicit: {
-            authorizationUrl:
-              'https://<AUTHSERVERURL>/protocol/openid-connect/auth',
-            scopes: {
-              roles: 'roles',
-              read: 'read',
-              write: 'write',
-            },
-          },
-        },
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
       },
     },
   },
