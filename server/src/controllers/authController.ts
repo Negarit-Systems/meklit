@@ -123,6 +123,7 @@ export const verifyUser = async (
 
   const accessToken = generateAccessToken({
     id: user.id as string,
+    email,
   });
   const refreshToken = generateRefreshToken({
     id: user.id as string,
@@ -156,6 +157,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
   const accessToken = generateAccessToken({
     id: user.id ?? '',
+    email,
   });
   const refreshToken = generateRefreshToken({ id: user.id ?? '' });
 
@@ -180,7 +182,7 @@ export const logoutUser = (req: Request, res: Response): void => {
   sendSuccess(res, 'User logged out successfully', 200);
 };
 
-export const refreshToken = (req: Request, res: Response): void => {
+export const refreshToken = async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
     return sendError(res, 'No refresh token provided', 401);
@@ -189,12 +191,24 @@ export const refreshToken = (req: Request, res: Response): void => {
   let payload;
   try {
     payload = verifyRefreshToken(refreshToken) as { id: string };
-  } catch (error) {
-    return sendError(res, 'Invalid refresh token', 401);
+  } catch (error: any) {
+    return sendError(
+      res,
+      'Invalid refresh token',
+      401,
+      error.message,
+    );
+  }
+
+  const user = await userService.findOne(payload.id);
+
+  if (!user || user.refreshToken !== refreshToken) {
+    return sendError(res, 'Invalid refresh token', 404);
   }
 
   const accessToken = generateAccessToken({
     id: payload.id,
+    email: user.email,
   });
 
   sendSuccess(res, 'Access token refreshed successfully', 200, {
