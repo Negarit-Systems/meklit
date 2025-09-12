@@ -131,7 +131,7 @@ export const verifyUser = async (
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: nodeEnv === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: maxAge
       ? parseInt(maxAge) * 24 * 60 * 60 * 1000
       : 7 * 24 * 60 * 60 * 1000,
@@ -162,7 +162,7 @@ export const loginUser = async (req: Request, res: Response) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -175,7 +175,7 @@ export const logoutUser = (req: Request, res: Response): void => {
   res.clearCookie('refreshToken', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
   });
   sendSuccess(res, 'User logged out successfully', 200);
 };
