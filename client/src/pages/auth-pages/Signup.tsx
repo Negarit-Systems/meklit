@@ -41,7 +41,7 @@ export function SignUp() {
   return (
     <AuthCard
       title="Join Meklit"
-      description="Create your account to start managing your early learning center with ease"
+      description="Create your account to start managing"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {isError && (
