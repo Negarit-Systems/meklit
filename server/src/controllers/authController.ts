@@ -117,8 +117,7 @@ export const verifyUser = async (
 
   await userService.update(user.id ?? '', {
     isVerified: true,
-    hashedOtp: undefined,
-    otpExpiresAt: undefined,
+    hashedOtp: '',
     updatedAt: admin.firestore.Timestamp.now(),
   });
 
@@ -147,7 +146,7 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const user = await userService.findByEmail(email);
-  if (!user || !bcrypt.compareSync(password, user.password)) {
+  if (!user || !(await bcrypt.compare(password, user.password))) {
     return sendError(res, 'Invalid Credential', 401);
   }
 
