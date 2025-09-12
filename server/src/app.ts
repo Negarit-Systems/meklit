@@ -9,7 +9,7 @@ const app = express();
 app.use(
   cors({
     origin: [
-      'http://localhost:3000',
+      'http://localhost:5173',
       'https://meklit-api.negaritsystems.com.et',
       'https://meklit.negaritsystems.com.et',
     ],
