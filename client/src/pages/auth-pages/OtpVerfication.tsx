@@ -29,7 +29,7 @@ export function OtpVerification() {
 
   const { mutate: verifyUser, isPending, isSuccess, isError, error } = useVerifyUser({
     onSuccess: () => {
-      navigate("/sign-in")
+      navigate("/dashboard")
     },
   })
 

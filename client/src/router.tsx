@@ -8,6 +8,7 @@ import ReportsDashboard from "./pages/ReportsDashboard";
 import { SignIn } from "./pages/auth-pages/Signin";
 import { SignUp } from "./pages/auth-pages/Signup";
 import { OtpVerification } from "./pages/auth-pages/OtpVerfication";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 
 export const router = createBrowserRouter([
@@ -24,15 +25,20 @@ export const router = createBrowserRouter([
     element: <OtpVerification />,
   },
   {
-      path: "",
-      element: <PublicLayout/>,
-      children: [
-        { index: true, element: <Navigate to="/dashboard" replace /> },
-        { path: "/dashboard", element: <Dashboard /> },
-        { path: "/comparision", element: <Comparision /> },
-        { path: "/reports", element: <ReportsDashboard /> },
-        { path: "/child-detail/:id", element: <ChildDetail /> },
-        { path: "*", element: <PublicNotFound /> },
+    path: "",
+    element: <PublicLayout />,
+    children: [
+      { index: true, element: <Navigate to="/dashboard" replace /> },
+      {
+        element: <RequireAuth />,
+        children: [
+          { path: "/dashboard", element: <Dashboard /> },
+          { path: "/comparision", element: <Comparision /> },
+          { path: "/reports", element: <ReportsDashboard /> },
+          { path: "/child-detail/:id", element: <ChildDetail /> },
+        ],
+      },
+      { path: "*", element: <PublicNotFound /> },
     ],
   },
 ]);

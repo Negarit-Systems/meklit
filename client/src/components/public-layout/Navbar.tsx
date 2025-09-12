@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { Settings, User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3 } from "lucide-react"
+import { User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3, LogOut } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog"
 import { useLocation, useNavigate } from "react-router-dom"
 import { AnimatePresence, motion } from "framer-motion"
 import { useMediaQuery } from "@/hooks/use-media-query"
@@ -25,6 +34,7 @@ export function Navbar({ className }: NavbarProps) {
   const location = useLocation()
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false)
   const isMdUp = useMediaQuery("(min-width: 768px)")
   const { theme, toggleTheme } = useContext(ThemeContext)
 
@@ -46,6 +56,7 @@ export function Navbar({ className }: NavbarProps) {
   const { mutate: logout } = useLogout({
     onSuccess: async () => {
       await queryClient.invalidateQueries()
+      setShowLogoutDialog(false)
       navigate("/sign-in")
     },
   })
@@ -111,12 +122,32 @@ export function Navbar({ className }: NavbarProps) {
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault()
+                      setShowLogoutDialog(true)
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </DropdownMenuItem>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Are you sure you want to log out?</DialogTitle>
+                      <DialogDescription>You will be returned to the sign-in page.</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </DialogClose>
+                      <Button variant="destructive" onClick={handleLogout}>
+                        Log out
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
