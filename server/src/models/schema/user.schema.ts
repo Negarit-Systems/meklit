@@ -20,6 +20,12 @@ export const userVerifySchema = z.object({
   }),
 });
 
+export const userResendOtpSchema = z.object({
+  body: z.object({
+    email: z.string().email('Invalid email address'),
+  }),
+});
+
 export const userLoginSchema = z.object({
   body: z.object({
     email: z.string().email('Invalid email address'),
