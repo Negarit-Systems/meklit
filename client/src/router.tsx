@@ -4,10 +4,10 @@ import { PublicLayout } from "./components/public-layout/PublicLayout";
 import { Dashboard } from "./pages/main-dashboard-page/Dashboard";
 import Comparision from "./pages/comparision-page/Comparision";
 import ChildDetail from "./pages/child-detail-page/ChildDetail";
-import { SignIn } from "./pages/auth-pages/Signin";
-import { SignUp } from "./pages/auth-pages/Signup";
-import { OtpVerification } from "./pages/auth-pages/OtpVerfication";
-import { ForgotPassword } from "./pages/auth-pages/ForgetPassword";
+import ReportsDashboard from "./pages/ReportsDashboard";
+import Signin from "./pages/auth-pages/Signin";
+import Signup from "./pages/auth-pages/Signup";
+
 
 export const router = createBrowserRouter([
   {
@@ -19,22 +19,15 @@ export const router = createBrowserRouter([
     element: <SignUp />,
   },
   {
-    path: "/otp-verification",
-    element: <OtpVerification />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
-  },
-  {
-    path: "/",
-    element: <PublicLayout />,
-    children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: "/dashboard", element: <Dashboard /> },
-      { path: "/comparision", element: <Comparision /> },
-      { path: "/child-detail/:id", element: <ChildDetail /> },
-      { path: "*", element: <PublicNotFound /> },
+      path: "",
+      element: <PublicLayout/>,
+      children: [
+        { index: true, element: <Navigate to="/dashboard" replace /> },
+        { path: "/dashboard", element: <Dashboard /> },
+        { path: "/comparision", element: <Comparision /> },
+        { path: "/reports", element: <ReportsDashboard /> },
+        { path: "/child-detail/:id", element: <ChildDetail /> },
+        { path: "*", element: <PublicNotFound /> },
     ],
   },
 ]);

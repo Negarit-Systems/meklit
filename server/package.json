@@ -7,13 +7,13 @@
   "scripts": {
     "build": "npx tsc",
     "start": "npm run swagger && node dist/server.js",
-    "start:dev": "npm run swagger && tsx watch src/server.ts",
+    "start:dev": "npm run seed && npm run swagger && tsx watch src/server.ts",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "lint:watch": "eslint . --ext .ts --watch",
     "test": "jest",
     "seed": "npx tsc && node dist/utils/seed.js",
-    "firebase-emulator": "firebase emulators:start --only firestore",
+    "firestore-emulator": "firebase emulators:start --only firestore",
     "firebase-login": "firebase login",
     "firebase-reauth": "firebase --reauth",
     "swagger": "tsx ./docs/swagger.ts"
