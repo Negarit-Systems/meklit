@@ -10,7 +10,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5000/api/v1"
+      "url": "http://localhost:5000/api"
     },
     {
       "url": "https://meklit-api.negaritsystems.com.et/api"
@@ -66,6 +66,30 @@
                   },
                   "otp": {
                     "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/resend-otp": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "test@gmail.com"
                   }
                 }
               }

@@ -55,6 +55,38 @@ export const registerUser = async (
   sendSuccess(res, 'User registered successfully', 201);
 };
 
+export const resendOtp = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  const user = await userService.findByEmail(email);
+  if (!user) {
+    return sendError(res, 'User not found', 404);
+  }
+
+  if (user.isVerified) {
+    return sendError(res, 'User already verified', 400);
+  }
+
+  const { otp, expiresAt } = generateOtp();
+  const hashedOtp = await bcrypt.hash(otp.toString(), 10);
+
+  await userService.update(user.id ?? '', {
+    hashedOtp,
+    otpExpiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
+    updatedAt: admin.firestore.Timestamp.now(),
+  });
+
+  const body = otpTemplate(user.name, String(otp), 10);
+
+  await sendEmail({
+    to: email,
+    subject: 'Your OTP Code - Meklit.Life',
+    body,
+  });
+
+  sendSuccess(res, 'OTP resent successfully', 200);
+};
+
 export const verifyUser = async (
   req: Request,
   res: Response,
