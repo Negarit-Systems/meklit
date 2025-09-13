@@ -333,7 +333,43 @@ const classes = useMemo(() => {
     </motion.div>
   );
 
-  const VisualizationContainer = () => {
+
+  // Safeguard for staffData
+  const safeStaffData = Array.isArray(staffData) ? staffData : [];
+  const staffChartData = {
+    labels: safeStaffData.map((item) => item.staffId),
+    datasets: [
+      {
+        label: "Total Logs",
+        data: safeStaffData.map((item) => item.totalLogs),
+        backgroundColor: safeStaffData.map(() => chartColors.green),
+        borderColor: safeStaffData.map(() => "rgb(54, 162, 235, 1)"),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const incidentDoughnutData = {
+    labels: incidentData.map((item) => item.type),
+    datasets: [
+      {
+        data: incidentData.map((item) => item.count),
+        backgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
+        hoverBackgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
+        borderWidth: 2,
+      },
+    ],
+  };
+  
+  const ChartSection = () => {
+    const showDailyLogs = filters.dataTypes.includes("Daily Logs");
+    const showHealthRecords = filters.dataTypes.includes("Health Records");
+    const showStaffPerformance = filters.dataTypes.includes("Staff Performance");
+    const hasData =
+      (showDailyLogs && trendData.length > 0) ||
+      (showStaffPerformance && staffData.length > 0) ||
+      (showHealthRecords && incidentData.length > 0);
+
     if (loading) {
       return (
         <div className="flex items-center justify-center h-96">
@@ -353,16 +389,6 @@ const classes = useMemo(() => {
         </div>
       );
     }
-
-    const showDailyLogs = filters.dataTypes.includes("Daily Logs");
-    const showHealthRecords = filters.dataTypes.includes("Health Records");
-    const showStaffPerformance = filters.dataTypes.includes("Staff Performance");
-
-    const hasData =
-      (showDailyLogs && trendData.length > 0) ||
-      (showStaffPerformance && staffData.length > 0) ||
-      (showHealthRecords && incidentData.length > 0);
-
     if (!hasData) {
       return (
         <div className="flex items-center justify-center h-96 text-gray-500 bg-white rounded-lg p-4 shadow-md">
@@ -370,33 +396,6 @@ const classes = useMemo(() => {
         </div>
       );
     }
-
-    // Safeguard for staffData
-    const safeStaffData = Array.isArray(staffData) ? staffData : [];
-    const staffChartData = {
-      labels: safeStaffData.map((item) => item.staffId),
-      datasets: [
-        {
-          label: "Total Logs",
-          data: safeStaffData.map((item) => item.totalLogs),
-          backgroundColor: safeStaffData.map(() => chartColors.green),
-          borderColor: safeStaffData.map(() => "rgb(54, 162, 235, 1)"),
-          borderWidth: 1,
-        },
-      ],
-    };
-
-    const incidentDoughnutData = {
-      labels: incidentData.map((item) => item.type),
-      datasets: [
-        {
-          data: incidentData.map((item) => item.count),
-          backgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
-          hoverBackgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
-          borderWidth: 2,
-        },
-      ],
-    };
 
     return (
       <div className="space-y-8">
@@ -468,13 +467,10 @@ const classes = useMemo(() => {
         )}
         {showHealthRecords && incidentData.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className={cn(
-              "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-md dark:shadow-none transition-all duration-300",
-              isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
-            )}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 shadow-md"
           >
             <div className="flex items-center mb-4 text-red-600">
               <PieChart className="h-6 w-6 mr-2" />
@@ -488,7 +484,7 @@ const classes = useMemo(() => {
       </div>
     );
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 font-sans text-gray-900 dark:text-gray-100">
       <div className="flex justify-between items-center mb-6 md:hidden">
@@ -498,13 +494,14 @@ const classes = useMemo(() => {
         </Button>
       </div>
 
-      <div className={cn("grid gap-8", isMdUp ? "grid-cols-4" : "grid-cols-1")}>
-        {isMdUp && (
+      <div className={cn("flex flex-col gap-8", isMdUp ? "grid grid-cols-4 gap-8" : "flex flex-col gap-6")}>
+        {isMdUp && filters.isFilterOpen && (
           <div className="col-span-1">
             <FilterPanel />
           </div>
         )}
-        <div className={cn(isMdUp ? "col-span-3" : "col-span-1")}>
+
+        <div className={cn(isMdUp ? "col-span-3" : "col-span-1 flex flex-col gap-6")}>
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -513,9 +510,10 @@ const classes = useMemo(() => {
           >
             Analytics Dashboard
           </motion.h1>
-          <VisualizationContainer />
+          <ChartSection />
         </div>
       </div>
+
 
       {!isMdUp && filters.isFilterOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-start justify-center p-4">
