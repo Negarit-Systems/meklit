@@ -8,17 +8,10 @@ reportRouter.get(
   '/class-summary',
   reportController.getClassSummary,
 );
-reportRouter.get(
-  '/activity-engagement',
-  reportController.getActivityEngagement,
-);
+
 reportRouter.get(
   '/class-comparison',
   reportController.compareClasses,
-);
-reportRouter.get(
-  '/activity-comparison',
-  reportController.compareActivityEngagement,
 );
 
 export default reportRouter;

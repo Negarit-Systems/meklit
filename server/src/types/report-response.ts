@@ -78,3 +78,11 @@ export type ClassActivityEngagement = {
   classId: string;
   activities: ActivityEngagementData[];
 };
+
+
+
+export interface ClassReportData {
+  classId: string;
+  averageNapDuration: number;
+  totalIncidents: number;
+}
