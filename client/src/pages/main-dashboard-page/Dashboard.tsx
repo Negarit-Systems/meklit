@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,8 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Filter, Calendar, X, BarChart, PieChart, LineChart } from "lucide-react";
-import { Doughnut, Bar, Line } from "react-chartjs-2";
+import { Filter, Calendar, X, BarChart, PieChart } from "lucide-react";
+import { Doughnut, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -69,14 +70,14 @@ export function Dashboard() {
   const isMdUp = useMediaQuery("(min-width: 768px)");
 
   const today = new Date();
-  const thirtyDaysAgo = new Date(today);
-  thirtyDaysAgo.setDate(today.getDate() - 30);
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 7);
 
   const [filters, setFilters] = useState<FilterState>({
     centerId: "",
     classId: "",
     childId: "",
-    dateRange: [thirtyDaysAgo, today],
+    dateRange: [sevenDaysAgo, today],
     dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
     isFilterOpen: isMdUp,
   });
@@ -148,10 +149,6 @@ export function Dashboard() {
       centerId: "",
       classId: "",
       childId: "",
-      // Resetting dateRange to a default, valid range for API calls,
-      // but the UI will show 'Select Start/End Date' because the values
-      // are not being explicitly set in the UI. A better long-term fix
-      // would be to have a single source of truth for the date state.
       dateRange: [undefined, undefined],
       dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
     }));
@@ -255,9 +252,16 @@ export function Dashboard() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
             <Popover>
               <PopoverTrigger asChild>
+                {/*==============================================*/}
+                {/* FIXED: Wrapped button contents in a span     */}
+                {/*==============================================*/}
                 <Button variant="outline" className="w-full justify-between pr-3">
-                  {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
-                  <Calendar className="h-4 w-4 opacity-50" />
+                    <span className="flex items-center justify-between w-full">
+                        <span>
+                            {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
+                        </span>
+                        <Calendar className="h-4 w-4 opacity-50" />
+                    </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -273,9 +277,16 @@ export function Dashboard() {
             <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
             <Popover>
               <PopoverTrigger asChild>
+                {/*==============================================*/}
+                {/* FIXED: Wrapped button contents in a span     */}
+                {/*==============================================*/}
                 <Button variant="outline" className="w-full justify-between pr-3">
-                  {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
-                  <Calendar className="h-4 w-4 opacity-50" />
+                    <span className="flex items-center justify-between w-full">
+                        <span>
+                            {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
+                        </span>
+                        <Calendar className="h-4 w-4 opacity-50" />
+                    </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -359,32 +370,6 @@ export function Dashboard() {
       );
     }
 
-    const trendChartData = {
-      labels: trendData.map((item) => {
-        // Correctly handle the Firebase Timestamp to get a valid date string
-        const date = new Date(item.date._seconds * 1000);
-        return isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date";
-      }),
-      datasets: [
-        {
-          label: "Avg Nap Duration (min)",
-          data: trendData.map((item) => item.averageNapDuration || 0),
-          borderColor: chartColors.blue,
-          backgroundColor: "rgba(75, 192, 192, 0.2)",
-          tension: 0.4,
-          fill: true,
-        },
-        {
-          label: "Total Meals",
-          data: trendData.map((item) => item.totalMeals || 0),
-          borderColor: chartColors.red,
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-          tension: 0.4,
-          fill: true,
-        },
-      ],
-    };
-
     const staffChartData = {
       labels: staffData.map((item) => item.staffId),
       datasets: [
@@ -419,15 +404,52 @@ export function Dashboard() {
             transition={{ duration: 0.5 }}
             className="bg-white rounded-xl p-8 shadow-md"
           >
-            <div className="flex items-center mb-4 text-blue-600">
-              <LineChart className="h-6 w-6 mr-2" />
-              <h3 className="text-xl font-bold">Daily Log Trends</h3>
+            <div className="flex items-center mb-6 text-blue-600">
+              <Calendar className="h-6 w-6 mr-2" />
+              <h3 className="text-xl font-bold">Daily Logs</h3>
             </div>
-            <div className="h-96">
-              <Line data={trendChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto pr-2">
+              {trendData.map((log, index) => {
+  // ✅ Safe date parsing
+  let date: Date | null = null;
+  if ((log as any)?.date?._seconds) {
+    date = new Date((log as any).date._seconds * 1000);
+  } else if (typeof (log as any).date === "string") {
+    const parsed = new Date((log as any).date);
+    date = isValid(parsed) ? parsed : null;
+  }
+
+  return (
+    <motion.div
+      key={index}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+    >
+      {/* ✅ Standardized Card UI */}
+      <Card className="transition-transform hover:scale-105">
+        <CardHeader>
+          <p className="font-semibold text-blue-800">
+            {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
+          </p>
+        </CardHeader>
+        <CardContent className="text-sm text-gray-700 space-y-1">
+          <p>
+            <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
+          </p>
+          <p>
+            <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
+          </p>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+})}
+
             </div>
           </motion.div>
         )}
+
         {showStaffPerformance && staffData.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
