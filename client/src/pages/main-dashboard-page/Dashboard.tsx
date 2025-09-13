@@ -123,19 +123,17 @@ export function Dashboard() {
   const error = errorChildren || errorTrend || errorStaff || errorIncidents;
 
   const centers = useMemo(() => {
-  if (!Array.isArray(children)) return [];
-  return Array.from(new Set(children.map((child) => child.centerId))).sort();
-}, [children]);
+    if (!Array.isArray(children)) return [];
+    return Array.from(new Set(children.map((child) => child.centerId))).sort();
+  }, [children]);
 
-
-const classes = useMemo(() => {
-  if (!Array.isArray(children)) return [];
-  const filteredChildrenByCenter = filters.centerId
-    ? children.filter((child) => child.centerId === filters.centerId)
-    : children;
-  return Array.from(new Set(filteredChildrenByCenter.map((child) => child.classId))).sort();
-}, [children, filters.centerId]);
-
+  const classes = useMemo(() => {
+    if (!Array.isArray(children)) return [];
+    const filteredChildrenByCenter = filters.centerId
+      ? children.filter((child) => child.centerId === filters.centerId)
+      : children;
+    return Array.from(new Set(filteredChildrenByCenter.map((child) => child.classId))).sort();
+  }, [children, filters.centerId]);
 
   const filteredChildren = useMemo(() => {
     if (!Array.isArray(children)) return [];
@@ -333,7 +331,6 @@ const classes = useMemo(() => {
     </motion.div>
   );
 
-
   // Safeguard for staffData
   const safeStaffData = Array.isArray(staffData) ? staffData : [];
   const staffChartData = {
@@ -484,24 +481,38 @@ const classes = useMemo(() => {
       </div>
     );
   };
-  
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 font-sans text-gray-900 dark:text-gray-100">
       <div className="flex justify-between items-center mb-6 md:hidden">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Analytics Dashboard</h1>
-        <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100" size="sm" onClick={toggleFilterPanel}>
+        {/* Mobile filter button */}
+        <Button variant="outline" className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100" size="sm" onClick={toggleFilterPanel}>
           <Filter className="h-5 w-5 mr-2" /> Filters
         </Button>
       </div>
 
       <div className={cn("flex flex-col gap-8", isMdUp ? "grid grid-cols-4 gap-8" : "flex flex-col gap-6")}>
+        {/* Desktop filter button visible only when the panel is hidden */}
+        {isMdUp && !filters.isFilterOpen && (
+          <div className="col-span-1 flex items-start">
+            <Button
+              variant="outline"
+              className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 mt-2"
+              onClick={toggleFilterPanel}
+            >
+              <Filter className="h-5 w-5 mr-2" />Filters
+            </Button>
+          </div>
+        )}
+
         {isMdUp && filters.isFilterOpen && (
           <div className="col-span-1">
             <FilterPanel />
           </div>
         )}
 
-        <div className={cn(isMdUp ? "col-span-3" : "col-span-1 flex flex-col gap-6")}>
+        <div className={cn(isMdUp && filters.isFilterOpen ? "col-span-3" : "col-span-4", "flex flex-col gap-6")}>
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -513,7 +524,6 @@ const classes = useMemo(() => {
           <ChartSection />
         </div>
       </div>
-
 
       {!isMdUp && filters.isFilterOpen && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-start justify-center p-4">
