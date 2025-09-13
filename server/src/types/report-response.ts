@@ -1,5 +1,4 @@
-// (This file might contain other types, you can keep them)
-// For example, you might still have these, which is fine:
+// --- Existing types for Activity reports ---
 export interface ActivityEngagementData {
   activityName: string;
   engagementCounts: Record<string, number>;
@@ -10,24 +9,50 @@ export interface ClassActivityEngagement {
   activities: ActivityEngagementData[];
 }
 
-// --- THIS IS THE IMPORTANT PART ---
-// 1. Rename ClassReportData and change classId to a generic 'id'
+// --- Existing types for the main 'reports' service ---
 export interface SummaryReportData {
   id: string; // Can be a classId OR a centerId
   averageNapDuration: number;
   totalIncidents: number;
 }
 
-// 2. Do the same for the comparison data type.
-//    The old 'ClassComparisonData' is now this more generic 'ComparisonData'.
 export interface ComparisonData {
   id: string; // Can be a classId OR a centerId
   averageNapDuration: number;
   totalIncidents: number;
 }
 
-// You might also have these other types from your health-record service.
-// It's okay to leave them here.
+// --- CORRECTED TYPES FOR THE 'daily-log' SERVICE ---
+
+// For the /daily-logs/trend-over-time endpoint
+// This now matches the object shape from your daily-log.ts service
+export interface TrendData {
+  date: string;
+  averageNapDuration: number;
+  napCount: number;
+  mealStatusCounts: Record<string, number>;
+  totalMeals: number;
+  moodCounts: Record<string, number>;
+  totalMoods: number;
+  otherTypeCounts: Record<string, number>;
+}
+
+// For the /daily-logs/staff-performance endpoint
+// This now includes the missing 'logsByType' property
+export interface StaffPerformance {
+  staffId: string;
+  totalLogs: number;
+  logsByType: Record<string, number>; // e.g., { "Nap": 10, "Meal": 25 }
+}
+
+// For the /daily-logs/comparative endpoint
+export interface ComparativeData {
+  id: string; // The ID of the item being grouped (e.g., a classId or centerId)
+  metric: number; // The calculated metric for that group
+}
+
+// --- Existing types from the 'health-record' service ---
+
 export interface IncidentFrequencyData {
   type: string;
   count: number;
