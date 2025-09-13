@@ -440,12 +440,12 @@ const ReportsDashboard: React.FC = () => {
             Comprehensive analytics and insights from your child care data
           </p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" onClick={fetchAllReports} className="flex-1 sm:flex-none">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" onClick={fetchAllReports} className="w-full sm:w-auto">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
-          <Button className="flex-1 sm:flex-none">
+          <Button className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
