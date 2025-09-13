@@ -129,10 +129,10 @@ const ChartCard: React.FC<ChartCardProps> = ({
                 </svg>
                 {/* Center content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-4xl font-bold text-primary">
+                  <div className="text-4xl font-bold text-foreground">
                     {data.reduce((sum, d) => sum + d.value, 0)}
                   </div>
-                  <div className="text-sm text-muted-foreground font-medium">Actions</div>
+                  <div className="text-sm text-foreground/70 font-medium">Actions</div>
                 </div>
               </div>
             </div>
