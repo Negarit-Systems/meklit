@@ -1,49 +1,49 @@
-export type TrendData = {
-  date: string;
-  averageNapDuration?: number;
-  napCount?: number;
-  mealStatusCounts?: Record<string, number>;
-  totalMeals?: number;
-  moodCounts?: Record<string, number>;
-  totalMoods?: number;
-  activityCounts?: Record<string, number>;
-  totalActivities?: number;
-  otherTypeCounts?: Record<string, number>;
-};
+// (This file might contain other types, you can keep them)
+// For example, you might still have these, which is fine:
+export interface ActivityEngagementData {
+  activityName: string;
+  engagementCounts: Record<string, number>;
+}
 
-export type StaffPerformance = {
-  staffId: string;
-  totalLogs: number;
-  logsByType: Record<string, number>;
-};
+export interface ClassActivityEngagement {
+  classId: string;
+  activities: ActivityEngagementData[];
+}
 
-export type ComparativeData = {
-  group: string;
-  totalLogs?: number;
-  mealStatuses: Record<string, number>;
-  averageSleepDuration?: number;
-  engagementLevels: Record<string, number>;
-  moodCounts: Record<string, number>;
-  mealCount: number;
-  napCount: number;
-};
+// --- THIS IS THE IMPORTANT PART ---
+// 1. Rename ClassReportData and change classId to a generic 'id'
+export interface SummaryReportData {
+  id: string; // Can be a classId OR a centerId
+  averageNapDuration: number;
+  totalIncidents: number;
+}
 
-export type IncidentFrequencyData = {
+// 2. Do the same for the comparison data type.
+//    The old 'ClassComparisonData' is now this more generic 'ComparisonData'.
+export interface ComparisonData {
+  id: string; // Can be a classId OR a centerId
+  averageNapDuration: number;
+  totalIncidents: number;
+}
+
+// You might also have these other types from your health-record service.
+// It's okay to leave them here.
+export interface IncidentFrequencyData {
   type: string;
   count: number;
-};
+}
 
-export type TimelineEvent = {
+export interface TimelineEvent {
   id: string;
   childId: string;
-  timestamp: Date;
+  timestamp: any;
   type: string;
   incident?: string;
   medication?: string;
   actionTaken: string;
-};
+}
 
-export type ChildHealthProfile = {
+export interface ChildHealthProfile {
   childId: string;
   totalIncidents: number;
   totalMedications: number;
@@ -51,11 +51,11 @@ export type ChildHealthProfile = {
   medicationDistribution: Record<string, number>;
   actionDistribution: Record<string, number>;
   recentEntries: TimelineEvent[];
-};
+}
 
-export type StaffAnalysis = {
+export interface StaffAnalysis {
   staffId: string;
   totalRecords: number;
   incidentsReported: number;
   medicationsReported: number;
-};
+}
