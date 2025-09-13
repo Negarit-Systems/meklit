@@ -11,6 +11,7 @@ import {
   ClassComparisonData,
   ClassActivityEngagement,
 } from '../types/report-response.js';
+
 export interface ClassReportData {
   classId: string;
   averageNapDuration: number;
@@ -28,6 +29,19 @@ export class ClassReportService {
     this.childService = new ChildService();
   }
 
+  private async getChildMap(
+    ids: string[],
+  ): Promise<Map<string, any>> {
+    const children = await this.childService.findMany(ids);
+    const map = new Map<string, any>();
+    for (const child of children) {
+      if (child.id) {
+        map.set(child.id, child);
+      }
+    }
+    return map;
+  }
+
   async generateReport(
     startDate: string,
     endDate: string,
@@ -41,21 +55,45 @@ export class ClassReportService {
       }
     > = {};
 
-    // 1. Calculate average nap times
+    // Collect nap logs and childIds
     const napQuery = this.dailyLogRef
       .where('type', '==', DailyLogEnum.Nap)
       .where('timestamp', '>=', new Date(startDate))
       .where('timestamp', '<=', new Date(endDate));
-
     const napSnapshot = await napQuery.get();
-
+    const napLogs: DailyLog[] = [];
+    const napChildIds = new Set<string>();
     for (const doc of napSnapshot.docs) {
       const log = doc.data() as DailyLog;
+      napLogs.push(log);
+      napChildIds.add(log.childId);
+    }
+
+    // Collect incident logs and childIds
+    const incidentQuery = this.healthRecordRef
+      .where('type', '==', HealthRecordEnum.Incident)
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
+    const incidentSnapshot = await incidentQuery.get();
+    const incidentRecords: HealthRecordEntry[] = [];
+    const incidentChildIds = new Set<string>();
+    for (const doc of incidentSnapshot.docs) {
+      const record = doc.data() as HealthRecordEntry;
+      incidentRecords.push(record);
+      incidentChildIds.add(record.childId);
+    }
+
+    // Batch fetch all children
+    const allChildIds = Array.from(
+      new Set([...napChildIds, ...incidentChildIds]),
+    );
+    const childMap = await this.getChildMap(allChildIds);
+
+    // Process nap logs
+    for (const log of napLogs) {
       if (!log.details.sleepDuration) continue;
-
-      const child = await this.childService.findOne(log.childId);
+      const child = childMap.get(log.childId);
       if (!child || !child.centerId) continue;
-
       const classId = child.centerId;
       if (!classStats[classId]) {
         classStats[classId] = {
@@ -64,25 +102,15 @@ export class ClassReportService {
           totalIncidents: 0,
         };
       }
-
       classStats[classId].totalNapDuration +=
         log.details.sleepDuration;
       classStats[classId].napCount++;
     }
 
-    // 2. Calculate total incidents
-    const incidentQuery = this.healthRecordRef
-      .where('type', '==', HealthRecordEnum.Incident)
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
-
-    const incidentSnapshot = await incidentQuery.get();
-
-    for (const doc of incidentSnapshot.docs) {
-      const record = doc.data() as HealthRecordEntry;
-      const child = await this.childService.findOne(record.childId);
+    // Process incident logs
+    for (const record of incidentRecords) {
+      const child = childMap.get(record.childId);
       if (!child || !child.centerId) continue;
-
       const classId = child.centerId;
       if (!classStats[classId]) {
         classStats[classId] = {
@@ -91,11 +119,10 @@ export class ClassReportService {
           totalIncidents: 0,
         };
       }
-
       classStats[classId].totalIncidents++;
     }
 
-    // 3. Format the final report
+    // Format the final report
     return Object.entries(classStats).map(([classId, stats]) => ({
       classId,
       averageNapDuration:
@@ -105,6 +132,7 @@ export class ClassReportService {
       totalIncidents: stats.totalIncidents,
     }));
   }
+
   async activityEngagementReport(
     startDate: string,
     endDate: string,
@@ -119,31 +147,32 @@ export class ClassReportService {
       .where('type', '==', DailyLogEnum.GeneralActivity)
       .where('timestamp', '>=', new Date(startDate))
       .where('timestamp', '<=', new Date(endDate));
-
     const activitySnapshot = await activityQuery.get();
-
+    const activityLogs: DailyLog[] = [];
+    const childIds = new Set<string>();
     for (const doc of activitySnapshot.docs) {
       const log = doc.data() as DailyLog;
-      const engagementLevel = log.details.activityEngagementLevel;
-      // Assuming the activity name is stored in details.other
-      const activityName = (log.details.other as any)?.activityName;
+      activityLogs.push(log);
+      childIds.add(log.childId);
+    }
 
-      if (!engagementLevel || !activityName) {
-        continue;
-      }
+    // Batch fetch children
+    const childMap = await this.getChildMap(Array.from(childIds));
+
+    for (const log of activityLogs) {
+      const engagementLevel = log.details.activityEngagementLevel;
+      const activityName = (log.details.other as any)?.activityName;
+      if (!engagementLevel || !activityName) continue;
 
       // If filtering by center, check the child's centerId
       if (centerId) {
-        const child = await this.childService.findOne(log.childId);
-        if (!child || child.centerId !== centerId) {
-          continue;
-        }
+        const child = childMap.get(log.childId);
+        if (!child || child.centerId !== centerId) continue;
       }
 
       if (!activityStats[activityName]) {
         activityStats[activityName] = { engagementCounts: {} };
       }
-
       activityStats[activityName].engagementCounts[engagementLevel] =
         (activityStats[activityName].engagementCounts[
           engagementLevel
@@ -185,18 +214,43 @@ export class ClassReportService {
       },
     };
 
-    // 1. Calculate nap times for the two classes
+    // Collect nap logs and childIds
     const napQuery = this.dailyLogRef
       .where('type', '==', DailyLogEnum.Nap)
       .where('timestamp', '>=', new Date(startDate))
       .where('timestamp', '<=', new Date(endDate));
-
     const napSnapshot = await napQuery.get();
-
+    const napLogs: DailyLog[] = [];
+    const napChildIds = new Set<string>();
     for (const doc of napSnapshot.docs) {
       const log = doc.data() as DailyLog;
-      const child = await this.childService.findOne(log.childId);
+      napLogs.push(log);
+      napChildIds.add(log.childId);
+    }
 
+    // Collect incident logs and childIds
+    const incidentQuery = this.healthRecordRef
+      .where('type', '==', HealthRecordEnum.Incident)
+      .where('timestamp', '>=', new Date(startDate))
+      .where('timestamp', '<=', new Date(endDate));
+    const incidentSnapshot = await incidentQuery.get();
+    const incidentRecords: HealthRecordEntry[] = [];
+    const incidentChildIds = new Set<string>();
+    for (const doc of incidentSnapshot.docs) {
+      const record = doc.data() as HealthRecordEntry;
+      incidentRecords.push(record);
+      incidentChildIds.add(record.childId);
+    }
+
+    // Batch fetch all children
+    const allChildIds = Array.from(
+      new Set([...napChildIds, ...incidentChildIds]),
+    );
+    const childMap = await this.getChildMap(allChildIds);
+
+    // Process nap logs
+    for (const log of napLogs) {
+      const child = childMap.get(log.childId);
       if (
         child &&
         child.centerId &&
@@ -209,18 +263,9 @@ export class ClassReportService {
       }
     }
 
-    // 2. Calculate incidents for the two classes
-    const incidentQuery = this.healthRecordRef
-      .where('type', '==', HealthRecordEnum.Incident)
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
-
-    const incidentSnapshot = await incidentQuery.get();
-
-    for (const doc of incidentSnapshot.docs) {
-      const record = doc.data() as HealthRecordEntry;
-      const child = await this.childService.findOne(record.childId);
-
+    // Process incident logs
+    for (const record of incidentRecords) {
+      const child = childMap.get(record.childId);
       if (
         child &&
         child.centerId &&
@@ -230,7 +275,7 @@ export class ClassReportService {
       }
     }
 
-    // 3. Format the final report
+    // Format the final report
     return Object.entries(classStats).map(([classId, stats]) => ({
       classId,
       averageNapDuration:
@@ -240,7 +285,7 @@ export class ClassReportService {
       totalIncidents: stats.totalIncidents,
     }));
   }
-  
+
   async compareActivityEngagement(
     startDate: string,
     endDate: string,
@@ -260,43 +305,52 @@ export class ClassReportService {
       .where('type', '==', DailyLogEnum.GeneralActivity)
       .where('timestamp', '>=', new Date(startDate))
       .where('timestamp', '<=', new Date(endDate));
-
     const activitySnapshot = await activityQuery.get();
-
+    const activityLogs: DailyLog[] = [];
+    const childIds = new Set<string>();
     for (const doc of activitySnapshot.docs) {
       const log = doc.data() as DailyLog;
-      const child = await this.childService.findOne(log.childId);
+      activityLogs.push(log);
+      childIds.add(log.childId);
+    }
 
-      if (!child || !child.centerId || !classIdsToCompare.includes(child.centerId)) {
+    // Batch fetch children
+    const childMap = await this.getChildMap(Array.from(childIds));
+
+    for (const log of activityLogs) {
+      const child = childMap.get(log.childId);
+      if (
+        !child ||
+        !child.centerId ||
+        !classIdsToCompare.includes(child.centerId)
+      )
         continue;
-      }
 
       const classId = child.centerId;
       const engagementLevel = log.details.activityEngagementLevel;
       const activityName = (log.details.other as any)?.activityName;
-
-      if (!engagementLevel || !activityName) {
-        continue;
-      }
+      if (!engagementLevel || !activityName) continue;
 
       if (!classActivityStats[classId][activityName]) {
-        classActivityStats[classId][activityName] = { engagementCounts: {} };
+        classActivityStats[classId][activityName] = {
+          engagementCounts: {},
+        };
       }
-
-      const counts = classActivityStats[classId][activityName].engagementCounts;
+      const counts =
+        classActivityStats[classId][activityName].engagementCounts;
       counts[engagementLevel] = (counts[engagementLevel] || 0) + 1;
     }
 
-    return Object.entries(classActivityStats).map(([classId, activities]) => ({
-      classId,
-      activities: Object.entries(activities).map(
-        ([activityName, { engagementCounts }]) => ({
-          activityName,
-          engagementCounts,
-        }),
-      ),
-    }));
+    return Object.entries(classActivityStats).map(
+      ([classId, activities]) => ({
+        classId,
+        activities: Object.entries(activities).map(
+          ([activityName, { engagementCounts }]) => ({
+            activityName,
+            engagementCounts,
+          }),
+        ),
+      }),
+    );
   }
 }
-
-

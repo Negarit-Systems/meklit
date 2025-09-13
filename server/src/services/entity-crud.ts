@@ -8,6 +8,21 @@ export class EntityCrudService<T extends { id?: string }> {
   constructor(collectionName: string) {
     this.collection = db.collection(collectionName);
   }
+  async findMany(ids: string[]): Promise<T[]> {
+    if (!ids.length) return [];
+    const chunkSize = 30; // Firestore 'in' query limit
+    let results: T[] = [];
+    for (let i = 0; i < ids.length; i += chunkSize) {
+      const chunk = ids.slice(i, i + chunkSize);
+      const snapshot = await this.collection
+        .where('id', 'in', chunk)
+        .get();
+      results = results.concat(
+        snapshot.docs.map((doc) => doc.data() as T),
+      );
+    }
+    return results;
+  }
 
   async create(data: T): Promise<T> {
     const docRef = await this.collection.add(data);
