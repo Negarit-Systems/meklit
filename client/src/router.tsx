@@ -4,7 +4,7 @@ import { PublicLayout } from "./components/public-layout/PublicLayout";
 import { Dashboard } from "./pages/main-dashboard-page/Dashboard";
 import Comparision from "./pages/comparision-page/Comparision";
 import ChildDetail from "./pages/child-detail-page/ChildDetail";
-import ReportsDashboard from "./pages/ReportsDashboard";
+import ReportsDashboard from "./pages/reports-page/ReportsDashboard";
 import { SignIn } from "./pages/auth-pages/Signin";
 import { SignUp } from "./pages/auth-pages/Signup";
 import { OtpVerification } from "./pages/auth-pages/OtpVerfication";

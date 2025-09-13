@@ -21,7 +21,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { apiClient } from "@/lib/axios";
+import { fetchChildren, fetchTrendOverTime, fetchHealthTimeline } from "@/services/apiComparsion";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 // Register Chart.js components
@@ -45,13 +45,13 @@ interface Child {
 
 interface TrendData {
   date: string;
-  averageNapDuration: number;
-  totalMeals: number;
+  averageNapDuration?: number;
+  totalMeals?: number;
   // Add more fields as needed from API response
 }
 
 interface HealthRecord {
-  childId: string; // Added this line to resolve the error
+  childId: string;
   createdAt: string;
   // Add more fields as needed
 }
@@ -99,19 +99,28 @@ export function Comparison() {
 
   // Fetch children
   useEffect(() => {
-    const fetchChildren = async () => {
+    const fetchChildrenData = async () => {
       try {
-        const response = await apiClient.get("/api/child/");
-        if (response.data.success) {
-          setChildren(response.data.data || []);
-        }
+        console.log("Fetching children...");
+        const childrenData = await fetchChildren();
+        console.log("Raw children data:", childrenData);
+        // Map API response to match the expected Child interface
+        const mappedChildren = childrenData.map((child) => ({
+          id: child.id,
+          name: child.firstName && child.lastName ? `${child.firstName} ${child.lastName}` : child.id, // Fallback to id if names are missing
+          centerId: child.centerId,
+          classId: child.classId,
+        }));
+        console.log("Mapped children:", mappedChildren);
+        setChildren(mappedChildren);
       } catch (err) {
-        setError("Failed to fetch children");
+        console.error("Error fetching children:", err);
+        setError("Failed to fetch children. Check console for details.");
       } finally {
         setLoading(false);
       }
     };
-    fetchChildren();
+    fetchChildrenData();
   }, []);
 
   // Get unique lists
@@ -153,41 +162,42 @@ export function Comparison() {
           if (!selectedCenter) {
             throw new Error("Please select a center for class comparison on health metrics");
           }
-          const params = {
+          const allRecords = await fetchHealthTimeline({
             startDate: dateRange.startDate,
             endDate: dateRange.endDate,
             centerId: selectedCenter,
-          };
-          const res = await apiClient.get("/api/health-records/timeline", { params });
-          const allRecords: HealthRecord[] = res.data.data || []; // Explicitly cast here for safety
+          });
 
           // Map childId to classId
           const childToClass = new Map(children.map((c) => [c.id, c.classId]));
 
           for (const classId of selectedEntities) {
-            const filtered = allRecords.filter((r) => childToClass.get(r.childId) === classId);
+            const filtered = allRecords.filter((r: HealthRecord) => childToClass.get(r.childId) === classId);
             newData[classId] = filtered;
           }
         } else {
           // Standard per entity fetch
           const paramName = comparisonLevel === "child" ? "childId" : comparisonLevel === "class" ? "classId" : "centerId";
-          const endpoint = isHealth ? "/api/health-records/timeline" : "/api/daily-logs/trend-over-time";
 
           const promises = selectedEntities.map(async (id) => {
-            const params: any = {
+            const filters: any = {
               startDate: dateRange.startDate,
               endDate: dateRange.endDate,
             };
-            if (comparisonLevel !== "class" || !isHealth) {
-              params[paramName] = id;
+            if (isHealth) {
+              if (comparisonLevel === "child") {
+                filters.childId = id;
+              } else if (comparisonLevel === "center") {
+                filters.centerId = id;
+              }
+            } else {
+              filters[paramName] = id;
             }
-            if (isHealth && comparisonLevel === "center") {
-              params.centerId = id;
-            } else if (isHealth && comparisonLevel === "child") {
-              params.childId = id;
-            }
-            const res = await apiClient.get(endpoint, { params });
-            return { id, data: res.data.data || [] };
+
+            const entityData = isHealth
+              ? await fetchHealthTimeline(filters)
+              : await fetchTrendOverTime(filters);
+            return { id, data: entityData };
           });
 
           const results = await Promise.all(promises);
@@ -198,7 +208,8 @@ export function Comparison() {
 
         setData(newData);
       } catch (err) {
-        setError("Failed to fetch comparison data");
+        console.error("Error fetching comparison data:", err);
+        setError("Failed to fetch comparison data. Check console for details.");
       } finally {
         setLoading(false);
       }
@@ -368,7 +379,7 @@ export function Comparison() {
                     {uniqueCenters.map((ce) => (
                       <DropdownMenuItem key={ce} onSelect={() => setSelectedCenter(ce)}>
                         {ce}
-                    </DropdownMenuItem>
+                      </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -476,4 +487,5 @@ export function Comparison() {
     </div>
   );
 }
+
 export default Comparison;

@@ -58,3 +58,15 @@ export function useLogout({ onSuccess }: { onSuccess: () => void }) {
         retry: 1,
     });
 }
+
+
+
+export function useResendOtp({ onSuccess }: { onSuccess: () => void }) {
+    return useMutation<void, AxiosError, { email: string }>({
+        mutationFn: async (info: { email: string }) => {
+            await apiClient.post("/auth/resend-otp", info);
+        },
+        onSuccess,
+        retry: 1,
+    });
+}

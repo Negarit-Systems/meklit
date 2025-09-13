@@ -36,7 +36,7 @@ export function SignIn() {
   return (
     <AuthCard
       title="Welcome"
-      description="Sign in to access your Meklit dashboard and manage your learning center"
+      description="Sign in to access your Meklit dashboard"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {isError && (
@@ -88,15 +88,6 @@ export function SignIn() {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <a
-            href="/forgot-password"
-            className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            Forgot your password?
-          </a>
-        </div>
-
         <Button
           type="submit"
           className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200 shadow-sm hover:shadow-md"
@@ -112,15 +103,6 @@ export function SignIn() {
             New to Meklit?{" "}
             <a href="/sign-up" className="text-primary hover:text-primary/80 font-medium transition-colors">
               Create your account
-            </a>
-          </p>
-        </div>
-
-        <div className="text-center pt-2">
-          <p className="text-xs text-muted-foreground">
-            Need help getting started?{" "}
-            <a href="/support" className="text-secondary hover:text-secondary/80 font-medium transition-colors">
-              Contact support
             </a>
           </p>
         </div>
