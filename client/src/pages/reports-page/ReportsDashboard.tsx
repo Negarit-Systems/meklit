@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  BarChart3,
   TrendingUp,
   Users,
   Download,
@@ -26,6 +25,7 @@ import TableCard from "./TableCard";
 import DateFilters from "./DateFilters";
 import TrendDetailsModal from "./TrendDetailsModal";
 import StaffDetailsModal from "./StaffDetailsModal";
+import ComparativeAnalysis from "./ComparativeAnalysis";
 
 // Import types
 import type {
@@ -201,7 +201,6 @@ const ReportsDashboard: React.FC = () => {
       const [
         trendRes,
         staffPerfRes,
-        comparativeRes,
         incidentRes,
         timelineRes,
         staffAnalysisRes,
@@ -209,9 +208,6 @@ const ReportsDashboard: React.FC = () => {
       ] = await Promise.allSettled([
         apiClient.get("/daily-logs/trend-over-time", { params: baseParams }),
         apiClient.get("/daily-logs/staff-performance", { params: baseParams }),
-        apiClient.get("/daily-logs/comparative", {
-          params: { ...baseParams, groupBy: "classId" },
-        }),
         apiClient.get("/health-records/incident-frequency", {
           params: baseParams,
         }),
@@ -240,7 +236,7 @@ const ReportsDashboard: React.FC = () => {
       const newReportData = {
         trendOverTime: getData(trendRes),
         staffPerformance: getData(staffPerfRes),
-        comparative: getData(comparativeRes),
+        comparative: [],
         incidentFrequency: getData(incidentRes),
         timeline: getData(timelineRes),
         staffAnalysis: getData(staffAnalysisRes),
@@ -357,6 +353,8 @@ const ReportsDashboard: React.FC = () => {
       name: item.staffId || `Staff ${index + 1}`,
       value: item.totalRecords || 0,
       color: getColor(index),
+      incidents: item.incidentsReported || 0,
+      medications: item.medicationsReported || 0,
     }));
   };
 
@@ -488,7 +486,8 @@ const ReportsDashboard: React.FC = () => {
           data={processStaffAnalysis()}
           title="Staff Analysis"
           icon={<Users className="h-4 w-4 text-muted-foreground" />}
-          description="Staff record analysis"
+          description="Staff record analysis with incidents & medications"
+          showBreakdown={true}
         />
 
         <ChartCard
@@ -496,6 +495,7 @@ const ReportsDashboard: React.FC = () => {
           title="Action Distribution"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
           description="Health action distribution"
+          chartType="pie"
         />
       </div>
 
@@ -512,39 +512,41 @@ const ReportsDashboard: React.FC = () => {
             {
               key: "timestamp",
               label: "Date",
-              render: (value) => new Date(value).toLocaleDateString(),
+              render: (value) => {
+                // Handle Firebase timestamp format
+                if (value && typeof value === 'object' && value._seconds) {
+                  return new Date(value._seconds * 1000).toLocaleDateString();
+                }
+                // Handle regular timestamp
+                if (value) {
+                  return new Date(value).toLocaleDateString();
+                }
+                return 'N/A';
+              },
             },
             {
               key: "type",
               label: "Type",
-              render: (value) => <Badge variant="outline">{value}</Badge>,
+              render: (value) => (
+                <Badge 
+                  variant="outline"
+                  className={`text-xs font-semibold ${
+                    value === "Incident" 
+                      ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" 
+                      : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                  }`}
+                >
+                  {value}
+                </Badge>
+              ),
             },
             { key: "actionTaken", label: "Action", render: (value) => value },
           ]}
         />
 
-        <TableCard
-          data={
-            Array.isArray(reportData.comparative) &&
-            reportData.comparative.length > 0
-              ? reportData.comparative
-              : []
-          }
-          title="Comparative Analysis"
-          icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
-          columns={[
-            { key: "category", label: "Category", render: (value) => value },
-            {
-              key: "current",
-              label: "Current",
-              render: (value) => `${value}%`,
-            },
-            {
-              key: "previous",
-              label: "Previous",
-              render: (value) => `${value}%`,
-            },
-          ]}
+        <ComparativeAnalysis
+          startDate={dateRange.startDate}
+          endDate={dateRange.endDate}
         />
       </div>
 

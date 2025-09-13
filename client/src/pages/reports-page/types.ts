@@ -12,6 +12,8 @@ export interface ChartData {
   name: string;
   value: number;
   color?: string;
+  incidents?: number;
+  medications?: number;
 }
 
 export interface DateRange {
