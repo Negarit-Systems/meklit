@@ -1,7 +1,6 @@
 export interface ReportData {
   trendOverTime: any[];
   staffPerformance: any[];
-  comparative: any[];
   incidentFrequency: any[];
   timeline: any[];
   staffAnalysis: any[];

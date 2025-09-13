@@ -25,7 +25,6 @@ import TableCard from "./TableCard";
 import DateFilters from "./DateFilters";
 import TrendDetailsModal from "./TrendDetailsModal";
 import StaffDetailsModal from "./StaffDetailsModal";
-import ComparativeAnalysis from "./ComparativeAnalysis";
 
 // Import types
 import type {
@@ -41,7 +40,6 @@ const ReportsDashboard: React.FC = () => {
   const [reportData, setReportData] = useState<ReportData>({
     trendOverTime: [],
     staffPerformance: [],
-    comparative: [],
     incidentFrequency: [],
     timeline: [],
     staffAnalysis: [],
@@ -236,7 +234,6 @@ const ReportsDashboard: React.FC = () => {
       const newReportData = {
         trendOverTime: getData(trendRes),
         staffPerformance: getData(staffPerfRes),
-        comparative: [],
         incidentFrequency: getData(incidentRes),
         timeline: getData(timelineRes),
         staffAnalysis: getData(staffAnalysisRes),
@@ -544,10 +541,6 @@ const ReportsDashboard: React.FC = () => {
           ]}
         />
 
-        <ComparativeAnalysis
-          startDate={dateRange.startDate}
-          endDate={dateRange.endDate}
-        />
       </div>
 
       <TrendDetailsModal
