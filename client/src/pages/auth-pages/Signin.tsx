@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AuthCard } from "@/components/auth/AuthCard"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { useLogin } from "@/services/auth"
+import type { AxiosError } from "axios"
+import ErrorMessage from "@/components/status/ErrorMessage"
+import SuccessMessage from "@/components/status/SuccessMessage"
+import Spinner from "@/components/status/Spinner"
 
 export function SignIn() {
   const navigate = useNavigate()
@@ -13,10 +18,15 @@ export function SignIn() {
     password: "",
   })
 
+  const { mutate: login, isPending, isSuccess, isError, error } = useLogin({
+    onSuccess: () => {
+      navigate("/dashboard")
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Add API call here for sign in
-    navigate("/dashboard")
+    login({ email: formData.email, password: formData.password })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,9 +36,13 @@ export function SignIn() {
   return (
     <AuthCard
       title="Welcome"
-      description="Sign in to access your Meklit dashboard and manage your learning center"
+      description="Sign in to access your Meklit dashboard"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+        {isError && (
+          <ErrorMessage message={(error as AxiosError<{ message?: string }>)?.response?.data?.message || "Sign in failed"} />
+        )}
+        {isSuccess && <SuccessMessage message="Signed in successfully" />}
         <div className="space-y-2">
           <label htmlFor="email" className="block text-sm font-medium text-foreground">
             Email Address
@@ -74,20 +88,14 @@ export function SignIn() {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <a
-            href="/forgot-password"
-            className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-          >
-            Forgot your password?
-          </a>
-        </div>
-
         <Button
           type="submit"
           className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200 shadow-sm hover:shadow-md"
+          disabled={isPending}
         >
-          Sign In to Dashboard
+          <span className="inline-flex items-center gap-2">
+            {isPending && <Spinner spin property="h-4 w-4" />} Sign In to Dashboard
+          </span>
         </Button>
 
         <div className="text-center pt-4 border-t border-border">
@@ -95,15 +103,6 @@ export function SignIn() {
             New to Meklit?{" "}
             <a href="/sign-up" className="text-primary hover:text-primary/80 font-medium transition-colors">
               Create your account
-            </a>
-          </p>
-        </div>
-
-        <div className="text-center pt-2">
-          <p className="text-xs text-muted-foreground">
-            Need help getting started?{" "}
-            <a href="/support" className="text-secondary hover:text-secondary/80 font-medium transition-colors">
-              Contact support
             </a>
           </p>
         </div>

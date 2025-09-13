@@ -1,7 +1,28 @@
 import { Request, Response } from 'express';
 import { HealthRecordService } from '../services/health-record.js';
+import { sendSuccess } from '../utils/apiResponse.js';
+import { QueryOptions } from '../types/query-option.js';
 
 const healthRecordService = new HealthRecordService();
+
+export const findHealthRecords = async (
+  req: Request,
+  res: Response,
+) => {
+  const { where, orderBy, limit, startAfter } = req.query;
+
+  // Parse query parameters if needed
+  let queryOptions: QueryOptions = {};
+  if (where) queryOptions.where = JSON.parse(where as string);
+  if (orderBy) queryOptions.orderBy = JSON.parse(orderBy as string);
+  if (limit) queryOptions.limit = Number(limit);
+  if (startAfter) queryOptions.startAfter = startAfter;
+
+  const dailyHealthRecords =
+    await healthRecordService.find(queryOptions);
+
+  sendSuccess(res, 'Daily logs fetched', 200, dailyHealthRecords);
+};
 
 export const incidentFrequencyReport = async (
   req: Request,

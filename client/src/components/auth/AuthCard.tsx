@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import logo from "@/assets/logo.png"
 
 interface AuthCardProps {
   title: string
@@ -25,6 +26,7 @@ export function AuthCard({ title, description, children, className }: AuthCardPr
         )}
       >
         <div className="text-center mb-6">
+          <img src={logo} alt="Meklit Logo" className="mx-auto h-20 w-auto mb-4" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
           {description && <p className="text-sm text-muted-foreground mt-2">{description}</p>}
         </div>

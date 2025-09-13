@@ -7,31 +7,123 @@ import {
   HealthRecordEnum,
 } from '../models/health-record.js';
 
+const N_CHILDREN = 15;
+const N_DAILY_LOGS = 100;
+const N_HEALTH_RECORDS = 100;
+
+// Variables defined at the top
+const firstNames = [
+  'Meklit',
+  'Abel',
+  'Selam',
+  'Samuel',
+  'Betelhem',
+  'Yonas',
+  'Hanna',
+  'Dawit',
+  'Liya',
+  'Marta',
+  'Robel',
+  'Sofia',
+  'Nahom',
+  'Mahi',
+  'Kidus',
+];
+const lastNames = [
+  'Teshome',
+  'Gebre',
+  'Alemu',
+  'Kebede',
+  'Mengistu',
+  'Tesfaye',
+  'Wolde',
+  'Bekele',
+  'Haile',
+  'Demissie',
+  'Fikadu',
+  'Abebe',
+  'Mulugeta',
+  'Yilma',
+  'Girma',
+];
+const centerIds = ['Center 1', 'Center 2', 'Center 3', 'Center 4'];
+const classIds = [
+  'Class A',
+  'Class B',
+  'Class C',
+  'Class D',
+  'Class E',
+  'Class F',
+  'Class G',
+  'Class H',
+];
+
+const staff = [
+  'Staff 1',
+  'Staff 2',
+  'Staff 3',
+  'Staff 4',
+  'Staff 5',
+  'Staff 6',
+  'Staff 7',
+  'Staff 8',
+  'Staff 9',
+  'Staff 10',
+  'Staff 11',
+  'Staff 12',
+];
+const mealStatuses = ['Ate all', 'Ate half', 'Ate little', 'Refused'];
+const sleepDurations = [30, 45, 60, 90, 120];
+const engagementLevels = ['High', 'Moderate', 'Low'];
+const moods = [
+  'Happy',
+  'Energetic',
+  'Sad',
+  'Cranky',
+  'Calm',
+  'Excited',
+  'Sleepy',
+  'Mad',
+];
+
+const incidents = [
+  'Scraped knee',
+  'Bumped head',
+  'Minor cut',
+  'Allergic reaction',
+  'Fell while playing',
+  'Insect bite',
+];
+
+const medications = [
+  'Ibuprofen',
+  'Antibiotic',
+  'Tylenol',
+  'Antihistamine',
+  'Cough syrup',
+  'Topical cream',
+  'Eye drops',
+  'Nasal spray',
+  'Paracetamol',
+  'Hydrocortisone',
+];
+
+const actions = [
+  'Applied bandage',
+  'Monitored for 30min',
+  'Called parent',
+  'Rest',
+  'Administered medication',
+  'Cleaned wound',
+  'Observed for allergic reaction',
+  'Provided ice pack',
+];
+
 async function seedChildren() {
   const collection = db.collection('children');
-  const firstNames = [
-    'Meklit',
-    'Abel',
-    'Selam',
-    'Samuel',
-    'Betelhem',
-    'Yonas',
-    'Hanna',
-    'Dawit',
-  ];
-  const lastNames = [
-    'Teshome',
-    'Gebre',
-    'Alemu',
-    'Kebede',
-    'Mengistu',
-  ];
-  const centerIds = ['center1', 'center2'];
-  const classIds = ['classA', 'classB', 'classC'];
-
   const children: Omit<Child, 'id'>[] = [];
-  for (let i = 0; i < 8; i++) {
-    const birthYear = 2020 + Math.floor(Math.random() * 3); // Kids born 2020-2022
+  for (let i = 0; i < N_CHILDREN; i++) {
+    const birthYear = 2020 + Math.floor(Math.random() * 3);
     const birthDate = new Date(
       birthYear,
       Math.floor(Math.random() * 12),
@@ -54,24 +146,13 @@ async function seedChildren() {
     const docRef = await collection.add(child);
     childIds.push(docRef.id);
   }
-  console.log('Seeded 8 Child entries');
+  console.log(`Seeded ${N_CHILDREN} Child entries`);
   return childIds;
 }
 
 async function seedDailyLogs(childIds: string[]) {
   const collection = db.collection('dailyLogEntries');
-  const staff = ['staff1', 'staff2', 'staff3'];
-  const mealStatuses = [
-    'Ate all',
-    'Ate half',
-    'Refused',
-    'Ate little',
-  ];
-  const sleepDurations = [30, 45, 60, 90, 120]; // Minutes
-  const engagementLevels = ['High', 'Moderate', 'Low'];
-  const moods = ['Happy', 'Cranky', 'Calm', 'Excited'];
-
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < N_DAILY_LOGS; i++) {
     const type =
       Object.values(DailyLogEnum)[
         Math.floor(Math.random() * Object.values(DailyLogEnum).length)
@@ -121,32 +202,12 @@ async function seedDailyLogs(childIds: string[]) {
 
     await collection.add(entry);
   }
-  console.log('Seeded 50 DailyLogEntries');
+  console.log(`Seeded ${N_DAILY_LOGS} DailyLogEntries`);
 }
 
 async function seedHealthRecords(childIds: string[]) {
   const collection = db.collection('healthRecordEntries');
-  const users = ['user1', 'user2', 'user3'];
-  const incidents = [
-    'Scraped knee',
-    'Bumped head',
-    'Minor cut',
-    'Allergic reaction',
-  ];
-  const medications = [
-    'Ibuprofen',
-    'Antibiotic',
-    'Tylenol',
-    'Antihistamine',
-  ];
-  const actions = [
-    'Applied bandage',
-    'Monitored for 30min',
-    'Called parent',
-    'Rest',
-  ];
-
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < N_HEALTH_RECORDS; i++) {
     const type =
       Object.values(HealthRecordEnum)[
         Math.floor(
@@ -156,7 +217,7 @@ async function seedHealthRecords(childIds: string[]) {
     const entry: Omit<HealthRecordEntry, 'id'> = {
       childId: childIds[Math.floor(Math.random() * childIds.length)],
       recordedByUserId:
-        users[Math.floor(Math.random() * users.length)],
+        staff[Math.floor(Math.random() * staff.length)],
       timestamp: new Date(
         Date.now() -
           Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000),
@@ -182,7 +243,7 @@ async function seedHealthRecords(childIds: string[]) {
 
     await collection.add(entry);
   }
-  console.log('Seeded 30 HealthRecordEntries');
+  console.log(`Seeded ${N_HEALTH_RECORDS} HealthRecordEntries`);
 }
 
 async function isCollectionEmpty(collectionName: string) {

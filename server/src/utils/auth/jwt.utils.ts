@@ -3,8 +3,11 @@ import { config } from '../../config/config.js';
 
 const { jwtSecret, refreshTokenSecret } = config();
 
-export const generateAccessToken = (user: { id: string }) => {
-  return jwt.sign({ id: user.id }, jwtSecret, {
+export const generateAccessToken = (user: {
+  id: string;
+  email: string;
+}) => {
+  return jwt.sign({ id: user.id, email: user.email }, jwtSecret, {
     expiresIn: '15m',
   });
 };

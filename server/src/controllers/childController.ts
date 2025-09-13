@@ -41,10 +41,15 @@ export const findOneChild = async (req: Request, res: Response) => {
 };
 
 export const findChildren = async (req: Request, res: Response) => {
-  const queryOptions: QueryOptions = req.query;
+  const { where, orderBy, limit, startAfter } = req.query;
+
+  // Parse query parameters if needed
+  let queryOptions: QueryOptions = {};
+  if (where) queryOptions.where = JSON.parse(where as string);
+  if (orderBy) queryOptions.orderBy = JSON.parse(orderBy as string);
+  if (limit) queryOptions.limit = Number(limit);
+  if (startAfter) queryOptions.startAfter = startAfter;
+
   const children = await childService.find(queryOptions);
-  if (!children) {
-    return sendError(res, 'Failed to fetch children.', 500);
-  }
   sendSuccess(res, 'Children fetched', 200, children);
 };

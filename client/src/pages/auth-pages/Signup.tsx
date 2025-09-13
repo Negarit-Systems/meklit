@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AuthCard } from "@/components/auth/AuthCard"
 import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from "lucide-react"
+import { useRegisterUser } from "@/services/auth"
+import ErrorMessage from "@/components/status/ErrorMessage"
+import SuccessMessage from "@/components/status/SuccessMessage"
+import Spinner from "@/components/status/Spinner"
+import type { AxiosError } from "axios"
 
 export function SignUp() {
   const navigate = useNavigate()
@@ -17,10 +22,16 @@ export function SignUp() {
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
 
+  const { mutate: registerUser, isPending, isSuccess, isError, error } = useRegisterUser({
+    onSuccess: () => {
+      navigate("/otp-verification", { state: { email: formData.email } })
+    },
+  })
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Add API call here for sign up
-    navigate("/otp-verification")
+    if (formData.password !== formData.confirmPassword) return
+    registerUser({ name: formData.name, email: formData.email, password: formData.password })
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,9 +41,13 @@ export function SignUp() {
   return (
     <AuthCard
       title="Join Meklit"
-      description="Create your account to start managing your early learning center with ease"
+      description="Create your account to start managing"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        {isError && (
+          <ErrorMessage message={(error as AxiosError<{ message?: string }>)?.response?.data?.message || "Sign up failed"} />
+        )}
+        {isSuccess && <SuccessMessage message="Registration successful. Check your email for OTP." />}
         <div className="space-y-2">
           <label htmlFor="name" className="block text-sm font-medium text-slate-700">
             Full Name
@@ -113,6 +128,9 @@ export function SignUp() {
               className="pl-10 pr-10 h-12 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
               required
             />
+            {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+              <p className="mt-1 text-xs text-red-600">Passwords do not match</p>
+            )}
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -126,8 +144,11 @@ export function SignUp() {
         <Button
           type="submit"
           className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
+          disabled={isPending || (formData.confirmPassword !== formData.password)}
         >
-          Create Account
+          <span className="inline-flex items-center gap-2">
+            {isPending && <Spinner spin property="h-4 w-4" />} Create Account
+          </span>
         </Button>
 
         <p className="text-center text-sm text-slate-600">
