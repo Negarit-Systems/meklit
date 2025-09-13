@@ -1,7 +1,6 @@
-import * as React from "react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,262 +8,307 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Filter, Calendar, Activity, Users, AlertTriangle } from "lucide-react";
-import { Bar as BarChart, Pie } from "react-chartjs-2";
+import { Filter, Calendar, X, BarChart, PieChart, LineChart } from "lucide-react";
+import { Doughnut, Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
+  ArcElement,
   CategoryScale,
   LinearScale,
   BarElement,
-  ArcElement,
   Title,
   Tooltip,
   Legend,
+  PointElement,
+  LineElement,
 } from "chart.js";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { format, isValid } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+import {
+  fetchChildren,
+  fetchTrendOverTime,
+  fetchStaffPerformance,
+  fetchIncidentFrequency,
+} from "../../services/apiService";
+
+import type { Child, TrendData, StaffPerformance, IncidentFrequency } from "../../services/apiService";
 
 // Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement);
 
+// Define interfaces
 interface FilterState {
   centerId: string;
   classId: string;
   childId: string;
-  dateRange: [string, string];
+  dateRange: [Date | undefined, Date | undefined];
   dataTypes: string[];
+  isFilterOpen: boolean;
 }
 
-interface Child {
-  id: string;
-  firstName: string;
-  lastName: string;
-  centerId: string;
-  classId: string;
-}
+// Chart color palette
+const chartColors = {
+  blue: "rgb(75, 192, 192)",
+  red: "rgb(255, 99, 132)",
+  yellow: "rgb(255, 205, 86)",
+  green: "rgb(54, 162, 235)",
+  purple: "rgb(153, 102, 255)",
+  orange: "rgb(255, 159, 64)",
+};
 
 export function Dashboard() {
   const isMdUp = useMediaQuery("(min-width: 768px)");
+
+  const today = new Date();
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+
   const [filters, setFilters] = useState<FilterState>({
     centerId: "",
     classId: "",
     childId: "",
-    dateRange: ["2022-09-01", "2027-09-01"],
-    dataTypes: ["Daily Logs", "Health Records"],
+    dateRange: [thirtyDaysAgo, today],
+    dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
+    isFilterOpen: isMdUp,
   });
 
-  // Fetch children for filter options
-  const { data: children, isLoading: loadingChildren } = useQuery({
-    queryKey: ["children", filters.centerId, filters.classId],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:5000/api/children?${new URLSearchParams({
-        centerId: filters.centerId || "",
-        classId: filters.classId || "",
-      })}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          Accept: "*/*",
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch children");
-      const { data } = await response.json();
-      return data; // Array of Child
-    },
+  const { data: children = [], isLoading: loadingChildren, error: errorChildren } = useQuery<Child[]>({
+    queryKey: ["children"],
+    queryFn: fetchChildren,
   });
 
-  // Fetch data for charts
-  const { data: trendData, isLoading: loadingTrend, error: errorTrend } = useQuery({
-    queryKey: ["daily-logs-trend", filters],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:5000/api/daily-logs/trend-over-time?${new URLSearchParams({
-        startDate: filters.dateRange[0],
-        endDate: filters.dateRange[1],
-        centerId: filters.centerId || "",
-        classId: filters.classId || "",
-        childId: filters.childId || "",
-      })}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          Accept: "*/*",
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch daily logs trend");
-      return response.json();
-    },
+  const { data: trendData = [], isLoading: loadingTrend, error: errorTrend } = useQuery<TrendData[]>({
+    queryKey: ["daily-logs-trend", filters.dateRange, filters.childId],
+    queryFn: () =>
+      fetchTrendOverTime({
+        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : "2022-09-01",
+        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : "2027-09-01",
+        childId: filters.childId || undefined,
+      }),
   });
 
-  const { data: staffData, isLoading: loadingStaff, error: errorStaff } = useQuery({
-    queryKey: ["daily-logs-staff", filters],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:5000/api/daily-logs/staff-performance?${new URLSearchParams({
-        startDate: filters.dateRange[0],
-        endDate: filters.dateRange[1],
-        centerId: filters.centerId || "",
-      })}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          Accept: "*/*",
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch staff performance");
-      return response.json();
-    },
+  const { data: staffData = [], isLoading: loadingStaff, error: errorStaff } = useQuery<StaffPerformance[]>({
+    queryKey: ["staff-performance", filters.dateRange, filters.centerId],
+    queryFn: () =>
+      fetchStaffPerformance({
+        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : "2022-09-01",
+        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : "2027-09-01",
+        centerId: filters.centerId || undefined,
+      }),
   });
 
-  const { data: incidentData, isLoading: loadingIncidents, error: errorIncidents } = useQuery({
-    queryKey: ["health-incident-frequency", filters],
-    queryFn: async () => {
-      const response = await fetch(`http://localhost:5000/api/health-records/incident-frequency?${new URLSearchParams({
-        startDate: filters.dateRange[0],
-        endDate: filters.dateRange[1],
-        centerId: filters.centerId || "",
-      })}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          Accept: "*/*",
-        },
-      });
-      if (!response.ok) throw new Error("Failed to fetch incident frequency");
-      return response.json();
-    },
+  const { data: incidentData = [], isLoading: loadingIncidents, error: errorIncidents } = useQuery<IncidentFrequency[]>({
+    queryKey: ["incident-frequency", filters.dateRange, filters.centerId],
+    queryFn: () =>
+      fetchIncidentFrequency({
+        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : "2022-09-01",
+        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : "2027-09-01",
+        centerId: filters.centerId || undefined,
+      }),
   });
 
   const loading = loadingChildren || loadingTrend || loadingStaff || loadingIncidents;
-  const error = errorTrend || errorStaff || errorIncidents;
+  const error = errorChildren || errorTrend || errorStaff || errorIncidents;
+
+  const centers = useMemo(() => {
+    return Array.from(new Set(children.map((child) => child.centerId))).sort();
+  }, [children]);
+
+  const classes = useMemo(() => {
+    const filteredChildrenByCenter = filters.centerId
+      ? children.filter((child) => child.centerId === filters.centerId)
+      : children;
+    return Array.from(new Set(filteredChildrenByCenter.map((child) => child.classId))).sort();
+  }, [children, filters.centerId]);
+
+  const filteredChildren = useMemo(() => {
+    return children.filter(
+      (child) =>
+        (!filters.centerId || child.centerId === filters.centerId) &&
+        (!filters.classId || child.classId === filters.classId)
+    );
+  }, [children, filters.centerId, filters.classId]);
 
   const handleFilterChange = (newFilters: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   const clearFilters = () => {
-    setFilters({
+    setFilters((prev) => ({
+      ...prev,
       centerId: "",
       classId: "",
       childId: "",
-      dateRange: ["2022-09-01", "2027-09-01"],
-      dataTypes: ["Daily Logs", "Health Records"],
-    });
+      dateRange: [undefined, undefined],
+      dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
+    }));
+  };
+
+  const toggleFilterPanel = () => {
+    setFilters((prev) => ({ ...prev, isFilterOpen: !prev.isFilterOpen }));
   };
 
   const FilterPanel = () => (
     <motion.div
-      initial={{ opacity: 0, x: -50 }}
+      initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-card border border-border rounded-2xl p-6 space-y-6 shadow-lg"
+      transition={{ duration: 0.3 }}
+      className={cn(
+        "bg-white border border-gray-200 rounded-xl p-6 shadow-md transition-all duration-300",
+        isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
+      )}
     >
-      <div className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl p-4">
-        <h2 className="text-xl font-bold text-white">Analytics Filters <Filter className="h-5 w-5 inline ml-2" /></h2>
-        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-white hover:text-gray-200">
-          Clear All
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h2 className="text-xl font-bold text-gray-800 flex items-center">
+          <Filter className="h-6 w-6 mr-2 text-blue-500" /> Filters
+        </h2>
+        <Button variant="ghost" size="sm" onClick={toggleFilterPanel} className="text-gray-600 hover:text-gray-900 md:hidden">
+          <X className="h-5 w-5" />
         </Button>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-foreground">Center</label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between mt-1">
-              {filters.centerId || "Select Center"}
-              <Filter className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {[...new Set(children?.map((child: Child) => child.centerId))].map((centerId) => (
-              <DropdownMenuItem key={centerId} onSelect={() => handleFilterChange({ centerId })}>
-                {centerId}
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Center</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                {filters.centerId || "All Centers"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+              <DropdownMenuItem onSelect={() => handleFilterChange({ centerId: "" })}>
+                All Centers
               </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-foreground">Class</label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between mt-1">
-              {filters.classId || "Select Class"}
-              <Filter className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {[...new Set(children?.filter((child: Child) => !filters.centerId || child.centerId === filters.centerId).map((child: Child) => child.classId))].map((classId) => (
-              <DropdownMenuItem key={classId} onSelect={() => handleFilterChange({ classId })}>
-                {classId}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-foreground">Child</label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between mt-1">
-              {filters.childId ? children?.find((child: Child) => child.id === filters.childId)?.firstName + " " + children?.find((child: Child) => child.id === filters.childId)?.lastName : "Select Child"}
-              <Filter className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {children?.filter((child: Child) => (!filters.centerId || child.centerId === filters.centerId) && (!filters.classId || child.classId === filters.classId)).map((child: Child) => (
-              <DropdownMenuItem key={child.id} onSelect={() => handleFilterChange({ childId: child.id })}>
-                {child.firstName} {child.lastName}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-foreground">Date Range</label>
-        <div className="flex gap-2 mt-1">
-          <Input
-            type="date"
-            value={filters.dateRange[0]}
-            onChange={(e) => handleFilterChange({ dateRange: [e.target.value, filters.dateRange[1]] })}
-            className="w-full"
-          />
-          <Input
-            type="date"
-            value={filters.dateRange[1]}
-            onChange={(e) => handleFilterChange({ dateRange: [filters.dateRange[0], e.target.value] })}
-            className="w-full"
-          />
+              {centers.map((center) => (
+                <DropdownMenuItem key={center} onSelect={() => handleFilterChange({ centerId: center })}>
+                  {center}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-foreground">Data Types</label>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-between mt-1">
-              {filters.dataTypes.length > 0 ? filters.dataTypes.join(", ") : "Select Data Types"}
-              <Filter className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              onSelect={() =>
-                handleFilterChange({
-                  dataTypes: filters.dataTypes.includes("Daily Logs")
-                    ? filters.dataTypes.filter((dt) => dt !== "Daily Logs")
-                    : [...filters.dataTypes, "Daily Logs"],
-                })
-              }
-            >
-              Daily Logs
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() =>
-                handleFilterChange({
-                  dataTypes: filters.dataTypes.includes("Health Records")
-                    ? filters.dataTypes.filter((dt) => dt !== "Health Records")
-                    : [...filters.dataTypes, "Health Records"],
-                })
-              }
-            >
-              Health Records
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between" disabled={classes.length === 0}>
+                {filters.classId || "All Classes"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+              <DropdownMenuItem onSelect={() => handleFilterChange({ classId: "" })}>
+                All Classes
+              </DropdownMenuItem>
+              {classes.map((classId) => (
+                <DropdownMenuItem key={classId} onSelect={() => handleFilterChange({ classId })}>
+                  {classId}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Child</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+                disabled={loadingChildren || filteredChildren.length === 0}
+              >
+                {loadingChildren
+                  ? "Loading..."
+                  : filters.childId
+                  ? filteredChildren.find((child) => child.id === filters.childId)?.firstName +
+                    " " +
+                    filteredChildren.find((child) => child.id === filters.childId)?.lastName
+                  : "All Children"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+              <DropdownMenuItem onSelect={() => handleFilterChange({ childId: "" })}>
+                All Children
+              </DropdownMenuItem>
+              {filteredChildren.map((child: Child) => (
+                <DropdownMenuItem key={child.id} onSelect={() => handleFilterChange({ childId: child.id })}>
+                  {child.firstName} {child.lastName}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between pr-3">
+                  {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
+                  <Calendar className="h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <DayPicker
+                  mode="single"
+                  selected={filters.dateRange[0]}
+                  onSelect={(date) => handleFilterChange({ dateRange: [date, filters.dateRange[1]] })}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between pr-3">
+                  {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
+                  <Calendar className="h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <DayPicker
+                  mode="single"
+                  selected={filters.dateRange[1]}
+                  onSelect={(date) => handleFilterChange({ dateRange: [filters.dateRange[0], date] })}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Data Types</label>
+          <div className="space-y-2">
+            {["Daily Logs", "Health Records", "Staff Performance"].map((type) => (
+              <div key={type} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={type}
+                  checked={filters.dataTypes.includes(type)}
+                  onChange={(e) => {
+                    const newTypes = e.target.checked
+                      ? [...filters.dataTypes, type]
+                      : filters.dataTypes.filter((dt) => dt !== type);
+                    handleFilterChange({ dataTypes: newTypes });
+                  }}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor={type} className="text-sm font-medium text-gray-700">
+                  {type}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex justify-end pt-2">
+          <Button variant="ghost" onClick={clearFilters} className="text-sm">
+            Reset Filters
+          </Button>
+        </div>
       </div>
     </motion.div>
   );
@@ -272,166 +316,179 @@ export function Dashboard() {
   const VisualizationContainer = () => {
     if (loading) {
       return (
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="flex items-center justify-center h-64"
-        >
-          <div className="rounded-full h-12 w-12 border-t-4 border-b-4 border-primary animate-spin" />
-        </motion.div>
+        <div className="flex items-center justify-center h-96">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400"
+          />
+        </div>
       );
     }
     if (error) {
       return (
-        <div className="flex items-center justify-center h-64 text-destructive">
-          Failed to load data. Please try again.
+        <div className="flex flex-col items-center justify-center h-96 text-red-600 bg-white rounded-lg p-4 shadow-md">
+          <X className="h-12 w-12 mb-4" />
+          <p>Error fetching data: {error.message}. Please try again.</p>
         </div>
       );
     }
-    if (!trendData?.data && !staffData?.data && !incidentData) {
+
+    const showDailyLogs = filters.dataTypes.includes("Daily Logs");
+    const showHealthRecords = filters.dataTypes.includes("Health Records");
+    const showStaffPerformance = filters.dataTypes.includes("Staff Performance");
+
+    const hasData =
+      (showDailyLogs && trendData.length > 0) ||
+      (showStaffPerformance && staffData.length > 0) ||
+      (showHealthRecords && incidentData.length > 0);
+
+    if (!hasData) {
       return (
-        <div className="flex items-center justify-center h-64 text-muted-foreground">
+        <div className="flex items-center justify-center h-96 text-gray-500 bg-white rounded-lg p-4 shadow-md">
           No data available for the selected filters.
         </div>
       );
     }
 
     const trendChartData = {
-      labels: trendData?.data?.map((item: any) => new Date(item.date._seconds * 1000).toLocaleDateString()) || [],
-      datasets: [
-        ...(filters.dataTypes.includes("Daily Logs")
-          ? [
-              {
-                label: "Average Nap Duration",
-                data: trendData?.data?.map((item: any) => item.averageNapDuration) || [],
-                backgroundColor: "bg-green-500",
-                borderColor: "border-green-700",
-                borderWidth: 2,
-              },
-              {
-                label: "Total Meals",
-                data: trendData?.data?.map((item: any) => item.totalMeals) || [],
-                backgroundColor: "bg-blue-500",
-                borderColor: "border-blue-700",
-                borderWidth: 2,
-              },
-            ]
-          : []),
-      ],
-    };
-
-    const staffChartData = {
-      labels: staffData?.data?.map((item: any) => item.staffId) || [],
+      labels: trendData.map((item) => {
+        // Correctly handle the Firebase Timestamp to get a valid date string
+        const date = new Date(item.date._seconds * 1000);
+        return isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date";
+      }),
       datasets: [
         {
-          label: "Total Logs",
-          data: staffData?.data?.map((item: any) => item.totalLogs) || [],
-          backgroundColor: "bg-purple-500",
-          borderColor: "border-purple-700",
-          borderWidth: 2,
+          label: "Avg Nap Duration (min)",
+          data: trendData.map((item) => item.averageNapDuration || 0),
+          borderColor: chartColors.blue,
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: "Total Meals",
+          data: trendData.map((item) => item.totalMeals || 0),
+          borderColor: chartColors.red,
+          backgroundColor: "rgba(255, 99, 132, 0.2)",
+          tension: 0.4,
+          fill: true,
         },
       ],
     };
 
-    const incidentPieData = {
-      labels: incidentData?.map((item: any) => item.type) || [],
+    const staffChartData = {
+      labels: staffData.map((item) => item.staffId),
       datasets: [
         {
-          data: incidentData?.map((item: any) => item.count) || [],
-          backgroundColor: ["bg-red-500", "bg-blue-500", "bg-yellow-500"],
-          borderColor: ["border-red-700", "border-blue-700", "border-yellow-700"],
+          label: "Total Logs",
+          data: staffData.map((item) => item.totalLogs),
+          backgroundColor: staffData.map(() => chartColors.green),
+          borderColor: staffData.map(() => "rgb(54, 162, 235, 1)"),
           borderWidth: 1,
         },
       ],
     };
 
+    const incidentDoughnutData = {
+      labels: incidentData.map((item) => item.type),
+      datasets: [
+        {
+          data: incidentData.map((item) => item.count),
+          backgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
+          hoverBackgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
+          borderWidth: 2,
+        },
+      ],
+    };
+
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filters.dataTypes.includes("Daily Logs") && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl text-white"
-            >
-              <div className="flex items-center mb-4">
-                <Activity className="h-8 w-8 mr-3" />
-                <h3 className="text-2xl font-extrabold">Daily Log Trends</h3>
-              </div>
-              <BarChart
-                data={trendChartData}
-                options={{
-                  responsive: true,
-                  plugins: { legend: { position: "top", labels: { color: "white" } }, title: { display: true, text: "Daily Log Trends", color: "white" } },
-                }}
-              />
-            </motion.div>
-          )}
-          {filters.dataTypes.includes("Daily Logs") && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl text-white"
-            >
-              <div className="flex items-center mb-4">
-                <Users className="h-8 w-8 mr-3" />
-                <h3 className="text-2xl font-extrabold">Staff Performance</h3>
-              </div>
-              <BarChart
-                data={staffChartData}
-                options={{
-                  responsive: true,
-                  plugins: { legend: { position: "top", labels: { color: "white" } }, title: { display: true, text: "Staff Performance", color: "white" } },
-                }}
-              />
-            </motion.div>
-          )}
-          {filters.dataTypes.includes("Health Records") && (
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.3 }}
-              className="bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl p-8 shadow-2xl hover:shadow-3xl text-white"
-            >
-              <div className="flex items-center mb-4">
-                <AlertTriangle className="h-8 w-8 mr-3" />
-                <h3 className="text-2xl font-extrabold">Incident Frequency</h3>
-              </div>
-              <Pie
-                data={incidentPieData}
-                options={{
-                  responsive: true,
-                  plugins: { legend: { position: "top", labels: { color: "white" } }, title: { display: true, text: "Health Incidents", color: "white" } },
-                }}
-              />
-            </motion.div>
-          )}
-        </div>
-      </motion.div>
+      <div className="space-y-8">
+        {showDailyLogs && trendData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-xl p-8 shadow-md"
+          >
+            <div className="flex items-center mb-4 text-blue-600">
+              <LineChart className="h-6 w-6 mr-2" />
+              <h3 className="text-xl font-bold">Daily Log Trends</h3>
+            </div>
+            <div className="h-96">
+              <Line data={trendChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </div>
+          </motion.div>
+        )}
+        {showStaffPerformance && staffData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-white rounded-xl p-8 shadow-md"
+          >
+            <div className="flex items-center mb-4 text-green-600">
+              <BarChart className="h-6 w-6 mr-2" />
+              <h3 className="text-xl font-bold">Staff Performance</h3>
+            </div>
+            <div className="h-96">
+              <Bar data={staffChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            </div>
+          </motion.div>
+        )}
+        {showHealthRecords && incidentData.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-white rounded-xl p-8 shadow-md"
+          >
+            <div className="flex items-center mb-4 text-red-600">
+              <PieChart className="h-6 w-6 mr-2" />
+              <h3 className="text-xl font-bold">Incident Frequency</h3>
+            </div>
+            <div className="h-96 flex items-center justify-center">
+              <Doughnut data={incidentDoughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: '70%' }} />
+            </div>
+          </motion.div>
+        )}
+      </div>
     );
   };
 
   return (
-    <div className={cn("flex flex-col md:flex-row gap-8 p-6 bg-background/95 rounded-xl", isMdUp ? "flex-row" : "flex-col")}>
-      <div className={cn("md:w-1/4", isMdUp ? "w-1/4" : "w-full")}>
-        <FilterPanel />
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
+      <div className="flex justify-between items-center mb-6 md:hidden">
+        <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
+        <Button variant="outline" size="sm" onClick={toggleFilterPanel}>
+          <Filter className="h-5 w-5 mr-2" /> Filters
+        </Button>
       </div>
-      <div className={cn("flex-1", isMdUp ? "w-3/4" : "w-full")}>
-        <motion.h1
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-4xl font-extrabold mb-8 text-primary"
-        >
-          Analytics Dashboard
-        </motion.h1>
-        <VisualizationContainer />
+
+      <div className={cn("grid gap-8", isMdUp ? "grid-cols-4" : "grid-cols-1")}>
+        {isMdUp && (
+          <div className="col-span-1">
+            <FilterPanel />
+          </div>
+        )}
+        <div className={cn(isMdUp ? "col-span-3" : "col-span-1")}>
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-4xl font-extrabold text-gray-900 mb-8 hidden md:block"
+          >
+            Analytics Dashboard
+          </motion.h1>
+          <VisualizationContainer />
+        </div>
       </div>
+
+      {!isMdUp && filters.isFilterOpen && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-start justify-center p-4">
+          <FilterPanel />
+        </div>
+      )}
     </div>
   );
 }
