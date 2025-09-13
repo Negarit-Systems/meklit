@@ -49,13 +49,11 @@ const ReportsDashboard: React.FC = () => {
     staffAnalysis: [],
     actionDistribution: {},
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
-    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0],
-    endDate: new Date().toISOString().split("T")[0],
+    startDate: "",
+    endDate: "",
   });
   const [showTrendDetails, setShowTrendDetails] = useState(false);
   const [showStaffDetails, setShowStaffDetails] = useState(false);
@@ -185,9 +183,7 @@ const ReportsDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    handleFetchChildren().then(() => {
-      handleFetchAllReports();
-    });
+    handleFetchChildren();
   }, []);
 
   const processTrendData = (): ChartData[] => {
@@ -343,7 +339,7 @@ const ReportsDashboard: React.FC = () => {
             Reports Dashboard
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
-            Comprehensive analytics and insights from your child care data
+            Comprehensive analytics and insights data
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -367,6 +363,7 @@ const ReportsDashboard: React.FC = () => {
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         onApplyFilters={handleFetchAllReports}
+        loading={loading}
       />
 
       {/* Error State */}
@@ -392,8 +389,98 @@ const ReportsDashboard: React.FC = () => {
         </div>
       )}
 
+      {/* Empty Cards when no dates selected */}
+      {!loading && !error && (!dateRange.startDate || !dateRange.endDate) && (
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <ChartCard
+              data={[]}
+              title="Trend Over Time"
+              icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+              description="Weekly activity trends"
+              showDetailsButton={true}
+              onDetailsClick={() => setShowTrendDetails(true)}
+            />
+
+            <ChartCard
+              data={[]}
+              title="Staff Performance"
+              icon={<UserCheck className="h-4 w-4 text-muted-foreground" />}
+              description="Total logs by staff member"
+              showDetailsButton={true}
+              onDetailsClick={() => setShowStaffDetails(true)}
+            />
+
+            <ChartCard
+              data={[]}
+              title="Incident Frequency"
+              icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
+              description="Health incident frequency"
+            />
+
+            <ChartCard
+              data={[]}
+              title="Staff Analysis"
+              icon={<Users className="h-4 w-4 text-muted-foreground" />}
+              description="Staff record analysis with incidents & medications"
+              showBreakdown={true}
+            />
+
+            <ChartCard
+              data={[]}
+              title="Action Distribution"
+              icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
+              description="Health action distribution"
+              chartType="pie"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TableCard
+              data={[]}
+              title="Health Timeline"
+              icon={<Clock className="h-4 w-4 text-muted-foreground" />}
+              columns={[
+                {
+                  key: "timestamp",
+                  label: "Date",
+                  render: (value) => {
+                    // Handle Firebase timestamp format
+                    if (value && typeof value === 'object' && value._seconds) {
+                      return new Date(value._seconds * 1000).toLocaleDateString();
+                    }
+                    // Handle regular timestamp
+                    if (value) {
+                      return new Date(value).toLocaleDateString();
+                    }
+                    return 'N/A';
+                  },
+                },
+                {
+                  key: "type",
+                  label: "Type",
+                  render: (value) => (
+                    <Badge 
+                      variant="outline"
+                      className={`text-xs font-semibold ${
+                        value === "Incident" 
+                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" 
+                          : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                      }`}
+                    >
+                      {value}
+                    </Badge>
+                  ),
+                },
+                { key: "actionTaken", label: "Action", render: (value) => value },
+              ]}
+            />
+          </div>
+        </>
+      )}
+
       {/* Data Content */}
-      {!loading && !error && (
+      {!loading && !error && dateRange.startDate && dateRange.endDate && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <ChartCard

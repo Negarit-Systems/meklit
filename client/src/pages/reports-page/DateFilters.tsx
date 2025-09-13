@@ -13,12 +13,14 @@ interface DateFiltersProps {
   dateRange: DateRange;
   onDateRangeChange: (dateRange: DateRange) => void;
   onApplyFilters: () => void;
+  loading?: boolean;
 }
 
 const DateFilters: React.FC<DateFiltersProps> = ({
   dateRange,
   onDateRangeChange,
   onApplyFilters,
+  loading = false,
 }) => {
   return (
     <Card>
@@ -54,9 +56,13 @@ const DateFilters: React.FC<DateFiltersProps> = ({
               />
             </div>
           </div>
-          <Button onClick={onApplyFilters} className="w-full sm:w-auto sm:self-end">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Apply Filters
+          <Button 
+            onClick={onApplyFilters} 
+            className="w-full sm:w-auto sm:self-end"
+            disabled={loading || !dateRange.startDate || !dateRange.endDate}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            {loading ? 'Loading...' : 'Apply Filters'}
           </Button>
         </div>
       </CardContent>
