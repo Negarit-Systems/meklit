@@ -164,33 +164,33 @@ export function Dashboard() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "bg-white border border-gray-200 rounded-xl p-6 shadow-md transition-all duration-300",
+        "bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-md transition-all duration-300",
         isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
       )}
     >
       <div className="flex items-center justify-between mb-6 pb-4 border-b">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center">
+        <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
           <Filter className="h-6 w-6 mr-2 text-blue-500" /> Filters
         </h2>
-        <Button variant="ghost" size="sm" onClick={toggleFilterPanel} className="text-gray-600 hover:text-gray-900 md:hidden">
-          <X className="h-5 w-5" />
-        </Button>
+        <Button variant="ghost" size="sm" onClick={toggleFilterPanel} className="ml-2 p-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
+  <X className="h-5 w-5" />
+</Button>
       </div>
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Center</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Center</label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
+              <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                 {filters.centerId || "All Centers"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-              <DropdownMenuItem onSelect={() => handleFilterChange({ centerId: "" })}>
+              <DropdownMenuItem className="dark:text-gray-100 dark:hover:bg-gray-700" onSelect={() => handleFilterChange({ centerId: "" })}>
                 All Centers
               </DropdownMenuItem>
               {centers.map((center) => (
-                <DropdownMenuItem key={center} onSelect={() => handleFilterChange({ centerId: center })}>
+                <DropdownMenuItem className="dark:text-gray-100 dark:hover:bg-gray-700" key={center} onSelect={() => handleFilterChange({ centerId: center })}>
                   {center}
                 </DropdownMenuItem>
               ))}
@@ -198,19 +198,19 @@ export function Dashboard() {
           </DropdownMenu>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Class</label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full justify-between" disabled={classes.length === 0}>
+              <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100" disabled={classes.length === 0}>
                 {filters.classId || "All Classes"}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-              <DropdownMenuItem onSelect={() => handleFilterChange({ classId: "" })}>
+              <DropdownMenuItem className="dark:text-gray-100 dark:hover:bg-gray-700" onSelect={() => handleFilterChange({ classId: "" })}>
                 All Classes
               </DropdownMenuItem>
               {classes.map((classId) => (
-                <DropdownMenuItem key={classId} onSelect={() => handleFilterChange({ classId })}>
+                <DropdownMenuItem className="dark:text-gray-100 dark:hover:bg-gray-700" key={classId} onSelect={() => handleFilterChange({ classId })}>
                   {classId}
                 </DropdownMenuItem>
               ))}
@@ -218,12 +218,12 @@ export function Dashboard() {
           </DropdownMenu>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Child</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Child</label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between"
+                className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100"
                 disabled={loadingChildren || filteredChildren.length === 0}
               >
                 {loadingChildren
@@ -236,11 +236,11 @@ export function Dashboard() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
-              <DropdownMenuItem onSelect={() => handleFilterChange({ childId: "" })}>
+              <DropdownMenuItem className="dark:text-gray-100 dark:hover:bg-gray-700" onSelect={() => handleFilterChange({ childId: "" })}>
                 All Children
               </DropdownMenuItem>
               {filteredChildren.map((child: Child) => (
-                <DropdownMenuItem key={child.id} onSelect={() => handleFilterChange({ childId: child.id })}>
+                <DropdownMenuItem className="dark:text-gray-100 dark:hover:bg-gray-700" key={child.id} onSelect={() => handleFilterChange({ childId: child.id })}>
                   {child.firstName} {child.lastName}
                 </DropdownMenuItem>
               ))}
@@ -249,13 +249,10 @@ export function Dashboard() {
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Start Date</label>
             <Popover>
               <PopoverTrigger asChild>
-                {/*==============================================*/}
-                {/* FIXED: Wrapped button contents in a span     */}
-                {/*==============================================*/}
-                <Button variant="outline" className="w-full justify-between pr-3">
+                <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                     <span className="flex items-center justify-between w-full">
                         <span>
                             {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
@@ -274,13 +271,10 @@ export function Dashboard() {
             </Popover>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">End Date</label>
             <Popover>
               <PopoverTrigger asChild>
-                {/*==============================================*/}
-                {/* FIXED: Wrapped button contents in a span     */}
-                {/*==============================================*/}
-                <Button variant="outline" className="w-full justify-between pr-3">
+                <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
                     <span className="flex items-center justify-between w-full">
                         <span>
                             {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
@@ -300,7 +294,7 @@ export function Dashboard() {
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data Types</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Data Types</label>
           <div className="space-y-2">
             {["Daily Logs", "Health Records", "Staff Performance"].map((type) => (
               <div key={type} className="flex items-center space-x-2">
@@ -316,7 +310,7 @@ export function Dashboard() {
                   }}
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor={type} className="text-sm font-medium text-gray-700">
+                <label htmlFor={type} className="text-sm font-medium text-gray-700 dark:text-gray-200">
                   {type}
                 </label>
               </div>
@@ -324,7 +318,7 @@ export function Dashboard() {
           </div>
         </div>
         <div className="flex justify-end pt-2">
-          <Button variant="ghost" onClick={clearFilters} className="text-sm">
+          <Button variant="ghost" onClick={clearFilters} className="text-sm text-gray-700 dark:text-gray-200">
             Reset Filters
           </Button>
         </div>
@@ -402,7 +396,7 @@ export function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-xl p-8 shadow-md"
+            className="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 shadow-md"
           >
             <div className="flex items-center mb-6 text-blue-600">
               <Calendar className="h-6 w-6 mr-2" />
@@ -427,21 +421,22 @@ export function Dashboard() {
       transition={{ duration: 0.3, delay: index * 0.05 }}
     >
       {/* ✅ Standardized Card UI */}
-      <Card className="transition-transform hover:scale-105">
-        <CardHeader>
-          <p className="font-semibold text-blue-800">
-            {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
-          </p>
-        </CardHeader>
-        <CardContent className="text-sm text-gray-700 space-y-1">
-          <p>
-            <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
-          </p>
-          <p>
-            <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
-          </p>
-        </CardContent>
-      </Card>
+      <Card className="transition-transform hover:scale-105 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+  <CardHeader>
+    <p className="font-semibold text-blue-800 dark:text-blue-400">
+      {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
+    </p>
+  </CardHeader>
+  <CardContent className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+    <p>
+      <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
+    </p>
+    <p>
+      <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
+    </p>
+  </CardContent>
+</Card>
+
     </motion.div>
   );
 })}
@@ -455,7 +450,7 @@ export function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-xl p-8 shadow-md"
+            className="bg-gray-50 dark:bg-gray-800 rounded-xl p-8 shadow-md"
           >
             <div className="flex items-center mb-4 text-green-600">
               <BarChart className="h-6 w-6 mr-2" />
@@ -468,11 +463,15 @@ export function Dashboard() {
         )}
         {showHealthRecords && incidentData.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-xl p-8 shadow-md"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+              "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-md dark:shadow-none transition-all duration-300",
+              isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
+            )}
           >
+
             <div className="flex items-center mb-4 text-red-600">
               <PieChart className="h-6 w-6 mr-2" />
               <h3 className="text-xl font-bold">Incident Frequency</h3>
@@ -487,10 +486,10 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-8 font-sans text-gray-900 dark:text-gray-100">
       <div className="flex justify-between items-center mb-6 md:hidden">
-        <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-        <Button variant="outline" size="sm" onClick={toggleFilterPanel}>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Analytics Dashboard</h1>
+        <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100" size="sm" onClick={toggleFilterPanel}>
           <Filter className="h-5 w-5 mr-2" /> Filters
         </Button>
       </div>
@@ -506,7 +505,7 @@ export function Dashboard() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-4xl font-extrabold text-gray-900 mb-8 hidden md:block"
+            className="text-4xl font-extrabold text-gray-900 dark:text-gray-100 mb-8 hidden md:block"
           >
             Analytics Dashboard
           </motion.h1>
