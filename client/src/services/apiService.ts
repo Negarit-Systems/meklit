@@ -1,6 +1,6 @@
-const API_BASE_URL = "http://localhost:5000/api";
+import { apiClient } from "@/lib/axios";
 
-// Define interfaces
+// Interfaces
 export interface Child {
   id: string;
   firstName: string;
@@ -26,47 +26,20 @@ export interface IncidentFrequency {
   count: number;
 }
 
-const fetchWithErrorHandling = async (url: string, options: RequestInit = {}) => {
-  try {
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
-
-    console.log('Fetching URL:', url);
-    const response = await fetch(url, { ...options, headers });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`HTTP Error ${response.status}: ${url}`, errorText);
-      try {
-        const errorData = JSON.parse(errorText);
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      } catch {
-        throw new Error(`HTTP error! status: ${response.status}, response: ${errorText.substring(0, 100)}...`);
-      }
-    }
-
-    const contentType = response.headers.get('content-type');
-    if (response.status === 204 || !contentType || !contentType.includes('application/json')) {
-      return null;
-    }
-
-    const jsonData = await response.json();
-    return jsonData.data || jsonData;
-  } catch (error) {
-    console.error('API Error for', url, ':', error);
-    throw error instanceof Error ? error : new Error('Network error occurred');
-  }
+// Helper to safely extract data from API responses
+const extractData = <T>(response: any): T => {
+  return response.data?.data ?? response.data;
 };
 
-// Fetch all children initially, filter client-side
+// ---------------- Children ----------------
+
+// Fetch all children (no filters to get complete dataset)
 export const fetchChildren = async (): Promise<Child[]> => {
-  const url = `${API_BASE_URL}/child`;
-  console.log('fetchChildren URL:', url);
-  return await fetchWithErrorHandling(url);
+  const response = await apiClient.get("/child");
+  return extractData<Child[]>(response);
 };
+
+// ---------------- Trend Over Time ----------------
 
 export const fetchTrendOverTime = async (filters: {
   startDate: string;
@@ -75,41 +48,48 @@ export const fetchTrendOverTime = async (filters: {
   classId?: string;
   childId?: string;
 }): Promise<TrendData[]> => {
-  const params = new URLSearchParams({
+  const params: Record<string, string> = {
     startDate: filters.startDate,
     endDate: filters.endDate,
-    ...(filters.centerId && { centerId: filters.centerId }),
-    ...(filters.classId && { classId: filters.classId }),
-    ...(filters.childId && { childId: filters.childId }),
-  }).toString();
-  const url = `${API_BASE_URL}/daily-logs/trend-over-time?${params}`;
-  return await fetchWithErrorHandling(url);
+  };
+  if (filters.centerId) params.centerId = filters.centerId;
+  if (filters.classId) params.classId = filters.classId;
+  if (filters.childId) params.childId = filters.childId;
+
+  const response = await apiClient.get("/daily-logs/trend-over-time", { params });
+  return extractData<TrendData[]>(response);
 };
+
+// ---------------- Staff Performance ----------------
 
 export const fetchStaffPerformance = async (filters: {
   startDate: string;
   endDate: string;
   centerId?: string;
 }): Promise<StaffPerformance[]> => {
-  const params = new URLSearchParams({
+  const params: Record<string, string> = {
     startDate: filters.startDate,
     endDate: filters.endDate,
-    ...(filters.centerId && { centerId: filters.centerId }),
-  }).toString();
-  const url = `${API_BASE_URL}/daily-logs/staff-performance?${params}`;
-  return await fetchWithErrorHandling(url);
+  };
+  if (filters.centerId) params.centerId = filters.centerId;
+
+  const response = await apiClient.get("/daily-logs/staff-performance", { params });
+  return extractData<StaffPerformance[]>(response);
 };
+
+// ---------------- Incident Frequency ----------------
 
 export const fetchIncidentFrequency = async (filters: {
   startDate: string;
   endDate: string;
   centerId?: string;
 }): Promise<IncidentFrequency[]> => {
-  const params = new URLSearchParams({
+  const params: Record<string, string> = {
     startDate: filters.startDate,
     endDate: filters.endDate,
-    ...(filters.centerId && { centerId: filters.centerId }),
-  }).toString();
-  const url = `${API_BASE_URL}/health-records/incident-frequency?${params}`;
-  return await fetchWithErrorHandling(url);
+  };
+  if (filters.centerId) params.centerId = filters.centerId;
+
+  const response = await apiClient.get("/health-records/incident-frequency", { params });
+  return extractData<IncidentFrequency[]>(response);
 };

@@ -42,7 +42,7 @@ import type { Child, TrendData, StaffPerformance, IncidentFrequency } from "../.
 // Register Chart.js components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement);
 
-// Define global constants for API date fallbacks for better maintainability
+// Define global constants for API date fallbacks
 const FALLBACK_START_DATE = "2022-09-01";
 const FALLBACK_END_DATE = "2027-09-01";
 
@@ -105,6 +105,8 @@ export function Dashboard() {
         endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : FALLBACK_END_DATE,
         centerId: filters.centerId || undefined,
       }),
+    retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   const { data: incidentData = [], isLoading: loadingIncidents, error: errorIncidents } = useQuery<IncidentFrequency[]>({
@@ -121,17 +123,22 @@ export function Dashboard() {
   const error = errorChildren || errorTrend || errorStaff || errorIncidents;
 
   const centers = useMemo(() => {
-    return Array.from(new Set(children.map((child) => child.centerId))).sort();
-  }, [children]);
+  if (!Array.isArray(children)) return [];
+  return Array.from(new Set(children.map((child) => child.centerId))).sort();
+}, [children]);
 
-  const classes = useMemo(() => {
-    const filteredChildrenByCenter = filters.centerId
-      ? children.filter((child) => child.centerId === filters.centerId)
-      : children;
-    return Array.from(new Set(filteredChildrenByCenter.map((child) => child.classId))).sort();
-  }, [children, filters.centerId]);
+
+const classes = useMemo(() => {
+  if (!Array.isArray(children)) return [];
+  const filteredChildrenByCenter = filters.centerId
+    ? children.filter((child) => child.centerId === filters.centerId)
+    : children;
+  return Array.from(new Set(filteredChildrenByCenter.map((child) => child.classId))).sort();
+}, [children, filters.centerId]);
+
 
   const filteredChildren = useMemo(() => {
+    if (!Array.isArray(children)) return [];
     return children.filter(
       (child) =>
         (!filters.centerId || child.centerId === filters.centerId) &&
@@ -173,8 +180,8 @@ export function Dashboard() {
           <Filter className="h-6 w-6 mr-2 text-blue-500" /> Filters
         </h2>
         <Button variant="ghost" size="sm" onClick={toggleFilterPanel} className="ml-2 p-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
-  <X className="h-5 w-5" />
-</Button>
+          <X className="h-5 w-5" />
+        </Button>
       </div>
       <div className="space-y-6">
         <div>
@@ -253,12 +260,12 @@ export function Dashboard() {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
-                    <span className="flex items-center justify-between w-full">
-                        <span>
-                            {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
-                        </span>
-                        <Calendar className="h-4 w-4 opacity-50" />
+                  <span className="flex items-center justify-between w-full">
+                    <span>
+                      {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
                     </span>
+                    <Calendar className="h-4 w-4 opacity-50" />
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -275,12 +282,12 @@ export function Dashboard() {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100">
-                    <span className="flex items-center justify-between w-full">
-                        <span>
-                            {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
-                        </span>
-                        <Calendar className="h-4 w-4 opacity-50" />
+                  <span className="flex items-center justify-between w-full">
+                    <span>
+                      {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
                     </span>
+                    <Calendar className="h-4 w-4 opacity-50" />
+                  </span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
@@ -364,14 +371,16 @@ export function Dashboard() {
       );
     }
 
+    // Safeguard for staffData
+    const safeStaffData = Array.isArray(staffData) ? staffData : [];
     const staffChartData = {
-      labels: staffData.map((item) => item.staffId),
+      labels: safeStaffData.map((item) => item.staffId),
       datasets: [
         {
           label: "Total Logs",
-          data: staffData.map((item) => item.totalLogs),
-          backgroundColor: staffData.map(() => chartColors.green),
-          borderColor: staffData.map(() => "rgb(54, 162, 235, 1)"),
+          data: safeStaffData.map((item) => item.totalLogs),
+          backgroundColor: safeStaffData.map(() => chartColors.green),
+          borderColor: safeStaffData.map(() => "rgb(54, 162, 235, 1)"),
           borderWidth: 1,
         },
       ],
@@ -404,43 +413,39 @@ export function Dashboard() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto pr-2">
               {trendData.map((log, index) => {
-  // ✅ Safe date parsing
-  let date: Date | null = null;
-  if ((log as any)?.date?._seconds) {
-    date = new Date((log as any).date._seconds * 1000);
-  } else if (typeof (log as any).date === "string") {
-    const parsed = new Date((log as any).date);
-    date = isValid(parsed) ? parsed : null;
-  }
+                let date: Date | null = null;
+                if ((log as any)?.date?._seconds) {
+                  date = new Date((log as any).date._seconds * 1000);
+                } else if (typeof (log as any).date === "string") {
+                  const parsed = new Date((log as any).date);
+                  date = isValid(parsed) ? parsed : null;
+                }
 
-  return (
-    <motion.div
-      key={index}
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-    >
-      {/* ✅ Standardized Card UI */}
-      <Card className="transition-transform hover:scale-105 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-  <CardHeader>
-    <p className="font-semibold text-blue-800 dark:text-blue-400">
-      {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
-    </p>
-  </CardHeader>
-  <CardContent className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
-    <p>
-      <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
-    </p>
-    <p>
-      <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
-    </p>
-  </CardContent>
-</Card>
-
-    </motion.div>
-  );
-})}
-
+                return (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <Card className="transition-transform hover:scale-105 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <p className="font-semibold text-blue-800 dark:text-blue-400">
+                          {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
+                        </p>
+                      </CardHeader>
+                      <CardContent className="text-sm text-gray-700 dark:text-gray-200 space-y-1">
+                        <p>
+                          <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
+                        </p>
+                        <p>
+                          <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         )}
@@ -471,13 +476,12 @@ export function Dashboard() {
               isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
             )}
           >
-
             <div className="flex items-center mb-4 text-red-600">
               <PieChart className="h-6 w-6 mr-2" />
               <h3 className="text-xl font-bold">Incident Frequency</h3>
             </div>
             <div className="h-96 flex items-center justify-center">
-              <Doughnut data={incidentDoughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: '70%' }} />
+              <Doughnut data={incidentDoughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: "70%" }} />
             </div>
           </motion.div>
         )}
