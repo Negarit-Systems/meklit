@@ -9,7 +9,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
-} from 'src/utils/auth/jwt.utils.js';
+} from '../utils/auth/jwt.utils.js';
 
 export class UsersService extends EntityCrudService<Users> {
   constructor() {
@@ -26,7 +26,7 @@ export class UsersService extends EntityCrudService<Users> {
       throw new Error('User already exists');
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const { otp, expiresAt } = generateOtp();
     const hashedOtp = await bcrypt.hash(otp.toString(), 10);
 
