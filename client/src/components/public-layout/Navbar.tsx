@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
-import { User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3, LogOut } from "lucide-react"
+import { User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3, LogOut, FileText } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,6 +68,7 @@ export function Navbar({ className }: NavbarProps) {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
     { icon: BarChart3, label: "Compare Analytics", href: "/comparision" },
+    { icon: FileText, label: "Reports", href: "/reports" },
   ]
 
   return (
