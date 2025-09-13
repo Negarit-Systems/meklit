@@ -41,6 +41,10 @@ import type { Child, TrendData, StaffPerformance, IncidentFrequency } from "../.
 // Register Chart.js components
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement);
 
+// Define global constants for API date fallbacks for better maintainability
+const FALLBACK_START_DATE = "2022-09-01";
+const FALLBACK_END_DATE = "2027-09-01";
+
 // Define interfaces
 interface FilterState {
   centerId: string;
@@ -86,8 +90,8 @@ export function Dashboard() {
     queryKey: ["daily-logs-trend", filters.dateRange, filters.childId],
     queryFn: () =>
       fetchTrendOverTime({
-        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : "2022-09-01",
-        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : "2027-09-01",
+        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : FALLBACK_START_DATE,
+        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : FALLBACK_END_DATE,
         childId: filters.childId || undefined,
       }),
   });
@@ -96,8 +100,8 @@ export function Dashboard() {
     queryKey: ["staff-performance", filters.dateRange, filters.centerId],
     queryFn: () =>
       fetchStaffPerformance({
-        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : "2022-09-01",
-        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : "2027-09-01",
+        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : FALLBACK_START_DATE,
+        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : FALLBACK_END_DATE,
         centerId: filters.centerId || undefined,
       }),
   });
@@ -106,8 +110,8 @@ export function Dashboard() {
     queryKey: ["incident-frequency", filters.dateRange, filters.centerId],
     queryFn: () =>
       fetchIncidentFrequency({
-        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : "2022-09-01",
-        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : "2027-09-01",
+        startDate: filters.dateRange[0] ? format(filters.dateRange[0], "yyyy-MM-dd") : FALLBACK_START_DATE,
+        endDate: filters.dateRange[1] ? format(filters.dateRange[1], "yyyy-MM-dd") : FALLBACK_END_DATE,
         centerId: filters.centerId || undefined,
       }),
   });
@@ -144,6 +148,10 @@ export function Dashboard() {
       centerId: "",
       classId: "",
       childId: "",
+      // Resetting dateRange to a default, valid range for API calls,
+      // but the UI will show 'Select Start/End Date' because the values
+      // are not being explicitly set in the UI. A better long-term fix
+      // would be to have a single source of truth for the date state.
       dateRange: [undefined, undefined],
       dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
     }));
