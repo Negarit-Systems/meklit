@@ -25,13 +25,19 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
   // Incident Frequency Report
   async incidentFrequencyReport(
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     centerId?: string,
   ): Promise<IncidentFrequencyData[]> {
-    let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
+    let q: FirebaseFirestore.Query = this.healthRecordRef;
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     const querySnapshot = await q.get();
     const typeCounts: Record<string, number> = {};
@@ -83,15 +89,20 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
   // Events Timeline Report
   async timelineReport(
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     childId?: string,
     centerId?: string,
   ): Promise<TimelineEvent[]> {
-    let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate))
-      .orderBy('timestamp', 'asc');
+    let q = this.healthRecordRef.orderBy('timestamp', 'asc');
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     if (childId) q = q.where('childId', '==', childId);
 
@@ -159,15 +170,21 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
   async childHealthProfile(
     childId: string,
     limit: number,
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
   ): Promise<ChildHealthProfile> {
-    const q = this.healthRecordRef
-      .where('childId', '==', childId)
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate))
-      .orderBy('timestamp', 'desc')
-      .limit(limit);
+    let q = this.healthRecordRef.where('childId', '==', childId);
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
+
+    q = q.orderBy('timestamp', 'asc');
+    q = q.limit(limit);
 
     const querySnapshot = await q.get();
     const profile: ChildHealthProfile = {
@@ -216,13 +233,19 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
   // Staff/Recorder Analysis Report
   async staffAnalysisReport(
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     centerId?: string,
   ): Promise<StaffAnalysis[]> {
-    let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
+    let q: FirebaseFirestore.Query = this.healthRecordRef;
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     const querySnapshot = await q.get();
     const staffData: Record<string, StaffAnalysis> = {};
@@ -310,13 +333,19 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
   // Action Distribution Report
   async actionDistributionReport(
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     centerId?: string,
   ): Promise<Record<string, number>> {
-    let q = this.healthRecordRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
+    let q: FirebaseFirestore.Query = this.healthRecordRef;
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     const querySnapshot = await q.get();
     const actionCounts: Record<string, number> = {};
