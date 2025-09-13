@@ -62,9 +62,18 @@ export const fetchTrendOverTime = async (filters: {
   if (filters.classId) params.classId = filters.classId;
   if (filters.childId) params.childId = filters.childId;
 
-  const response = await apiClient.get("/daily-logs/trend-over-time", { params });
+  const response = await apiClient.get("/daily-logs/trend-over-time", {
+    params,
+  });
   // Transform date from {_seconds: number} to ISO string for consistency with Comparison.tsx
-  const data = extractData<{ date: { _seconds: number }; averageNapDuration?: number; totalMeals?: number; type?: string }[]>(response).map((item) => ({
+  const data = extractData<
+    {
+      date: { _seconds: number };
+      averageNapDuration?: number;
+      totalMeals?: number;
+      type?: string;
+    }[]
+  >(response).map((item) => ({
     ...item,
     date: new Date(item.date._seconds * 1000).toISOString().split("T")[0],
   }));
@@ -103,7 +112,9 @@ export const fetchStaffPerformance = async (filters: {
   };
   if (filters.centerId) params.centerId = filters.centerId;
 
-  const response = await apiClient.get("/daily-logs/staff-performance", { params });
+  const response = await apiClient.get("/daily-logs/staff-performance", {
+    params,
+  });
   return extractData<StaffPerformance[]>(response);
 };
 
@@ -120,6 +131,96 @@ export const fetchIncidentFrequency = async (filters: {
   };
   if (filters.centerId) params.centerId = filters.centerId;
 
-  const response = await apiClient.get("/health-records/incident-frequency", { params });
+  const response = await apiClient.get("/health-records/incident-frequency", {
+    params,
+  });
   return extractData<IncidentFrequency[]>(response);
+};
+
+// ###############################################################
+// ######################## COMPARISON ###########################
+// ###############################################################
+
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+
+export const USER_KEY = "users";
+
+export function useRegisterUser({ onSuccess }: { onSuccess: () => void }) {
+  return useMutation<void, AxiosError, RegisterUser>({
+    mutationFn: async (info: RegisterUser) => {
+      await apiClient.post("/auth/register", info);
+    },
+    onSuccess,
+    retry: 1,
+  });
+}
+
+// ---------------- Report Summary ----------------
+
+export interface ReportSummaryItem {
+  id: string;
+  averageNapDuration: number;
+  totalIncidents: number;
+}
+
+export const fetchReportSummary = async (filters: {
+  startDate: string;
+  endDate: string;
+  centerId?: string;
+  groupBy: "center" | "class";
+}): Promise<ReportSummaryItem[]> => {
+  const params: Record<string, string> = {
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    groupBy: filters.groupBy,
+  };
+  if (filters.centerId) {
+    params.centerId = filters.centerId;
+  }
+
+  const response = await apiClient.get("/reports/summary", { params });
+  return extractData<ReportSummaryItem[]>(response);
+};
+
+// ---------- Class Comparison ----------------
+
+export const fetchClassComparison = async (filters: {
+  startDate: string;
+  endDate: string;
+  classId1: string;
+  classId2: string;
+}): Promise<ReportSummaryItem[]> => {
+  const params: Record<string, string> = {
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    classId1: filters.classId1,
+    classId2: filters.classId2,
+  };
+
+  const response = await apiClient.get("/reports/class-comparison", {
+    params,
+  });
+  return extractData<ReportSummaryItem[]>(response);
+};
+
+// ---------------- Center Comparison ----------------
+
+export const fetchCenterComparison = async (filters: {
+  startDate: string;
+  endDate: string;
+  centerId1: string;
+  centerId2: string;
+}): Promise<ReportSummaryItem[]> => {
+  const params: Record<string, string> = {
+    startDate: filters.startDate,
+    endDate: filters.endDate,
+    centerId1: filters.centerId1,
+    centerId2: filters.centerId2,
+  };
+
+  const response = await apiClient.get("/reports/center-comparison", {
+    params,
+  });
+  return extractData<ReportSummaryItem[]>(response);
 };
