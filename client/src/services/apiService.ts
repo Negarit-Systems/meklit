@@ -19,6 +19,7 @@ export interface TrendData {
 export interface StaffPerformance {
   staffId: string;
   totalLogs: number;
+  logsByType?: Record<string, number>;
 }
 
 export interface IncidentFrequency {

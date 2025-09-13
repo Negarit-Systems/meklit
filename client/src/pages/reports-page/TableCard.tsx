@@ -73,11 +73,11 @@ const TableCard: React.FC<TableCardProps> = ({ data, title, icon, columns }) => 
               {currentData.map((item, index) => (
                 <div
                   key={startIndex + index}
-                  className="group p-5 border border-border/50 rounded-2xl bg-gradient-to-r from-card to-card/80 hover:from-primary/5 hover:to-secondary/5 transition-all duration-300 hover:shadow-xl hover:border-primary/30 hover:-translate-y-1"
+                  className="group p-3 sm:p-5 border border-border/50 rounded-2xl bg-gradient-to-r from-card to-card/80 hover:from-primary/5 hover:to-secondary/5 transition-all duration-300 hover:shadow-xl hover:border-primary/30 hover:-translate-y-1"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-6">
                     {columns.map((column, colIndex) => (
-                      <div key={colIndex} className="space-y-2">
+                      <div key={colIndex} className="space-y-1 sm:space-y-2">
                         <span className="text-xs font-bold text-primary/80 uppercase tracking-widest">
                           {column.label}
                         </span>

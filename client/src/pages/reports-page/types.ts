@@ -21,9 +21,9 @@ export interface DateRange {
 }
 
 export interface TrendFilters {
-  childId: string;
-  classId: string;
-  centerId: string;
+  childId?: string;
+  classId?: string;
+  centerId?: string;
 }
 
 export interface FilteredInsights {
