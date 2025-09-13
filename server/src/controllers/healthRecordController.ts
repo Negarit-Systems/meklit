@@ -31,8 +31,8 @@ export const incidentFrequencyReport = async (
   const { startDate, endDate, centerId } = req.query;
   healthRecordService
     .incidentFrequencyReport(
-      startDate as string,
-      endDate as string,
+      startDate ? String(startDate) : undefined,
+      endDate ? String(endDate) : undefined,
       centerId as string | undefined,
     )
     .then((data) => res.json(data))
@@ -47,8 +47,8 @@ export const timelineReport = async (req: Request, res: Response) => {
   const { startDate, endDate, childId, centerId } = req.query;
   healthRecordService
     .timelineReport(
-      startDate as string,
-      endDate as string,
+      startDate ? String(startDate) : undefined,
+      endDate ? String(endDate) : undefined,
       childId as string | undefined,
       centerId as string | undefined,
     )
@@ -69,8 +69,8 @@ export const childHealthProfile = async (
     .childHealthProfile(
       childId as string,
       Number(limit),
-      startDate as string,
-      endDate as string,
+      startDate ? String(startDate) : undefined,
+      endDate ? String(endDate) : undefined,
     )
     .then((data) => res.json(data))
     .catch(() =>
@@ -87,8 +87,8 @@ export const staffAnalysisReport = async (
   const { startDate, endDate, centerId } = req.query;
   healthRecordService
     .staffAnalysisReport(
-      startDate as string,
-      endDate as string,
+      startDate ? String(startDate) : undefined,
+      endDate ? String(endDate) : undefined,
       centerId as string | undefined,
     )
     .then((data) => res.json(data))
@@ -106,8 +106,8 @@ export const actionDistributionReport = async (
   const { startDate, endDate, centerId } = req.query;
   healthRecordService
     .actionDistributionReport(
-      startDate as string,
-      endDate as string,
+      startDate ? String(startDate) : undefined,
+      endDate ? String(endDate) : undefined,
       centerId as string | undefined,
     )
     .then((data) => res.json(data))

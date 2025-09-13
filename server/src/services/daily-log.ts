@@ -21,17 +21,23 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
 
   // Trend Over Time Report
   async trendOverTimeReport(
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     filter: {
       childId?: string;
       classId?: string;
       centerId?: string;
     } = {},
   ): Promise<TrendData[]> {
-    let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
+    let q: FirebaseFirestore.Query = this.dailyLogsRef;
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     if (filter.childId) q = q.where('childId', '==', filter.childId);
 
@@ -165,13 +171,19 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
 
   // Staff Performance Analysis Report
   async staffPerformanceReport(
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
     centerId?: string,
   ): Promise<StaffPerformance[]> {
-    let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
+    let q: FirebaseFirestore.Query = this.dailyLogsRef;
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     const querySnapshot = await q.get();
     const staffData: Record<string, StaffPerformance> = {};
@@ -247,14 +259,20 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
 
   // Comparative Report across classes or children
   async comparativeReport(
-    startDate: string,
-    endDate: string,
     groupBy: 'classId' | 'childId',
+    startDate?: string,
+    endDate?: string,
     centerId?: string,
   ): Promise<ComparativeData[]> {
-    let q = this.dailyLogsRef
-      .where('timestamp', '>=', new Date(startDate))
-      .where('timestamp', '<=', new Date(endDate));
+    let q: FirebaseFirestore.Query = this.dailyLogsRef;
+
+    if (startDate) {
+      q = q.where('timestamp', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      q = q.where('timestamp', '<=', new Date(endDate));
+    }
 
     const querySnapshot = await q.get();
     const groupData: Record<string, any> = {};

@@ -26,8 +26,8 @@ export const trendOverTimeReport = async (
   const { startDate, endDate, childId, classId, centerId } =
     req.query;
   const result = await dailyLogService.trendOverTimeReport(
-    startDate as string,
-    endDate as string,
+    startDate ? String(startDate) : undefined,
+    endDate ? String(endDate) : undefined,
     {
       childId: childId as string,
       classId: classId as string,
@@ -43,8 +43,8 @@ export const staffPerformanceReport = async (
 ): Promise<void> => {
   const { startDate, endDate, centerId } = req.query;
   const result = await dailyLogService.staffPerformanceReport(
-    startDate as string,
-    endDate as string,
+    startDate ? String(startDate) : undefined,
+    endDate ? String(endDate) : undefined,
     centerId as string,
   );
   sendSuccess(res, 'Staff performance report generated', 200, result);
@@ -59,9 +59,9 @@ export const comparativeReport = async (
     return sendError(res, 'Invalid groupBy value', 400);
   }
   const result = await dailyLogService.comparativeReport(
-    startDate as string,
-    endDate as string,
     groupBy as 'classId' | 'childId',
+    startDate ? String(startDate) : undefined,
+    endDate ? String(endDate) : undefined,
     centerId as string,
   );
   sendSuccess(res, 'Comparative report generated', 200, result);
