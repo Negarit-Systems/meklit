@@ -51,6 +51,7 @@ const ReportsDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasData, setHasData] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: "",
     endDate: "",
@@ -174,6 +175,7 @@ const ReportsDashboard: React.FC = () => {
       setError(null);
       const newReportData = await fetchAllReports(dateRange);
       setReportData(newReportData);
+      setHasData(true);
     } catch (err) {
       setError("Failed to fetch report data");
       console.error("Error fetching reports:", err);
@@ -184,6 +186,8 @@ const ReportsDashboard: React.FC = () => {
 
   useEffect(() => {
     handleFetchChildren();
+    // Automatically fetch all data on component mount (with empty dates)
+    handleFetchAllReports();
   }, []);
 
   const processTrendData = (): ChartData[] => {
@@ -389,8 +393,8 @@ const ReportsDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Empty Cards when no dates selected */}
-      {!loading && !error && (!dateRange.startDate || !dateRange.endDate) && (
+      {/* Empty Cards when no data has been fetched yet */}
+      {!loading && !error && !hasData && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <ChartCard
@@ -479,8 +483,8 @@ const ReportsDashboard: React.FC = () => {
         </>
       )}
 
-      {/* Data Content */}
-      {!loading && !error && dateRange.startDate && dateRange.endDate && (
+      {/* Data Content - Show when data has been fetched */}
+      {!loading && !error && hasData && (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <ChartCard

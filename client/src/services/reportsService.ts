@@ -88,11 +88,17 @@ export const fetchFilteredTrendData = async (
   }
 
   try {
-    const baseParams = {
-      startDate: dateRange.startDate,
-      endDate: dateRange.endDate,
+    const baseParams: any = {
       _t: Date.now(),
     };
+    
+    // Only add date parameters if they are provided
+    if (dateRange.startDate) {
+      baseParams.startDate = dateRange.startDate;
+    }
+    if (dateRange.endDate) {
+      baseParams.endDate = dateRange.endDate;
+    }
 
     const params = { ...baseParams } as any;
     if (filters.childId) params.childId = filters.childId;
@@ -116,11 +122,17 @@ export const fetchFilteredTrendData = async (
 
 export const fetchAllReports = async (dateRange: DateRange): Promise<ReportData> => {
   try {
-    const baseParams = {
-      startDate: dateRange.startDate,
-      endDate: dateRange.endDate,
+    const baseParams: any = {
       _t: Date.now(),
     };
+    
+    // Only add date parameters if they are provided
+    if (dateRange.startDate) {
+      baseParams.startDate = dateRange.startDate;
+    }
+    if (dateRange.endDate) {
+      baseParams.endDate = dateRange.endDate;
+    }
 
     const [
       trendRes,
