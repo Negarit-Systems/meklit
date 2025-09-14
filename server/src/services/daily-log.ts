@@ -62,13 +62,9 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
       { classId?: string; centerId?: string }
     > = {};
     if (childIds.size > 0) {
-      const childDocs = await this.childService.find({
-        where: {
-          field: 'id',
-          operator: 'in',
-          value: Array.from(childIds),
-        },
-      });
+      const childDocs = await this.childService.findManyById(
+        Array.from(childIds),
+      );
 
       for (const childInfo of childDocs) {
         if (!childInfo || !childInfo.id) {
@@ -203,13 +199,9 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
       // Batch fetch all child info
       const childInfoMap: Record<string, { centerId?: string }> = {};
       if (childIds.size > 0) {
-        const childDocs = await this.childService.find({
-          where: {
-            field: 'id',
-            operator: 'in',
-            value: Array.from(childIds),
-          },
-        });
+        const childDocs = await this.childService.findManyById(
+          Array.from(childIds),
+        );
 
         for (const childInfo of childDocs) {
           if (!childInfo || !childInfo.id) {

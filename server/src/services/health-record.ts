@@ -57,9 +57,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
       );
 
       // Batch fetch all child infos
-      const childInfos = await this.childService.find({
-        where: [{ field: 'id', operator: 'in', value: childIds }],
-      });
+      const childInfos =
+        await this.childService.findManyById(childIds);
 
       // Build a map for quick lookup
       for (const childInfo of childInfos) {
@@ -147,9 +146,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
       );
 
       // Batch fetch all child infos
-      const childInfos = await this.childService.find({
-        where: [{ field: 'id', operator: 'in', value: childIds }],
-      });
+      const childInfos =
+        await this.childService.findManyById(childIds);
 
       // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
@@ -289,9 +287,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
       );
 
       // Batch fetch all child infos
-      const childInfos = await this.childService.find({
-        where: [{ field: 'id', operator: 'in', value: childIds }],
-      });
+      const childInfos =
+        await this.childService.findManyById(childIds);
 
       // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
@@ -389,9 +386,8 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
       );
 
       // Batch fetch all child infos
-      const childInfos = await this.childService.find({
-        where: [{ field: 'id', operator: 'in', value: childIds }],
-      });
+      const childInfos =
+        await this.childService.findManyById(childIds);
 
       // Build a map for quick lookup
       const childInfoMap: Record<string, { centerId?: string }> = {};
