@@ -47,12 +47,7 @@ export class EntityCrudService<T extends { id?: string }> {
   }
 
   async find(queryOptions?: QueryOptions): Promise<T[]> {
-    const {
-      where,
-      orderBy,
-      limit = 10,
-      startAfter,
-    } = queryOptions ?? {};
+    const { where, orderBy, limit, startAfter } = queryOptions ?? {};
     let query: Query = this.collection;
 
     // Handle WHERE conditions
