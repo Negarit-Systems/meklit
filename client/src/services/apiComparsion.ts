@@ -141,21 +141,6 @@ export const fetchIncidentFrequency = async (filters: {
 // ######################## COMPARISON ###########################
 // ###############################################################
 
-import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-
-export const USER_KEY = "users";
-
-export function useRegisterUser({ onSuccess }: { onSuccess: () => void }) {
-  return useMutation<void, AxiosError, RegisterUser>({
-    mutationFn: async (info: RegisterUser) => {
-      await apiClient.post("/auth/register", info);
-    },
-    onSuccess,
-    retry: 1,
-  });
-}
-
 // ---------------- Report Summary ----------------
 
 export interface ReportSummaryItem {

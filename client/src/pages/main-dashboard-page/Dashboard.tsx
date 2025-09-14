@@ -397,83 +397,89 @@ export function Dashboard() {
     return (
       <div className="space-y-8">
         {showDailyLogs && trendData.length > 0 && (
-          <Card as={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <CardHeader>
-              <CardTitle className="flex items-center text-green-500">
-                <Calendar className="h-6 w-6 mr-2" />
-                Daily Logs
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto pr-2">
-                {trendData.map((log, index) => {
-                  let date: Date | null = null;
-                  if ((log as any)?.date?._seconds) {
-                    date = new Date((log as any).date._seconds * 1000);
-                  } else if (typeof (log as any).date === "string") {
-                    const parsed = new Date((log as any).date);
-                    date = isValid(parsed) ? parsed : null;
-                  }
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-500">
+                  <Calendar className="h-6 w-6 mr-2" />
+                  Daily Logs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto pr-2">
+                  {trendData.map((log, index) => {
+                    let date: Date | null = null;
+                    if (typeof log.date === "object" && log.date && "_seconds" in log.date) {
+                      date = new Date(log.date._seconds * 1000);
+                    } else if (typeof log.date === "string") {
+                      const parsed = new Date(log.date);
+                      date = isValid(parsed) ? parsed : null;
+                    }
 
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                    >
-                      <Card className="transition-transform hover:scale-105 bg-background/50">
-                        <CardHeader>
-                          <p className="font-semibold text-blue-500">
-                            {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
-                          </p>
-                        </CardHeader>
-                        <CardContent className="text-sm text-muted-foreground space-y-1">
-                          <p>
-                            <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
-                          </p>
-                          <p>
-                            <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                      >
+                        <Card className="transition-transform hover:scale-105 bg-background/50">
+                          <CardHeader>
+                            <p className="font-semibold text-blue-500">
+                              {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
+                            </p>
+                          </CardHeader>
+                          <CardContent className="text-sm text-muted-foreground space-y-1">
+                            <p>
+                              <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
+                            </p>
+                            <p>
+                              <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
         {showStaffPerformance && staffData.length > 0 && (
-          <Card as={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-            <CardHeader>
-              <CardTitle className="flex items-center text-green-500">
-                <BarChart className="h-6 w-6 mr-2" />
-                Staff Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96">
-                <Bar data={staffChartData} options={{ responsive: true, maintainAspectRatio: false }} />
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-500">
+                  <BarChart className="h-6 w-6 mr-2" />
+                  Staff Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96">
+                  <Bar data={staffChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
         {showHealthRecords && incidentData.length > 0 && (
-          <Card as={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
-            <CardHeader>
-              <CardTitle className="flex items-center text-blue-500">
-                <PieChart className="h-6 w-6 mr-2" />
-                Incident Frequency
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-96 flex items-center justify-center">
-                <Doughnut data={incidentDoughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: "70%" }} />
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-blue-500">
+                  <PieChart className="h-6 w-6 mr-2" />
+                  Incident Frequency
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96 flex items-center justify-center">
+                  <Doughnut data={incidentDoughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: "70%" }} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
       </div>
     );
