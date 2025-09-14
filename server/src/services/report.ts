@@ -10,6 +10,7 @@ import { ChildService } from './child-service.js';
 import {
   ComparisonData,
   SummaryReportData,
+  ChildComparisonData,
 } from '../types/report-response.js';
 
 interface ReportOptions {
@@ -203,5 +204,97 @@ export class ClassReportService {
     return reportData.filter(
       (item) => item.id === centerId1 || item.id === centerId2,
     );
+  }
+
+  async compareChildrenReport(
+    childId1: string,
+    childId2: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<ChildComparisonData[]> {
+    const childIdsToCompare = [childId1, childId2];
+    const childStats: Record<
+      string,
+      {
+        totalIncidents: number;
+        totalNapDuration: number;
+        napCount: number;
+      }
+    > = {
+      [childId1]: {
+        totalIncidents: 0,
+        totalNapDuration: 0,
+        napCount: 0,
+      },
+      [childId2]: {
+        totalIncidents: 0,
+        totalNapDuration: 0,
+        napCount: 0,
+      },
+    };
+
+    let incidentQuery = this.healthRecordRef
+      .where('childId', 'in', childIdsToCompare)
+      .where('type', '==', HealthRecordEnum.Incident);
+
+    let napQuery = this.dailyLogRef
+      .where('childId', 'in', childIdsToCompare)
+      .where('type', '==', DailyLogEnum.Nap);
+
+    if (startDate) {
+      incidentQuery = incidentQuery.where(
+        'timestamp',
+        '>=',
+        new Date(startDate),
+      );
+      napQuery = napQuery.where(
+        'timestamp',
+        '>=',
+        new Date(startDate),
+      );
+    }
+    if (endDate) {
+      incidentQuery = incidentQuery.where(
+        'timestamp',
+        '<=',
+        new Date(endDate),
+      );
+      napQuery = napQuery.where('timestamp', '<=', new Date(endDate));
+    }
+
+    // --- Fetch Data in Parallel ---
+    const [incidentSnapshot, napSnapshot] = await Promise.all([
+      incidentQuery.get(),
+      napQuery.get(),
+    ]);
+
+    // --- Process Incidents ---
+    incidentSnapshot.forEach((doc) => {
+      const record = doc.data() as HealthRecordEntry;
+      if (childStats[record.childId]) {
+        childStats[record.childId].totalIncidents++;
+      }
+    });
+
+    // --- Process Naps ---
+    napSnapshot.forEach((doc) => {
+      const log = doc.data() as DailyLog;
+      if (childStats[log.childId] && log.details.sleepDuration) {
+        childStats[log.childId].totalNapDuration +=
+          log.details.sleepDuration;
+        childStats[log.childId].napCount++;
+      }
+    });
+
+    // --- Format and Return the Report ---
+    return Object.entries(childStats).map(([childId, stats]) => ({
+      childId,
+      totalIncidents: stats.totalIncidents,
+      totalNapDuration: stats.totalNapDuration,
+      averageNapDuration:
+        stats.napCount > 0
+          ? stats.totalNapDuration / stats.napCount
+          : 0,
+    }));
   }
 }
