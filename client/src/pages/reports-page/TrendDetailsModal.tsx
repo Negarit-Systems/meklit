@@ -368,16 +368,16 @@ const TrendDetailsModal: React.FC<TrendDetailsModalProps> = ({
                           <div className="font-medium">{day.date}</div>
                           <div className="flex gap-4 text-sm">
                             {day.meals > 0 && (
-                              <span className="text-green-600">🍽️ {day.meals}</span>
+                              <span className="text-white">Meals: {day.meals}</span>
                             )}
                             {day.moods > 0 && (
-                              <span className="text-blue-600">😊 {day.moods}</span>
+                              <span className="text-white">Moods: {day.moods}</span>
                             )}
                             {day.naps > 0 && (
-                              <span className="text-purple-600">😴 {day.naps}</span>
+                              <span className="text-white">Naps: {day.naps}</span>
                             )}
                             {day.diapers > 0 && (
-                              <span className="text-orange-600">🧸 {day.diapers}</span>
+                              <span className="text-white">Diapers: {day.diapers}</span>
                             )}
                           </div>
                         </div>
