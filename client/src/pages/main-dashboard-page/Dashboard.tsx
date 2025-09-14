@@ -42,15 +42,11 @@ const FALLBACK_END_DATE = "2027-09-01";
 export function Dashboard() {
   const isMdUp = useMediaQuery("(min-width: 768px)");
 
-  const today = new Date();
-  const sevenDaysAgo = new Date(today);
-  sevenDaysAgo.setDate(today.getDate() - 7);
-
   const [filters, setFilters] = useState<FilterState>({
     centerId: "",
     classId: "",
     childId: "",
-    dateRange: [sevenDaysAgo, today],
+    dateRange: [undefined, undefined],
     dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
     isFilterOpen: isMdUp,
   });

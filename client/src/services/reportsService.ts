@@ -1,13 +1,18 @@
 import { apiClient } from "@/lib/axios";
-import type { Child, TrendData, StaffPerformance, IncidentFrequency } from "./apiService";
+import type {
+  Child,
+  TrendData,
+  StaffPerformance,
+  IncidentFrequency,
+} from "./apiService";
 
 // Extended interfaces for reports-specific data
 export interface ExtendedTrendData extends TrendData {
-  totalMoods?: number;
-  napCount?: number;
-  otherTypeCounts?: Record<string, number>;
-  moodCounts?: Record<string, number>;
-  mealStatusCounts?: Record<string, number>;
+  totalMoods: number;
+  napCount: number;
+  otherTypeCounts: Record<string, number>;
+  moodCount: Record<string, number>;
+  mealStatusCounts: Record<string, number>;
 }
 
 export interface TimelineData {
@@ -85,13 +90,13 @@ export const fetchFilteredTrendData = async (
 ): Promise<ExtendedTrendData[]> => {
   if (!filters.childId && !filters.classId && !filters.centerId) {
     return [];
-  } 
+  }
 
   try {
     const baseParams: any = {
       _t: Date.now(),
     };
-    
+
     // Only add date parameters if they are provided
     if (dateRange.startDate) {
       baseParams.startDate = dateRange.startDate;
@@ -120,12 +125,14 @@ export const fetchFilteredTrendData = async (
 
 // ---------------- All Reports Data ----------------
 
-export const fetchAllReports = async (dateRange: DateRange): Promise<ReportData> => {
+export const fetchAllReports = async (
+  dateRange: DateRange
+): Promise<ReportData> => {
   try {
     const baseParams: any = {
       _t: Date.now(),
     };
-    
+
     // Only add date parameters if they are provided
     if (dateRange.startDate) {
       baseParams.startDate = dateRange.startDate;
@@ -166,4 +173,3 @@ export const fetchAllReports = async (dateRange: DateRange): Promise<ReportData>
     throw new Error("Failed to fetch report data");
   }
 };
-

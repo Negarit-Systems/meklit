@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TrendingUp } from "lucide-react";
+import { FileText } from "lucide-react";
 import type { ChartData } from "./types";
 
 interface ChartCardProps {
@@ -48,7 +48,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
           {icon}
           {showDetailsButton && onDetailsClick && (
             <Button variant="ghost" size="sm" onClick={onDetailsClick} className="flex-1 sm:flex-none">
-              <TrendingUp className="h-3 w-3 mr-1" />
+              <FileText className="h-3 w-3 mr-1" />
               Details
             </Button>
           )}
@@ -81,7 +81,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
                     const percentage = (item.value / total) * 100;
                     const angle = (percentage / 100) * 360;
                     const prevAngle = data.slice(0, index).reduce((sum, d) => sum + (d.value / total) * 360, 0);
-                    
+
                     const colors = [
                       'hsl(210, 100%, 50%)', // Sky Blue
                       'hsl(120, 60%, 50%)',  // Forest Green
@@ -92,28 +92,28 @@ const ChartCard: React.FC<ChartCardProps> = ({
                       'hsl(180, 60%, 50%)',  // Ocean Teal
                       'hsl(320, 60%, 60%)',  // Pink
                     ];
-                    
+
                     // Calculate path for pie slice
                     const startAngle = prevAngle - 90; // Start from top
                     const endAngle = startAngle + angle;
-                    
+
                     const startAngleRad = (startAngle * Math.PI) / 180;
                     const endAngleRad = (endAngle * Math.PI) / 180;
-                    
+
                     const x1 = 50 + 40 * Math.cos(startAngleRad);
                     const y1 = 50 + 40 * Math.sin(startAngleRad);
                     const x2 = 50 + 40 * Math.cos(endAngleRad);
                     const y2 = 50 + 40 * Math.sin(endAngleRad);
-                    
+
                     const largeArcFlag = angle > 180 ? 1 : 0;
-                    
+
                     const pathData = [
                       `M 50 50`,
                       `L ${x1} ${y1}`,
                       `A 40 40 0 ${largeArcFlag} 1 ${x2} ${y2}`,
                       `Z`
                     ].join(' ');
-                    
+
                     return (
                       <path
                         key={index}
@@ -136,7 +136,7 @@ const ChartCard: React.FC<ChartCardProps> = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Compact Legend */}
             <div className="grid grid-cols-2 gap-2 p-4 pt-0">
               {data.map((item, index) => {
@@ -152,11 +152,11 @@ const ChartCard: React.FC<ChartCardProps> = ({
                   'hsl(180, 60%, 50%)',  // Ocean Teal
                   'hsl(320, 60%, 60%)',  // Pink
                 ];
-                
+
                 return (
                   <div key={index} className="flex items-center space-x-2 p-2 rounded bg-muted/20">
-                    <div 
-                      className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" 
+                    <div
+                      className="w-3 h-3 rounded-full shadow-sm flex-shrink-0"
                       style={{ backgroundColor: colors[index % colors.length] }}
                     />
                     <div className="min-w-0 flex-1">

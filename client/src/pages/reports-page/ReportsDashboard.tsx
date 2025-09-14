@@ -39,6 +39,7 @@ import type {
   FilteredInsights,
   StaffPerformanceDetail,
 } from "./types";
+import IncidentDetailsModal from "./IncidentDetailsModal";
 
 const ReportsDashboard: React.FC = () => {
   const [reportData, setReportData] = useState<ReportData>({
@@ -58,6 +59,7 @@ const ReportsDashboard: React.FC = () => {
   });
   const [showTrendDetails, setShowTrendDetails] = useState(false);
   const [showStaffDetails, setShowStaffDetails] = useState(false);
+  const [showIncidentDetails, setShowIncidentDetails] = useState(false);
   const [children, setChildren] = useState<Child[]>([]);
   const [trendFilters, setTrendFilters] = useState<TrendFilters>({
     childId: "",
@@ -501,6 +503,8 @@ const ReportsDashboard: React.FC = () => {
               title="Incident Frequency"
               icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
               description="Health incident frequency"
+              showDetailsButton={true}
+              onDetailsClick={() => setShowIncidentDetails(true)}
             />
 
             <ChartCard
@@ -596,6 +600,12 @@ const ReportsDashboard: React.FC = () => {
         onClose={() => setShowStaffDetails(false)}
         staffPerformanceDetails={processDetailedStaffPerformance()}
         getColor={getColor}
+      />
+
+      <IncidentDetailsModal
+        isOpen={showIncidentDetails}
+        onClose={() => setShowIncidentDetails(false)}
+        incidentData={reportData.incidentFrequency}
       />
     </div>
   );

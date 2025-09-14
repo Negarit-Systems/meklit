@@ -89,7 +89,7 @@ export function ChartSection({ loading, error, filters, trendData, staffData, in
   return (
     <div className="space-y-8">
       {showDailyLogs && trendData.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-green-500">
@@ -117,19 +117,64 @@ export function ChartSection({ loading, error, filters, trendData, staffData, in
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                     >
-                      <Card className="transition-transform hover:scale-105 bg-background/50">
+                      <Card className="h-52 flex flex-col"> {/* fixed equal height */}
                         <CardHeader>
                           <p className="font-semibold text-blue-500">
                             {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
                           </p>
                         </CardHeader>
-                        <CardContent className="text-sm text-muted-foreground space-y-1">
-                          <p>
-                            <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
-                          </p>
-                          <p>
-                            <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
-                          </p>
+
+                        <CardContent className="flex-1 min-h-0 overflow-y-auto text-sm text-muted-foreground space-y-1">
+                          {/* Nap info */}
+                          {log.napCount > 0 && (
+                            <p>
+                              <strong>Nap:</strong>{" "}
+                              {`${log.napCount} (${log.averageNapDuration?.toFixed(0)} min avg)`}
+                            </p>
+                          )}
+
+                          {/* Meal info */}
+                          {log.totalMeals > 0 && (
+                            <div>
+                              <strong>Meals:</strong>
+                              <ul className="list-disc list-inside ml-5">
+                                {Object.entries(log.mealStatusCounts).map(([status, count]) => (
+                                  <li key={status}>
+                                    {status} ({count})
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Mood info */}
+                          {log.totalMoods > 0 && (
+                            <div>
+                              <strong>Moods:</strong>
+                              <ul className="list-disc list-inside ml-5">
+                                {Object.entries(log.moodCounts).map(([mood, count]) => (
+                                  <li key={mood}>
+                                    {mood} ({count})
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Other info */}
+                          {log.otherTypeCounts &&
+                            Object.keys(log.otherTypeCounts).length > 0 && (
+                              <div>
+                                <strong>Other:</strong>
+                                <ul className="list-disc list-inside ml-5">
+                                  {Object.entries(log.otherTypeCounts).map(([type, count]) => (
+                                    <li key={type}>
+                                      {type} ({count})
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                         </CardContent>
                       </Card>
                     </motion.div>
@@ -138,7 +183,7 @@ export function ChartSection({ loading, error, filters, trendData, staffData, in
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {showStaffPerformance && staffData.length > 0 && (
