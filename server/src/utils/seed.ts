@@ -253,34 +253,11 @@ async function isCollectionEmpty(collectionName: string) {
 }
 
 async function seed() {
-  const childrenEmpty = await isCollectionEmpty('children');
-  const dailyLogsEmpty = await isCollectionEmpty('dailyLogEntries');
-  const healthRecordsEmpty = await isCollectionEmpty(
-    'healthRecordEntries',
-  );
-
   let childIds: string[] = [];
 
-  if (childrenEmpty) {
-    childIds = await seedChildren();
-  } else {
-    console.log('Children already seeded, skipping...');
-    // fetch childIds if you still need them for logs/records
-    const snapshot = await db.collection('children').get();
-    childIds = snapshot.docs.map((doc) => doc.id);
-  }
-
-  if (dailyLogsEmpty) {
-    await seedDailyLogs(childIds);
-  } else {
-    console.log('Daily logs already seeded, skipping...');
-  }
-
-  if (healthRecordsEmpty) {
-    await seedHealthRecords(childIds);
-  } else {
-    console.log('Health records already seeded, skipping...');
-  }
+  childIds = await seedChildren();
+  await seedDailyLogs(childIds);
+  await seedHealthRecords(childIds);
 }
 
 seed().catch(console.error);
