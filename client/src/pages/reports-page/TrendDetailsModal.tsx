@@ -87,13 +87,25 @@ const TrendDetailsModal: React.FC<TrendDetailsModalProps> = ({
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-gray-50">
+            <div className="p-4 border rounded-lg bg-muted/30 border-border">
+              <div className="mb-3">
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-foreground">Note:</strong> Center and Class filters are mutually exclusive. Selecting one will disable the other.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">Center</label>
+                <label className="text-sm font-medium mb-2 block text-foreground">Center</label>
                 <select
-                  className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  style={{ backgroundColor: "#f3f4f6", color: "#1f2937" }}
+                  className={`w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    trendFilters.classId ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-800'
+                  }`}
+                  style={{ 
+                    backgroundColor: trendFilters.classId ? "#e5e7eb" : "#f3f4f6", 
+                    color: trendFilters.classId ? "#6b7280" : "#1f2937" 
+                  }}
                   value={trendFilters.centerId}
+                  disabled={!!trendFilters.classId}
                   onChange={(e) => {
                     const newFilters = {
                       ...trendFilters,
@@ -126,15 +138,22 @@ const TrendDetailsModal: React.FC<TrendDetailsModalProps> = ({
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Class</label>
+                <label className="text-sm font-medium mb-2 block text-foreground">Class</label>
                 <select
-                  className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  style={{ backgroundColor: "#f3f4f6", color: "#1f2937" }}
+                  className={`w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                    trendFilters.centerId ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gray-100 text-gray-800'
+                  }`}
+                  style={{ 
+                    backgroundColor: trendFilters.centerId ? "#e5e7eb" : "#f3f4f6", 
+                    color: trendFilters.centerId ? "#6b7280" : "#1f2937" 
+                  }}
                   value={trendFilters.classId}
+                  disabled={!!trendFilters.centerId}
                   onChange={(e) => {
                     const newFilters = {
                       ...trendFilters,
                       classId: e.target.value,
+                      centerId: "",
                       childId: "",
                     };
                     onTrendFiltersChange(newFilters);
@@ -162,7 +181,7 @@ const TrendDetailsModal: React.FC<TrendDetailsModalProps> = ({
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium mb-2 block">Child</label>
+                <label className="text-sm font-medium mb-2 block text-foreground">Child</label>
                 <select
                   className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   style={{ backgroundColor: "#f3f4f6", color: "#1f2937" }}
@@ -195,6 +214,7 @@ const TrendDetailsModal: React.FC<TrendDetailsModalProps> = ({
                     </option>
                   ))}
                 </select>
+              </div>
               </div>
             </div>
 
