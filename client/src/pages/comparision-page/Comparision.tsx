@@ -84,9 +84,12 @@ export function Comparison() {
   const [dateRange, setDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     endDate: new Date().toISOString().split("T")[0],
-  })
-  const [selectedCenter, setSelectedCenter] = useState<string>("")
-  const [data, setData] = useState<ReportSummaryItem[] | null>(null)
+  });
+  const [considerDateRange, setConsiderDateRange] = useState(false);
+  const [useStartDate, setUseStartDate] = useState(true);
+  const [useEndDate, setUseEndDate] = useState(true);
+  const [selectedCenter, setSelectedCenter] = useState<string>("");
+  const [data, setData] = useState<ReportSummaryItem[] | null>(null);
 
   // Fetch children
   useEffect(() => {
@@ -158,9 +161,10 @@ export function Comparison() {
       setError(null)
       try {
         let comparisonData
-        const filters = {
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate,
+        const filters: { startDate?: string; endDate?: string } = {}
+        if (considerDateRange) {
+          if (useStartDate) filters.startDate = dateRange.startDate
+          if (useEndDate) filters.endDate = dateRange.endDate
         }
 
         if (comparisonLevel === "class") {
@@ -206,7 +210,7 @@ export function Comparison() {
     }
 
     fetchComparisonData()
-  }, [entity1, entity2, dateRange, comparisonLevel, children])
+  }, [entity1, entity2, dateRange, comparisonLevel, children, considerDateRange, useStartDate, useEndDate])
 
   return (
     <div className="space-y-6">
@@ -227,6 +231,12 @@ export function Comparison() {
             setViewType={setViewType}
             dateRange={dateRange}
             setDateRange={setDateRange}
+            considerDateRange={considerDateRange}
+            setConsiderDateRange={setConsiderDateRange}
+            useStartDate={useStartDate}
+            setUseStartDate={setUseStartDate}
+            useEndDate={useEndDate}
+            setUseEndDate={setUseEndDate}
             selectedCenter={selectedCenter}
             setSelectedCenter={setSelectedCenter}
             entities={entities}

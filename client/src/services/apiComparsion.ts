@@ -48,16 +48,15 @@ export const fetchChildren = async (): Promise<Child[]> => {
 // ---------------- Trend Over Time ----------------
 
 export const fetchTrendOverTime = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   centerId?: string;
   classId?: string;
   childId?: string;
 }): Promise<TrendData[]> => {
-  const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
-  };
+  const params: Record<string, string> = {};
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
   if (filters.centerId) params.centerId = filters.centerId;
   if (filters.classId) params.classId = filters.classId;
   if (filters.childId) params.childId = filters.childId;
@@ -83,15 +82,14 @@ export const fetchTrendOverTime = async (filters: {
 // ---------------- Health Timeline ----------------
 
 export const fetchHealthTimeline = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   centerId?: string;
   childId?: string;
 }): Promise<HealthRecord[]> => {
-  const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
-  };
+  const params: Record<string, string> = {};
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
   if (filters.centerId) params.centerId = filters.centerId;
   if (filters.childId) params.childId = filters.childId;
 
@@ -102,14 +100,13 @@ export const fetchHealthTimeline = async (filters: {
 // ---------------- Staff Performance ----------------
 
 export const fetchStaffPerformance = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   centerId?: string;
 }): Promise<StaffPerformance[]> => {
-  const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
-  };
+  const params: Record<string, string> = {};
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
   if (filters.centerId) params.centerId = filters.centerId;
 
   const response = await apiClient.get("/daily-logs/staff-performance", {
@@ -121,14 +118,13 @@ export const fetchStaffPerformance = async (filters: {
 // ---------------- Incident Frequency ----------------
 
 export const fetchIncidentFrequency = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   centerId?: string;
 }): Promise<IncidentFrequency[]> => {
-  const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
-  };
+  const params: Record<string, string> = {};
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
   if (filters.centerId) params.centerId = filters.centerId;
 
   const response = await apiClient.get("/health-records/incident-frequency", {
@@ -150,16 +146,16 @@ export interface ReportSummaryItem {
 }
 
 export const fetchReportSummary = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   centerId?: string;
   groupBy: "center" | "class";
 }): Promise<ReportSummaryItem[]> => {
   const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
     groupBy: filters.groupBy,
   };
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
   if (filters.centerId) {
     params.centerId = filters.centerId;
   }
@@ -171,17 +167,17 @@ export const fetchReportSummary = async (filters: {
 // ---------- Class Comparison ----------------
 
 export const fetchClassComparison = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   classId1: string;
   classId2: string;
 }): Promise<ReportSummaryItem[]> => {
   const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
     classId1: filters.classId1,
     classId2: filters.classId2,
   };
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
 
   const response = await apiClient.get("/reports/class-comparison", {
     params,
@@ -192,17 +188,17 @@ export const fetchClassComparison = async (filters: {
 // ---------------- Center Comparison ----------------
 
 export const fetchCenterComparison = async (filters: {
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   centerId1: string;
   centerId2: string;
 }): Promise<ReportSummaryItem[]> => {
   const params: Record<string, string> = {
-    startDate: filters.startDate,
-    endDate: filters.endDate,
     centerId1: filters.centerId1,
     centerId2: filters.centerId2,
   };
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
 
   const response = await apiClient.get("/reports/center-comparison", {
     params,

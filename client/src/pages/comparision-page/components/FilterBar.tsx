@@ -64,6 +64,12 @@ interface FilterBarProps {
   setViewType: (view: "aggregate" | "table") => void
   dateRange: { startDate: string; endDate: string }
   setDateRange: (range: { startDate: string; endDate: string }) => void
+  considerDateRange: boolean
+  setConsiderDateRange: (consider: boolean) => void
+  useStartDate: boolean
+  setUseStartDate: (v: boolean) => void
+  useEndDate: boolean
+  setUseEndDate: (v: boolean) => void
   selectedCenter: string
   setSelectedCenter: (center: string) => void
   entities: { value: string; label: string }[]
@@ -84,6 +90,12 @@ export function FilterBar({
   setViewType,
   dateRange,
   setDateRange,
+  considerDateRange,
+  setConsiderDateRange,
+  useStartDate,
+  setUseStartDate,
+  useEndDate,
+  setUseEndDate,
   selectedCenter,
   setSelectedCenter,
   entities,
@@ -302,25 +314,61 @@ export function FilterBar({
         <Separator />
 
         {/* Date Range */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <label className="text-sm font-medium text-foreground flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-green-500" />
             <span>Date Range</span>
           </label>
-          <div className="space-y-2">
-            <Input
-              type="date"
-              value={dateRange.startDate}
-              onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-              className="h-10 bg-background/70 dark:bg-background/50 border-border/50"
-            />
-            <Input
-              type="date"
-              value={dateRange.endDate}
-              onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-              className="h-10 bg-background/70 dark:bg-background/50 border-border/50"
-            />
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Apply to requests</span>
+            <Button
+              onClick={() => setConsiderDateRange(!considerDateRange)}
+              variant={considerDateRange ? "default" : "outline"}
+              className="h-8 px-3"
+              size="sm"
+            >
+              {considerDateRange ? "On" : "Off"}
+            </Button>
           </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={useStartDate}
+                onChange={(e) => setUseStartDate(e.target.checked)}
+                disabled={!considerDateRange}
+              />
+              <Input
+                type="date"
+                value={dateRange.startDate}
+                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+                className="h-10 bg-background/70 dark:bg-background/50 border-border/50"
+                disabled={!considerDateRange}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={useEndDate}
+                onChange={(e) => setUseEndDate(e.target.checked)}
+                disabled={!considerDateRange}
+              />
+              <Input
+                type="date"
+                value={dateRange.endDate}
+                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                className="h-10 bg-background/70 dark:bg-background/50 border-border/50"
+                disabled={!considerDateRange}
+              />
+            </div>
+          </div>
+          <Button
+            onClick={() => setConsiderDateRange(!considerDateRange)}
+            variant={considerDateRange ? "default" : "outline"}
+            className="w-full h-10"
+          >
+            {considerDateRange ? "Ignore Date Range" : "Consider Date Range"}
+          </Button>
         </div>
       </CardContent>
     </Card>

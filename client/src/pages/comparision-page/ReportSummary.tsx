@@ -19,35 +19,53 @@ export function ReportSummary() {
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     endDate: new Date().toISOString().split("T")[0],
   })
+  const [considerDateRange, setConsiderDateRange] = useState(false)
+  const [useStartDate, setUseStartDate] = useState(true)
+  const [useEndDate, setUseEndDate] = useState(true)
 
   useEffect(() => {
-    const getCenters = async () => {
+    const init = async () => {
       const children = await fetchChildren()
       const uniqueCenters = [...new Set(children.map((c) => c.centerId))].sort()
       setCenters(uniqueCenters)
-      if (uniqueCenters.length > 0) {
-        setSelectedCenter(uniqueCenters[0])
-      }
+      // Default center selection: prefer "center 1" if present (case-insensitive), otherwise first
+      let defaultCenter = uniqueCenters[0] || ""
+      const preferred = uniqueCenters.find((c) => c.toLowerCase() === "center 1")
+      if (preferred) defaultCenter = preferred
+      setSelectedCenter(defaultCenter)
+      // Turn off date ranges by default
+      setConsiderDateRange(false)
+      setUseStartDate(false)
+      setUseEndDate(false)
+      // Trigger initial fetch
+      await handleFetchSummary({
+        groupBy: "class",
+        centerId: defaultCenter || undefined,
+        useDate: false,
+      })
     }
-    getCenters()
+    init()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const handleFetchSummary = async () => {
+  const handleFetchSummary = async (opts?: { groupBy?: "center" | "class"; centerId?: string; useDate?: boolean }) => {
     setLoading(true)
     setError(null)
     try {
       const filters: {
-        startDate: string
-        endDate: string
+        startDate?: string
+        endDate?: string
         centerId?: string
         groupBy: "center" | "class"
       } = {
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-        groupBy,
+        groupBy: opts?.groupBy ?? groupBy,
       }
-      if (selectedCenter) {
-        filters.centerId = selectedCenter
+      if (opts?.useDate ?? considerDateRange) {
+        if (useStartDate) filters.startDate = dateRange.startDate
+        if (useEndDate) filters.endDate = dateRange.endDate
+      }
+      if (opts?.centerId ?? selectedCenter) {
+        filters.centerId = (opts?.centerId ?? selectedCenter) as string
       }
       const summaryData = await fetchReportSummary(filters)
       setData(summaryData)
@@ -162,26 +180,55 @@ export function ReportSummary() {
                 <Calendar className="h-4 w-4 text-green-500" />
                 Date Range
               </label>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Apply to requests</span>
+                <Button
+                  onClick={() => setConsiderDateRange(!considerDateRange)}
+                  variant={considerDateRange ? "default" : "outline"}
+                  className="h-8 px-3"
+                  size="sm"
+                >
+                  {considerDateRange ? "On" : "Off"}
+                </Button>
+              </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input
-                  type="date"
-                  value={dateRange.startDate}
-                  onChange={(e) => setDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
-                  className="h-11 bg-background/70 dark:bg-background/50 border-border/50"
-                />
-                <Input
-                  type="date"
-                  value={dateRange.endDate}
-                  onChange={(e) => setDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
-                  className="h-11 bg-background/70 dark:bg-background/50 border-border/50"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={useStartDate}
+                    onChange={(e) => setUseStartDate(e.target.checked)}
+                    disabled={!considerDateRange}
+                  />
+                  <Input
+                    type="date"
+                    value={dateRange.startDate}
+                    onChange={(e) => setDateRange((prev) => ({ ...prev, startDate: e.target.value }))}
+                    className="h-11 bg-background/70 dark:bg-background/50 border-border/50"
+                    disabled={!considerDateRange}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={useEndDate}
+                    onChange={(e) => setUseEndDate(e.target.checked)}
+                    disabled={!considerDateRange}
+                  />
+                  <Input
+                    type="date"
+                    value={dateRange.endDate}
+                    onChange={(e) => setDateRange((prev) => ({ ...prev, endDate: e.target.value }))}
+                    className="h-11 bg-background/70 dark:bg-background/50 border-border/50"
+                    disabled={!considerDateRange}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground opacity-0">Action</label>
               <Button
-                onClick={handleFetchSummary}
+                onClick={() => handleFetchSummary()}
                 disabled={loading}
                 className="w-full h-11 bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200"
               >
