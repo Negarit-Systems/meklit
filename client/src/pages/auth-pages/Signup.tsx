@@ -1,42 +1,52 @@
-import * as React from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { AuthCard } from "@/components/auth/AuthCard"
-import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from "lucide-react"
-import { useRegisterUser } from "@/services/auth"
-import ErrorMessage from "@/components/status/ErrorMessage"
-import SuccessMessage from "@/components/status/SuccessMessage"
-import Spinner from "@/components/status/Spinner"
-import type { AxiosError } from "axios"
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AuthCard } from "@/components/auth/AuthCard";
+import { Eye, EyeOff, User, Mail, Lock, CheckCircle } from "lucide-react";
+import { useRegisterUser } from "@/services/auth";
+import ErrorMessage from "@/components/status/ErrorMessage";
+import SuccessMessage from "@/components/status/SuccessMessage";
+import Spinner from "@/components/status/Spinner";
+import type { AxiosError } from "axios";
 
 export function SignUp() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [formData, setFormData] = React.useState({
     email: "",
     password: "",
     confirmPassword: "",
     name: "",
-  })
+  });
 
-  const [showPassword, setShowPassword] = React.useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
-  const { mutate: registerUser, isPending, isSuccess, isError, error } = useRegisterUser({
+  const {
+    mutate: registerUser,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+  } = useRegisterUser({
     onSuccess: () => {
-      navigate("/otp-verification", { state: { email: formData.email } })
+      navigate("/otp-verification", { state: { email: formData.email } });
     },
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (formData.password !== formData.confirmPassword) return
-    registerUser({ name: formData.name, email: formData.email, password: formData.password })
-  }
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) return;
+    registerUser({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   return (
     <AuthCard
@@ -45,11 +55,21 @@ export function SignUp() {
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {isError && (
-          <ErrorMessage message={(error as AxiosError<{ message?: string }>)?.response?.data?.message || "Sign up failed"} />
+          <ErrorMessage
+            message={
+              (error as AxiosError<{ message?: string }>)?.response?.data
+                ?.message || "Sign up failed"
+            }
+          />
         )}
-        {isSuccess && <SuccessMessage message="Registration successful. Check your email for OTP." />}
+        {isSuccess && (
+          <SuccessMessage message="Registration successful. Check your email for OTP." />
+        )}
         <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-slate-700"
+          >
             Full Name
           </label>
           <div className="relative">
@@ -68,7 +88,10 @@ export function SignUp() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-slate-700"
+          >
             Email Address
           </label>
           <div className="relative">
@@ -87,7 +110,10 @@ export function SignUp() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="password"
+            className="block text-sm font-medium text-slate-700"
+          >
             Password
           </label>
           <div className="relative">
@@ -99,6 +125,8 @@ export function SignUp() {
               placeholder="Create a secure password"
               value={formData.password}
               onChange={handleChange}
+              minLength={8}
+              aria-describedby="password-requirement"
               className="pl-10 pr-10 h-12 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
               required
             />
@@ -107,13 +135,28 @@ export function SignUp() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
+            {formData.password && formData.password.length < 8 && (
+              <p
+                id="password-requirement"
+                className="mt-1 text-xs text-red-600"
+              >
+                Password must be at least 8 characters
+              </p>
+            )}
           </div>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700">
+          <label
+            htmlFor="confirmPassword"
+            className="block text-sm font-medium text-slate-700"
+          >
             Confirm Password
           </label>
           <div className="relative">
@@ -128,15 +171,22 @@ export function SignUp() {
               className="pl-10 pr-10 h-12 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500"
               required
             />
-            {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-              <p className="mt-1 text-xs text-red-600">Passwords do not match</p>
-            )}
+            {formData.confirmPassword &&
+              formData.password !== formData.confirmPassword && (
+                <p className="mt-1 text-xs text-red-600">
+                  Passwords do not match
+                </p>
+              )}
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
             >
-              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showConfirmPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
             </button>
           </div>
         </div>
@@ -144,7 +194,11 @@ export function SignUp() {
         <Button
           type="submit"
           className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors"
-          disabled={isPending || (formData.confirmPassword !== formData.password)}
+          disabled={
+            isPending ||
+            formData.password.length < 8 ||
+            formData.confirmPassword !== formData.password
+          }
         >
           <span className="inline-flex items-center gap-2">
             {isPending && <Spinner spin property="h-4 w-4" />} Create Account
@@ -153,11 +207,14 @@ export function SignUp() {
 
         <p className="text-center text-sm text-slate-600">
           Already have an account?{" "}
-          <a href="/sign-in" className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline">
+          <a
+            href="/sign-in"
+            className="text-emerald-600 hover:text-emerald-700 font-medium hover:underline"
+          >
             Sign in here
           </a>
         </p>
       </form>
     </AuthCard>
-  )
+  );
 }
