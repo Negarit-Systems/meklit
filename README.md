@@ -32,7 +32,7 @@ This project reflects our proficiency in UI/UX design, dynamic data handling, an
 
 1. Clone the repository:
 git clone <https://github.com/Negarit-Systems/meklit.git>
-cd <meklit>
+cd meklit
 
 
 2. Install dependencies for both frontend and backend:
