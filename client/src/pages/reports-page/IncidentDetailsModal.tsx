@@ -48,7 +48,7 @@ const IncidentDetailsModal: React.FC<IncidentDetailsModalProps> = ({
               No incident data available
             </div>
           ) : (
-            incidentData.map((item, index) => (
+            incidentData.map((item, _) => (
               <div key={item.type} className="p-4 border rounded-lg">
                 <h3 className="font-semibold mb-3 text-lg">{item.type}</h3>
                 <div className="space-y-2">

@@ -1,6 +1,6 @@
 export enum HealthRecordEnum {
   Incident = 'Incident',
-  MedicationAdministered = 'Medication Administered',
+  MedicationAdministered = 'Medication',
 }
 
 export interface HealthRecordEntry {

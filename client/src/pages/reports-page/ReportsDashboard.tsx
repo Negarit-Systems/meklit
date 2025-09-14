@@ -606,7 +606,6 @@ const ReportsDashboard: React.FC = () => {
         isOpen={showIncidentDetails}
         onClose={() => setShowIncidentDetails(false)}
         incidentData={reportData.incidentFrequency}
-        getColor={getColor}
       />
     </div>
   );
