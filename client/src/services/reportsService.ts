@@ -85,7 +85,7 @@ export const fetchFilteredTrendData = async (
 ): Promise<ExtendedTrendData[]> => {
   if (!filters.childId && !filters.classId && !filters.centerId) {
     return [];
-  }
+  } 
 
   try {
     const baseParams: any = {
