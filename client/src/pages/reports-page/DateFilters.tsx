@@ -25,7 +25,8 @@ const DateFilters: React.FC<DateFiltersProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Filters</CardTitle>
+        <CardTitle className="text-lg">Date Filters</CardTitle>
+
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-4">
@@ -59,7 +60,7 @@ const DateFilters: React.FC<DateFiltersProps> = ({
           <Button 
             onClick={onApplyFilters} 
             className="w-full sm:w-auto sm:self-end"
-            disabled={loading || !dateRange.startDate || !dateRange.endDate}
+            disabled={loading}
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Loading...' : 'Apply Filters'}
