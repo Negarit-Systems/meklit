@@ -1,69 +1,60 @@
-# React + TypeScript + Vite
+# Meklit Dashboard Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available
+This is the frontend for the Meklit Dynamic Analytics Dashboard, built by **Negarit Systems**. It provides an attractive, intuitive UI for analyzing daily logs and health records, with dynamic filtering and visualizations.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Key features:
+- Dynamic filter panel for slicing data by center, class, child, curriculum, symptoms, nap duration, etc.
+- Interactive charts (using Chart.js) that update based on filters.
+- Responsive design for desktop and mobile.
+- Data fetching with Tanstack React Query for efficient API calls.
+- Component-based architecture with Radix UI and Tailwind CSS for modern styling.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- React.js (v19) with Vite for fast development.
+- Tailwind CSS for styling, with plugins like tailwindcss-animate.
+- Radix UI components (Dialog, Dropdown, Popover, Select, etc.).
+- Tanstack React Query for data fetching and caching.
+- Tanstack React Table for tabular data display.
+- Chart.js and React Chartjs-2 for visualizations.
+- Firebase for direct database interactions (if needed).
+- Axios for API requests.
+- Date-fns and React Day Picker for date handling.
+- Framer Motion for animations.
+- Lucide React and React Icons for icons.
+- React Router DOM for routing.
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Dev tools: TypeScript, ESLint, SWC plugin for Vite.
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+## Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- Node.js (v18+).
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Setup and Running
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Navigate to the client folder:
+cd client
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. Install dependencies:
+npm install
+
+
+3. Create a `.env` file with required variables:
+- `VITE_API_URL=http://localhost:3000` (backend API base URL).
+
+
+4. Run in development mode:
+npm run dev
+Access at `http://localhost:5173`.
+
+5. Build for production:
+npm run build
+
+## Folder Structure
+
+- `/src/components`: Reusable UI components.
+- `/src/pages`: Main dashboard pages.
+- `/src/api`: API service layers.
+- `/src/utils`: Helpers for data processing, etc.
