@@ -6,11 +6,11 @@ import {
   HealthRecordEnum,
 } from '../models/health-record.js';
 import { ChildService } from './child-service.js';
-// UPDATED IMPORT: Use the new, more accurate types
 import {
   ComparisonData,
   SummaryReportData,
   ChildComparisonData,
+  HealthEvent,
 } from '../types/report-response.js';
 
 interface ReportOptions {
@@ -26,11 +26,12 @@ export class ClassReportService {
   private childService: ChildService;
 
   constructor() {
-    this.dailyLogRef = db.collection('dailyLogsEntries');
+    this.dailyLogRef = db.collection('dailyLogEntries');
     this.healthRecordRef = db.collection('healthRecordEntries');
     this.childService = new ChildService();
   }
 
+  // ... (generateReport, compareClassesReport, compareCentersReport methods are unchanged)
   private async getChildMap(
     ids: string[],
   ): Promise<Map<string, any>> {
@@ -44,7 +45,6 @@ export class ClassReportService {
     return map;
   }
 
-  // UPDATED RETURN TYPE
   async generateReport(
     options: ReportOptions = {},
   ): Promise<SummaryReportData[]> {
@@ -132,7 +132,7 @@ export class ClassReportService {
       groupBy === 'class' ? 'classId' : 'centerId';
 
     for (const log of napLogs) {
-      if (!log.details.sleepDuration) continue;
+      if (!log.details?.sleepDuration) continue;
       const child = childMap.get(log.childId);
       if (!child || !child[groupingKeyField]) continue;
 
@@ -163,7 +163,6 @@ export class ClassReportService {
       stats[key].totalIncidents++;
     }
 
-    // This return type now matches SummaryReportData[]
     return Object.entries(stats).map(([id, data]) => ({
       id,
       averageNapDuration:
@@ -172,7 +171,6 @@ export class ClassReportService {
     }));
   }
 
-  // UPDATED RETURN TYPE
   async compareClassesReport(
     classId1: string,
     classId2: string,
@@ -189,7 +187,6 @@ export class ClassReportService {
     );
   }
 
-  // UPDATED RETURN TYPE
   async compareCentersReport(
     centerId1: string,
     centerId2: string,
@@ -217,32 +214,42 @@ export class ClassReportService {
       string,
       {
         totalIncidents: number;
+        totalMedications: number;
         totalNapDuration: number;
         napCount: number;
+        healthEvents: HealthEvent[];
       }
     > = {
       [childId1]: {
         totalIncidents: 0,
+        totalMedications: 0,
         totalNapDuration: 0,
         napCount: 0,
+        healthEvents: [],
       },
       [childId2]: {
         totalIncidents: 0,
+        totalMedications: 0,
         totalNapDuration: 0,
         napCount: 0,
+        healthEvents: [],
       },
     };
 
-    let incidentQuery = this.healthRecordRef
+    const healthRecordTypes = [
+      HealthRecordEnum.Incident,
+      HealthRecordEnum.MedicationAdministered,
+    ];
+    let healthQuery = this.healthRecordRef
       .where('childId', 'in', childIdsToCompare)
-      .where('type', '==', HealthRecordEnum.Incident);
+      .where('type', 'in', healthRecordTypes);
 
     let napQuery = this.dailyLogRef
       .where('childId', 'in', childIdsToCompare)
       .where('type', '==', DailyLogEnum.Nap);
 
     if (startDate) {
-      incidentQuery = incidentQuery.where(
+      healthQuery = healthQuery.where(
         'timestamp',
         '>=',
         new Date(startDate),
@@ -254,7 +261,7 @@ export class ClassReportService {
       );
     }
     if (endDate) {
-      incidentQuery = incidentQuery.where(
+      healthQuery = healthQuery.where(
         'timestamp',
         '<=',
         new Date(endDate),
@@ -262,39 +269,63 @@ export class ClassReportService {
       napQuery = napQuery.where('timestamp', '<=', new Date(endDate));
     }
 
-    // --- Fetch Data in Parallel ---
-    const [incidentSnapshot, napSnapshot] = await Promise.all([
-      incidentQuery.get(),
+    const [healthSnapshot, napSnapshot] = await Promise.all([
+      healthQuery.get(),
       napQuery.get(),
     ]);
 
-    // --- Process Incidents ---
-    incidentSnapshot.forEach((doc) => {
+    
+
+    healthSnapshot.forEach((doc) => {
       const record = doc.data() as HealthRecordEntry;
-      if (childStats[record.childId]) {
-        childStats[record.childId].totalIncidents++;
+      const childStat = childStats[record.childId];
+
+      if (childStat) {
+        let eventDetail = '';
+        if (record.type === HealthRecordEnum.Incident) {
+          childStat.totalIncidents++;
+          eventDetail = record.details.incident || 'Unknown Incident';
+        } else if (
+          record.type === HealthRecordEnum.MedicationAdministered
+        ) {
+          childStat.totalMedications++;
+          eventDetail =
+            record.details.medication || 'Unknown Medication';
+        }
+
+        childStat.healthEvents.push({
+          timestamp: record.timestamp,
+          type: record.type as 'Incident' | 'Medication Administered',
+          detail: eventDetail,
+        });
       }
     });
 
-    // --- Process Naps ---
     napSnapshot.forEach((doc) => {
       const log = doc.data() as DailyLog;
-      if (childStats[log.childId] && log.details.sleepDuration) {
+      if (childStats[log.childId] && log.details?.sleepDuration) {
         childStats[log.childId].totalNapDuration +=
           log.details.sleepDuration;
         childStats[log.childId].napCount++;
       }
     });
 
-    // --- Format and Return the Report ---
-    return Object.entries(childStats).map(([childId, stats]) => ({
-      childId,
-      totalIncidents: stats.totalIncidents,
-      totalNapDuration: stats.totalNapDuration,
-      averageNapDuration:
-        stats.napCount > 0
-          ? stats.totalNapDuration / stats.napCount
-          : 0,
-    }));
+    return Object.entries(childStats).map(([childId, stats]) => {
+      stats.healthEvents.sort(
+        (a, b) => a.timestamp._seconds - b.timestamp._seconds,
+      );
+
+      return {
+        childId,
+        totalIncidents: stats.totalIncidents,
+        totalMedications: stats.totalMedications,
+        totalNapDuration: stats.totalNapDuration,
+        averageNapDuration:
+          stats.napCount > 0
+            ? stats.totalNapDuration / stats.napCount
+            : 0,
+        healthEvents: stats.healthEvents,
+      };
+    });
   }
 }

@@ -1,13 +1,5 @@
 // --- Existing types for Activity reports ---
-export interface ActivityEngagementData {
-  activityName: string;
-  engagementCounts: Record<string, number>;
-}
 
-export interface ClassActivityEngagement {
-  classId: string;
-  activities: ActivityEngagementData[];
-}
 
 // --- Existing types for the main 'reports' service ---
 export interface SummaryReportData {
@@ -85,9 +77,52 @@ export interface StaffAnalysis {
   medicationsReported: number;
 }
 
+
+
+// A new helper type to describe a single health event
+export interface HealthEvent {
+  timestamp: any;
+  type: 'Incident' | 'Medication Administered';
+  detail: string; // The text of the incident or the name of the medication
+}
+// The updated main interface for the child comparison response
 export interface ChildComparisonData {
   childId: string;
   totalIncidents: number;
+  totalMedications: number; // <-- NEW
   totalNapDuration: number;
   averageNapDuration: number;
+  healthEvents: HealthEvent[]; // <-- NEW: A list of all incidents and medications
+}
+
+export interface IncidentFrequencyData {
+  type: string;
+  count: number;
+}
+
+export interface TimelineEvent {
+  id: string;
+  childId: string;
+  timestamp: any;
+  type: string;
+  incident?: string;
+  medication?: string;
+  actionTaken: string;
+}
+
+export interface ChildHealthProfile {
+  childId: string;
+  totalIncidents: number;
+  totalMedications: number;
+  incidentDistribution: Record<string, number>;
+  medicationDistribution: Record<string, number>;
+  actionDistribution: Record<string, number>;
+  recentEntries: TimelineEvent[];
+}
+
+export interface StaffAnalysis {
+  staffId: string;
+  totalRecords: number;
+  incidentsReported: number;
+  medicationsReported: number;
 }
