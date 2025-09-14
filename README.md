@@ -31,8 +31,8 @@ This project reflects our proficiency in UI/UX design, dynamic data handling, an
 ## Setup and Running Locally
 
 1. Clone the repository:
-git clone <repository-url>
-cd <repository-name></repository-name></repository-url>
+git clone <https://github.com/Negarit-Systems/meklit.git>
+cd <meklit>
 
 
 2. Install dependencies for both frontend and backend:
