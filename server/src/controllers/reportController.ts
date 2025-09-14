@@ -4,7 +4,7 @@ import { ClassReportService } from '../services/report.js';
 const reportService = new ClassReportService();
 
 export const reportController = {
-  // 1. MODIFIED: Get a flexible summary grouped by class or center
+  // Get a flexible summary grouped by class or center
   async getSummary(req: Request, res: Response) {
     try {
       const { startDate, endDate, centerId, groupBy } = req.query;
@@ -22,7 +22,7 @@ export const reportController = {
           typeof startDate === 'string' ? startDate : undefined,
         endDate: typeof endDate === 'string' ? endDate : undefined,
         centerId: typeof centerId === 'string' ? centerId : undefined,
-        groupBy: groupBy as 'class' | 'center' | undefined, // Type assertion after validation
+        groupBy: groupBy as 'class' | 'center' | undefined,
       };
 
       const data = await reportService.generateReport(options);
@@ -35,7 +35,7 @@ export const reportController = {
     }
   },
 
-  // 2. UPDATED: Compare TWO classes (summary)
+  // Compare TWO classes (summary)
   async compareClasses(req: Request, res: Response) {
     try {
       const { startDate, endDate, classId1, classId2 } = req.query;
@@ -118,4 +118,3 @@ export const reportController = {
     }
   },
 };
-

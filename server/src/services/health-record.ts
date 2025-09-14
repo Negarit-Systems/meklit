@@ -41,8 +41,11 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
 
     const querySnapshot = await q.get();
     const typeCounts: Record<string, number> = {};
+    const incidentCounts: Record<string, number> = {};
+    const medicationCounts: Record<string, number> = {};
 
     // If filtering by center, check each record's child center
+    let childInfoMap: Record<string, { centerId?: string }> = {};
     if (centerId) {
       // Collect all childIds from the records
       const childIds = Array.from(
@@ -59,31 +62,54 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
       });
 
       // Build a map for quick lookup
-      const childInfoMap: Record<string, { centerId?: string }> = {};
       for (const childInfo of childInfos) {
         if (childInfo && childInfo.id) {
           childInfoMap[childInfo.id] = childInfo;
         }
       }
+    }
 
-      for (const doc of querySnapshot.docs) {
-        const record = doc.data() as HealthRecordEntry;
+    for (const doc of querySnapshot.docs) {
+      const record = doc.data() as HealthRecordEntry;
+      let include = true;
+      if (centerId) {
         const childInfo = childInfoMap[record.childId];
-        if (childInfo && childInfo.centerId === centerId) {
-          typeCounts[record.type] =
-            (typeCounts[record.type] || 0) + 1;
-        }
+        include = childInfo && childInfo.centerId === centerId;
       }
-    } else {
-      querySnapshot.forEach((doc) => {
-        const record = doc.data() as HealthRecordEntry;
-        typeCounts[record.type] = (typeCounts[record.type] || 0) + 1;
-      });
+      if (!include) continue;
+
+      typeCounts[record.type] = (typeCounts[record.type] || 0) + 1;
+
+      if (
+        record.type === HealthRecordEnum.Incident &&
+        record.details.incident
+      ) {
+        const incidentText = record.details.incident as string;
+        incidentCounts[incidentText] =
+          (incidentCounts[incidentText] || 0) + 1;
+      }
+
+      if (
+        record.type === HealthRecordEnum.MedicationAdministered &&
+        record.details.medication
+      ) {
+        const medicationText = record.details.medication as string;
+        medicationCounts[medicationText] =
+          (medicationCounts[medicationText] || 0) + 1;
+      }
     }
 
     return Object.entries(typeCounts).map(([type, count]) => ({
       type,
       count,
+      incidents:
+        type === HealthRecordEnum.Incident
+          ? incidentCounts
+          : undefined,
+      medications:
+        type === HealthRecordEnum.MedicationAdministered
+          ? medicationCounts
+          : undefined,
     }));
   }
 

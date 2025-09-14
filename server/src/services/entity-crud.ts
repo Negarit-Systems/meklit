@@ -14,28 +14,6 @@ export class EntityCrudService<T extends { id?: string }> {
     this.collection = db.collection(collectionName);
   }
 
-  async findMany(ids: string[]): Promise<T[]> {
-    if (!ids.length) return [];
-    const chunkSize = 30; // Firestore 'in' query limit
-    let results: T[] = [];
-    for (let i = 0; i < ids.length; i += chunkSize) {
-      const chunk = ids.slice(i, i + chunkSize);
-
-      // 2. The Fix: Query by the actual Document ID instead of a field named "id"
-      const snapshot = await this.collection
-        .where(FieldPath.documentId(), 'in', chunk)
-        .get();
-
-      // 3. Improvement: Ensure the document's ID is included in the returned object
-      results = results.concat(
-        snapshot.docs.map(
-          (doc) => ({ id: doc.id, ...doc.data() }) as T,
-        ),
-      );
-    }
-    return results;
-  }
-
   async create(data: T): Promise<T> {
     const docRef = await this.collection.add(data);
     const createdDoc = await docRef.get();

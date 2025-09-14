@@ -3,20 +3,22 @@ import { reportController } from '../controllers/reportController.js';
 
 const reportRouter = Router();
 
-// 1. MODIFIED: Flexible summary route (groups by class or center)
+// Flexible summary route (groups by class or center)
 reportRouter.get('/summary', reportController.getSummary);
 
-// 2. UNCHANGED: Compares two specific classes
+// Compares two specific classes
 reportRouter.get(
   '/class-comparison',
   reportController.compareClasses,
 );
 
-// 3. NEW: Compares two specific centers
+// Compares two specific centers
 reportRouter.get(
   '/center-comparison',
   reportController.compareCenters,
 );
+
+// Compares two children
 reportRouter.get(
   '/child-comparison',
   reportController.compareChildren,

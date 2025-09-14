@@ -6,7 +6,6 @@ import {
   HealthRecordEnum,
 } from '../models/health-record.js';
 import { ChildService } from './child-service.js';
-// UPDATED IMPORT: Use the new, more accurate types
 import {
   ComparisonData,
   SummaryReportData,
@@ -34,7 +33,13 @@ export class ClassReportService {
   private async getChildMap(
     ids: string[],
   ): Promise<Map<string, any>> {
-    const children = await this.childService.findMany(ids);
+    const children = await this.childService.find({
+      where: {
+        field: 'id',
+        operator: 'in',
+        value: Array.from(ids),
+      },
+    });
     const map = new Map<string, any>();
     for (const child of children) {
       if (child.id) {
@@ -44,7 +49,6 @@ export class ClassReportService {
     return map;
   }
 
-  // UPDATED RETURN TYPE
   async generateReport(
     options: ReportOptions = {},
   ): Promise<SummaryReportData[]> {
@@ -172,7 +176,6 @@ export class ClassReportService {
     }));
   }
 
-  // UPDATED RETURN TYPE
   async compareClassesReport(
     classId1: string,
     classId2: string,
@@ -189,7 +192,6 @@ export class ClassReportService {
     );
   }
 
-  // UPDATED RETURN TYPE
   async compareCentersReport(
     centerId1: string,
     centerId2: string,
