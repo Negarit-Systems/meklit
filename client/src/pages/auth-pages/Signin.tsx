@@ -53,7 +53,7 @@ export function SignIn() {
               id="email"
               name="email"
               type="email"
-              placeholder="you@learningcenter.com"
+              placeholder="your@email.com"
               value={formData.email}
               onChange={handleChange}
               className="pl-10 h-11 bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent"
