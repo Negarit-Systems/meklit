@@ -35,13 +35,7 @@ export class ClassReportService {
   private async getChildMap(
     ids: string[],
   ): Promise<Map<string, any>> {
-    const children = await this.childService.find({
-      where: {
-        field: 'id',
-        operator: 'in',
-        value: Array.from(ids),
-      },
-    });
+    const children = await this.childService.findManyById(ids);
     const map = new Map<string, any>();
     for (const child of children) {
       if (child.id) {
@@ -279,8 +273,6 @@ export class ClassReportService {
       healthQuery.get(),
       napQuery.get(),
     ]);
-
-    
 
     healthSnapshot.forEach((doc) => {
       const record = doc.data() as HealthRecordEntry;

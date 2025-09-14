@@ -252,10 +252,20 @@ async function isCollectionEmpty(collectionName: string) {
   return snapshot.empty;
 }
 
-async function seed() {
-  let childIds: string[] = [];
+async function clearCollection(collectionName: string) {
+  const collectionRef = db.collection(collectionName);
+  const snapshot = await collectionRef.get();
+  const batch = db.batch();
+  snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+  await batch.commit();
+}
 
-  childIds = await seedChildren();
+async function seed() {
+  await clearCollection('children');
+  await clearCollection('dailyLogEntries');
+  await clearCollection('healthRecordEntries');
+
+  const childIds = await seedChildren();
   await seedDailyLogs(childIds);
   await seedHealthRecords(childIds);
 }

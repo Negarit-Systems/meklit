@@ -89,4 +89,27 @@ export class EntityCrudService<T extends { id?: string }> {
       (doc) => ({ id: doc.id, ...doc.data() }) as T,
     );
   }
+
+  async findManyById(ids: string[]): Promise<T[]> {
+    if (!ids.length) return [];
+
+    const chunkSize = 30;
+    let results: T[] = [];
+
+    for (let i = 0; i < ids.length; i += chunkSize) {
+      const chunk = ids.slice(i, i + chunkSize);
+
+      const snapshot = await this.collection
+        .where(FieldPath.documentId(), 'in', chunk)
+        .get();
+
+      results = results.concat(
+        snapshot.docs.map(
+          (doc) => ({ id: doc.id, ...doc.data() }) as T,
+        ),
+      );
+    }
+
+    return results;
+  }
 }
