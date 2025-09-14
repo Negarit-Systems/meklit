@@ -11,26 +11,30 @@ import {
   staffPerformanceSchema,
   trendOverTimeSchema,
 } from '../models/schema/daily-log.schema.js';
+import { authMiddleware } from '../middlewares/auth.js';
 
 const dailyLogRoute = Router();
 
-dailyLogRoute.get('/', findDailyLogs);
+dailyLogRoute.get('/', authMiddleware, findDailyLogs);
 
 // Report Routes
 dailyLogRoute.get(
   '/trend-over-time',
+  authMiddleware,
   validateResource(trendOverTimeSchema),
   trendOverTimeReport,
 );
 
 dailyLogRoute.get(
   '/staff-performance',
+  authMiddleware,
   validateResource(staffPerformanceSchema),
   staffPerformanceReport,
 );
 
 dailyLogRoute.get(
   '/comparative',
+  authMiddleware,
   validateResource(comparativeReportSchema),
   comparativeReport,
 );

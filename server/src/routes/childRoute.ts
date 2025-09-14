@@ -11,25 +11,28 @@ import {
   findOneChild,
   updateChild,
 } from '../controllers/childController.js';
+import { authMiddleware } from '../middlewares/auth.js';
 
 const childRoute = Router();
 
 childRoute.post(
   '/',
+  authMiddleware,
   validateResource(childCreateSchema),
   createChild,
 );
 
-childRoute.get('/', findChildren);
+childRoute.get('/', authMiddleware, findChildren);
 
-childRoute.get('/:id', findOneChild);
+childRoute.get('/:id', authMiddleware, findOneChild);
 
 childRoute.put(
   '/:id',
+  authMiddleware,
   validateResource(childUpdateSchema),
   updateChild,
 );
 
-childRoute.delete('/:id', deleteChild);
+childRoute.delete('/:id', authMiddleware, deleteChild);
 
 export default childRoute;

@@ -14,6 +14,7 @@ import {
   userResendOtpSchema,
   userVerifySchema,
 } from '../models/schema/user.schema.js';
+import { authMiddleware } from '../middlewares/auth.js';
 
 const authRoute = Router();
 
@@ -38,6 +39,6 @@ authRoute.post(
   loginUser,
 );
 authRoute.post('/refresh-token', refreshToken);
-authRoute.post('/logout', logoutUser);
+authRoute.post('/logout', authMiddleware, logoutUser);
 
 export default authRoute;
