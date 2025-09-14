@@ -143,7 +143,7 @@ const ReportsDashboard: React.FC = () => {
       } else {
         date = new Date();
       }
-      
+
       return {
         date: date.toLocaleDateString("en-US", {
           month: "short",
@@ -210,7 +210,7 @@ const ReportsDashboard: React.FC = () => {
         } else {
           return; // Skip invalid dates
         }
-        
+
         const weekStart = new Date(date);
         weekStart.setDate(date.getDate() - date.getDay());
         const weekKey = weekStart.toLocaleDateString("en-US", {
@@ -347,9 +347,9 @@ const ReportsDashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button 
-            variant="outline" 
-            onClick={handleFetchAllReports} 
+          <Button
+            variant="outline"
+            onClick={handleFetchAllReports}
             className="w-full sm:w-auto"
             disabled={loading}
           >
@@ -408,6 +408,21 @@ const ReportsDashboard: React.FC = () => {
 
             <ChartCard
               data={[]}
+              title="Incident Frequency"
+              icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
+              description="Health incident frequency"
+            />
+
+            <ChartCard
+              data={[]}
+              title="Action Distribution"
+              icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
+              description="Health action distribution"
+              chartType="pie"
+            />
+
+            <ChartCard
+              data={[]}
               title="Staff Performance"
               icon={<UserCheck className="h-4 w-4 text-muted-foreground" />}
               description="Total logs by staff member"
@@ -417,25 +432,10 @@ const ReportsDashboard: React.FC = () => {
 
             <ChartCard
               data={[]}
-              title="Incident Frequency"
-              icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
-              description="Health incident frequency"
-            />
-
-            <ChartCard
-              data={[]}
               title="Staff Analysis"
               icon={<Users className="h-4 w-4 text-muted-foreground" />}
               description="Staff record analysis with incidents & medications"
               showBreakdown={true}
-            />
-
-            <ChartCard
-              data={[]}
-              title="Action Distribution"
-              icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-              description="Health action distribution"
-              chartType="pie"
             />
           </div>
 
@@ -464,11 +464,11 @@ const ReportsDashboard: React.FC = () => {
                   key: "type",
                   label: "Type",
                   render: (value) => (
-                    <Badge 
+                    <Badge
                       variant="outline"
                       className={`text-xs font-semibold ${
-                        value === "Incident" 
-                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" 
+                        value === "Incident"
+                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                           : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                       }`}
                     >
@@ -559,11 +559,11 @@ const ReportsDashboard: React.FC = () => {
                   key: "type",
                   label: "Type",
                   render: (value) => (
-                    <Badge 
+                    <Badge
                       variant="outline"
                       className={`text-xs font-semibold ${
-                        value === "Incident" 
-                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100" 
+                        value === "Incident"
+                          ? "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                           : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                       }`}
                     >
