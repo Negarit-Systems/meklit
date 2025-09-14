@@ -488,47 +488,46 @@ const ReportsDashboard: React.FC = () => {
         <>
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             <ChartCard
-          data={processTrendData()}
-          title="Trend Over Time"
-          icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
-          description="Weekly activity trends"
-          showDetailsButton={true}
-          onDetailsClick={() => setShowTrendDetails(true)}
-        />
+              data={processTrendData()}
+              title="Trend Over Time"
+              icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+              description="Weekly activity trends"
+              showDetailsButton={true}
+              onDetailsClick={() => setShowTrendDetails(true)}
+            />
 
-        <ChartCard
-          data={processStaffPerformance()}
-          title="Staff Performance"
-          icon={<UserCheck className="h-4 w-4 text-muted-foreground" />}
-          description="Total logs by staff member"
-          showDetailsButton={true}
-          onDetailsClick={() => setShowStaffDetails(true)}
-        />
+            <ChartCard
+              data={processIncidentFrequency()}
+              title="Incident Frequency"
+              icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
+              description="Health incident frequency"
+            />
 
-        <ChartCard
-          data={processIncidentFrequency()}
-          title="Incident Frequency"
-          icon={<AlertTriangle className="h-4 w-4 text-muted-foreground" />}
-          description="Health incident frequency"
-        />
+            <ChartCard
+              data={processActionDistribution()}
+              title="Action Distribution"
+              icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
+              description="Health action distribution"
+              chartType="pie"
+            />
 
-        <ChartCard
-          data={processStaffAnalysis()}
-          title="Staff Analysis"
-          icon={<Users className="h-4 w-4 text-muted-foreground" />}
-          description="Staff record analysis with incidents & medications"
-          showBreakdown={true}
-        />
+            <ChartCard
+              data={processStaffPerformance()}
+              title="Staff Performance"
+              icon={<UserCheck className="h-4 w-4 text-muted-foreground" />}
+              description="Total logs by staff member"
+              showDetailsButton={true}
+              onDetailsClick={() => setShowStaffDetails(true)}
+            />
 
-        <ChartCard
-          data={processActionDistribution()}
-          title="Action Distribution"
-          icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          description="Health action distribution"
-          chartType="pie"
-        />
-      </div>
-
+            <ChartCard
+              data={processStaffAnalysis()}
+              title="Staff Analysis"
+              icon={<Users className="h-4 w-4 text-muted-foreground" />}
+              description="Staff record analysis with incidents & medications"
+              showBreakdown={true}
+            />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TableCard
