@@ -257,11 +257,9 @@ export function Visualization({
       <div className="h-96">
         <AnimatePresence mode="wait">
           <motion.div
-            key={JSON.stringify({ labels, selectedMetric, viewType, values: chartData.datasets.map(d => d.data) })}
-            initial={{ rotate: -12, opacity: 0, scale: 0.975 }}
-            animate={{ rotate: 0, opacity: 1, scale: 1 }}
-            exit={{ rotate: 12, opacity: 0, scale: 0.975 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
             className="h-full"
           >
             <ChartComponent
@@ -281,7 +279,7 @@ export function Visualization({
                       },
                     },
                   },
-                    title: {
+                  title: {
                     display: true,
                     text: comparisonLevel === "child" ? "Child Metrics Comparison" : `${metricObj.label} Comparison`,
                     font: {

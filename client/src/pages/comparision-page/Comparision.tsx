@@ -316,20 +316,9 @@ export function Comparison() {
         <div className="lg:col-span-3">
           <AnimatePresence mode="wait">
             <motion.div
-              key={JSON.stringify({
-                comparisonLevel,
-                entity1,
-                entity2,
-                selectedMetric,
-                viewType,
-                filters: considerDateRange
-                  ? { startDate: dateRange.startDate, endDate: dateRange.endDate, useStartDate, useEndDate }
-                  : null,
-              })}
               variants={sectionVariants}
-              initial="hidden"
+              initial={false}
               animate="visible"
-              exit="exit"
               layout
             >
               <Visualization
@@ -350,11 +339,9 @@ export function Comparison() {
           {comparisonLevel === "child" && entity1 && entity2 && childEventsData && (
             <AnimatePresence mode="wait">
               <motion.div
-                key={`child-events-${entity1}-${entity2}-${considerDateRange ? `${dateRange.startDate}-${dateRange.endDate}` : "all"}`}
                 variants={sectionVariants}
-                initial="hidden"
+                initial={false}
                 animate="visible"
-                exit="exit"
                 layout
               >
                 <ChildEventsChart childrenData={childEventsData} getLabel={getLabel} />

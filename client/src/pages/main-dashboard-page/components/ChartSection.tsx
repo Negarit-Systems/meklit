@@ -61,11 +61,10 @@ export function ChartSection({ loading, error, filters, trendData, staffData, in
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400"
-        />
+        <div className="flex items-center gap-3 text-muted-foreground">
+          <div className="h-3 w-3 rounded-full bg-blue-400" />
+          <span>Loading…</span>
+        </div>
       </div>
     );
   }
