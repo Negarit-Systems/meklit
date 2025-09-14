@@ -22,7 +22,7 @@ Key features:
 - Swagger JSDoc and UI Express for API docs.
 - Bcrypt and JWT for security features.
 
-Dev tools: TypeScript, ESLint, Jest for testing, TSX for development.
+Dev tools: TypeScript, ESLint, TSX for development.
 
 ## Prerequisites
 
@@ -33,12 +33,14 @@ Dev tools: TypeScript, ESLint, Jest for testing, TSX for development.
 ## Setup and Running
 
 1. Navigate to the server folder:
-- cd server
-
+```bash
+cd server
+```
 
 2. Install dependencies:
-- npm install
-
+```bash
+npm install
+```
 
 3. Create a `.env` file with required variables:
 - `PORT=5000`
@@ -46,19 +48,22 @@ Dev tools: TypeScript, ESLint, Jest for testing, TSX for development.
 - `REFRESH_TOKEN_SECRET=nfjkajhejerksldkk234ndsjijo34]kkd`
 - `NODE_ENV=development`
 - `FIREBASE_SERVICE_ACCOUNT_PATH= path to your serviceAccountKey.json`
-- `N8N_WEBHOOK_URL=te setup firestore locally`
+- `N8N_WEBHOOK_URL= webhook_url_for_email_service_built_with_n8n`
 - `MAX_AGE= max_age_for_refreshtoken_in_number`
 - `CLIENT_URL=https://your-url.com`
 
 4. Seed the database with mock data:
-- npm run seed
-
+```bash
+npm run seed
+```
 
 5. Run in development mode (with hot reload):
-- npm run start:dev
+```bash
+npm run start:dev
+```
 
 6. Run in production mode:
-- npm run build
-- npm run start
-
-
+```bash
+npm run build
+npm run start
+```
