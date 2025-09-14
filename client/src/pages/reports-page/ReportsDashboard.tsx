@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   TrendingUp,
   Users,
-  Download,
   RefreshCw,
   Clock,
   AlertTriangle,
@@ -357,10 +356,6 @@ const ReportsDashboard: React.FC = () => {
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             {loading ? 'Loading...' : 'Refresh'}
-          </Button>
-          <Button className="w-full sm:w-auto">
-            <Download className="h-4 w-4 mr-2" />
-            Export
           </Button>
         </div>
       </div>

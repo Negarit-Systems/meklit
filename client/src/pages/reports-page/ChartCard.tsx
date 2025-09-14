@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import type { ChartData } from "./types";
 
 interface ChartCardProps {
