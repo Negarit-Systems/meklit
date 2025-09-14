@@ -1,4 +1,5 @@
 import { Bar as BarChart, Line as LineChart } from "react-chartjs-2"
+import { AnimatePresence, motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Filter, BarChart3 } from "lucide-react"
@@ -184,58 +185,69 @@ export function Visualization({
 
     return (
       <div className="h-96">
-        <ChartComponent
-          data={chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "top",
-                labels: {
-                  usePointStyle: true,
-                  padding: 20,
-                  font: {
-                    size: 12,
-                    weight: 500,
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={JSON.stringify({ labels, selectedMetric, viewType, values: chartData.datasets.map(d => d.data) })}
+            initial={{ rotate: -12, opacity: 0, scale: 0.975 }}
+            animate={{ rotate: 0, opacity: 1, scale: 1 }}
+            exit={{ rotate: 12, opacity: 0, scale: 0.975 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="h-full"
+          >
+            <ChartComponent
+              data={chartData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    position: "top",
+                    labels: {
+                      usePointStyle: true,
+                      padding: 20,
+                      font: {
+                        size: 12,
+                        weight: 500,
+                      },
+                    },
+                  },
+                  title: {
+                    display: true,
+                    text: `${metricObj.label} Comparison`,
+                    font: {
+                      size: 16,
+                      weight: "bold",
+                    },
+                    padding: 20,
                   },
                 },
-              },
-              title: {
-                display: true,
-                text: `${metricObj.label} Comparison`,
-                font: {
-                  size: 16,
-                  weight: "bold",
-                },
-                padding: 20,
-              },
-            },
-            scales: {
-              y: {
-                beginAtZero: true,
-                grid: {
-                  color: "rgba(0, 0, 0, 0.1)",
-                },
-                ticks: {
-                  font: {
-                    size: 11,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    grid: {
+                      color: "rgba(0, 0, 0, 0.1)",
+                    },
+                    ticks: {
+                      font: {
+                        size: 11,
+                      },
+                    },
+                  },
+                  x: {
+                    grid: {
+                      display: false,
+                    },
+                    ticks: {
+                      font: {
+                        size: 11,
+                      },
+                    },
                   },
                 },
-              },
-              x: {
-                grid: {
-                  display: false,
-                },
-                ticks: {
-                  font: {
-                    size: 11,
-                  },
-                },
-              },
-            },
-          }}
-        />
+              }}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
     )
   }

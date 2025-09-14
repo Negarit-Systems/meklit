@@ -23,6 +23,7 @@ import { Header } from "./components/Header"
 import { FilterBar } from "./components/FilterBar"
 import { Visualization } from "./components/Visualization"
 import { BarChart3, Table2, TrendingUp } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
 
@@ -90,6 +91,27 @@ export function Comparison() {
   const [useEndDate, setUseEndDate] = useState(true);
   const [selectedCenter, setSelectedCenter] = useState<string>("");
   const [data, setData] = useState<ReportSummaryItem[] | null>(null);
+
+  // Animation variants
+  const pageVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.16, 1, 0.3, 1],
+        when: "beforeChildren",
+        staggerChildren: 0.06,
+      },
+    },
+  } as const
+
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 12 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+    exit: { opacity: 0, y: -8, transition: { duration: 0.25 } },
+  } as const
 
   // Fetch children
   useEffect(() => {
@@ -213,11 +235,25 @@ export function Comparison() {
   }, [entity1, entity2, dateRange, comparisonLevel, children, considerDateRange, useStartDate, useEndDate])
 
   return (
-    <div className="space-y-6">
-      <Header />
+    <motion.div
+      className="space-y-6"
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      layout
+    >
+      <motion.div variants={sectionVariants} layout>
+        <Header />
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
+        <motion.div
+          className="lg:col-span-1"
+          variants={sectionVariants}
+          layout
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.995 }}
+        >
           <FilterBar
             comparisonLevel={comparisonLevel}
             setComparisonLevel={setComparisonLevel}
@@ -243,23 +279,43 @@ export function Comparison() {
             uniqueCenters={uniqueCenters}
             getLabel={getLabel}
           />
-        </div>
+        </motion.div>
 
         <div className="lg:col-span-3">
-          <Visualization
-            loading={loading}
-            error={error}
-            entity1={entity1}
-            entity2={entity2}
-            data={data}
-            viewType={viewType}
-            selectedMetric={selectedMetric}
-            getLabel={getLabel}
-            metricObj={metricObj}
-          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={JSON.stringify({
+                comparisonLevel,
+                entity1,
+                entity2,
+                selectedMetric,
+                viewType,
+                filters: considerDateRange
+                  ? { startDate: dateRange.startDate, endDate: dateRange.endDate, useStartDate, useEndDate }
+                  : null,
+              })}
+              variants={sectionVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              layout
+            >
+              <Visualization
+                loading={loading}
+                error={error}
+                entity1={entity1}
+                entity2={entity2}
+                data={data}
+                viewType={viewType}
+                selectedMetric={selectedMetric}
+                getLabel={getLabel}
+                metricObj={metricObj}
+              />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

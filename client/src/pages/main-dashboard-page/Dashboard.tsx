@@ -38,9 +38,6 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 const FALLBACK_START_DATE = "2022-09-01";
 const FALLBACK_END_DATE = "2027-09-01";
 
-// FilterState moved to components/FilterPanel
-
-// chart colors moved to ChartSection
 
 export function Dashboard() {
   const isMdUp = useMediaQuery("(min-width: 768px)");
@@ -139,10 +136,6 @@ export function Dashboard() {
     setFilters((prev) => ({ ...prev, isFilterOpen: !prev.isFilterOpen }));
   };
 
-  // Filter UI moved to components/FilterPanel
-
-  // Safeguard for staffData
-  // Charts moved to components/ChartSection
 
   return (
     <div className="min-h-screen p-4 md:p-8 font-sans">
