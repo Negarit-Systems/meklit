@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { FileText, TrendingUp } from "lucide-react";
 import type { ChartData } from "./types";
 
 interface ChartCardProps {
@@ -47,8 +47,8 @@ const ChartCard: React.FC<ChartCardProps> = ({
         <div className="flex items-center gap-2 w-full sm:w-auto">
           {icon}
           {showDetailsButton && onDetailsClick && (
-            <Button variant="ghost" size="sm" onClick={onDetailsClick} className="flex-1 sm:flex-none">
-              <FileText className="h-3 w-3 mr-1" />
+            <Button size="sm" onClick={onDetailsClick} className="flex-1 sm:flex-none">
+              <TrendingUp className="h-3 w-3 mr-1" />
               Details
             </Button>
           )}
