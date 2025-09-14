@@ -34,10 +34,10 @@ Dev tools: TypeScript, ESLint, SWC plugin for Vite.
 ## Setup and Running
 
 1. Navigate to the client folder:
-cd client
+- `cd client`
 
 2. Install dependencies:
-npm install
+- `npm install`
 
 
 3. Create a `.env` file with required variables:
@@ -45,15 +45,9 @@ npm install
 
 
 4. Run in development mode:
-npm run dev
-Access at `http://localhost:5173`.
+- `npm run dev`
+- Access at `http://localhost:5173`.
 
 5. Build for production:
-npm run build
+- `npm run build`
 
-## Folder Structure
-
-- `/src/components`: Reusable UI components.
-- `/src/pages`: Main dashboard pages.
-- `/src/api`: API service layers.
-- `/src/utils`: Helpers for data processing, etc.
