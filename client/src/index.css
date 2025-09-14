@@ -122,3 +122,11 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Make date picker icon visible in dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+}
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}

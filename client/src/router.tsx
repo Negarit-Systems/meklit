@@ -1,8 +1,9 @@
+import ComparisonPage from "./pages/comparision-page/Comparision";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import PublicNotFound from "./components/navigation/PublicNotFound";
 import { PublicLayout } from "./components/public-layout/PublicLayout";
 import { Dashboard } from "./pages/main-dashboard-page/Dashboard";
-import Comparision from "./pages/comparision-page/Comparision";
+
 import ChildDetail from "./pages/child-detail-page/ChildDetail";
 import ReportsDashboard from "./pages/reports-page/ReportsDashboard";
 import { SignIn } from "./pages/auth-pages/Signin";
@@ -33,7 +34,7 @@ export const router = createBrowserRouter([
         element: <RequireAuth />,
         children: [
           { path: "/dashboard", element: <Dashboard /> },
-          { path: "/comparision", element: <Comparision /> },
+          { path: "/comparision", element: <ComparisonPage /> },
           { path: "/reports", element: <ReportsDashboard /> },
           { path: "/child-detail/:id", element: <ChildDetail /> },
         ],
