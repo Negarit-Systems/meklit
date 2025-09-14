@@ -17,5 +17,9 @@ reportRouter.get(
   '/center-comparison',
   reportController.compareCenters,
 );
+reportRouter.get(
+  '/child-comparison',
+  reportController.compareChildren,
+);
 
 export default reportRouter;

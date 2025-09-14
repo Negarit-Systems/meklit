@@ -90,4 +90,32 @@ export const reportController = {
       });
     }
   },
+
+  async compareChildren(req: Request, res: Response) {
+    try {
+      const { startDate, endDate, childId1, childId2 } = req.query;
+      if (
+        typeof childId1 !== 'string' ||
+        typeof childId2 !== 'string'
+      ) {
+        return res.status(400).send({
+          error:
+            'childId1 and childId2 query parameters are required.',
+        });
+      }
+      const data = await reportService.compareChildrenReport(
+        childId1,
+        childId2,
+        typeof startDate === 'string' ? startDate : undefined,
+        typeof endDate === 'string' ? endDate : undefined,
+      );
+      res.status(200).json(data);
+    } catch (error) {
+      console.error('Error in compareChildren:', error);
+      res.status(500).send({
+        error: 'Failed to generate child comparison report.',
+      });
+    }
+  },
 };
+

@@ -84,3 +84,10 @@ export interface StaffAnalysis {
   incidentsReported: number;
   medicationsReported: number;
 }
+
+export interface ChildComparisonData {
+  childId: string;
+  totalIncidents: number;
+  totalNapDuration: number;
+  averageNapDuration: number;
+}
