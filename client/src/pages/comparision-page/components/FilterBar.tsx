@@ -257,34 +257,36 @@ export function FilterBar({
 
         <Separator />
 
-        {/* Metric Selection */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Metric</label>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="w-full justify-between h-10 bg-background/70 dark:bg-background/50 border-border/50 hover:bg-muted/50"
-              >
-                <span className="flex items-center space-x-2">
-                  {metricObj.icon}
-                  <span>{metricObj.label}</span>
-                </span>
-                <Filter className="h-4 w-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-full bg-card border-border/50">
-              {metrics.map((m) => (
-                <DropdownMenuItem key={m.value} onSelect={() => setSelectedMetric(m.value)}>
+        {/* Metric Selection - hidden for children; child comparison shows all 4 metrics */}
+        {comparisonLevel !== "child" && (
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">Metric</label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between h-10 bg-background/70 dark:bg-background/50 border-border/50 hover:bg-muted/50"
+                >
                   <span className="flex items-center space-x-2">
-                    {m.icon}
-                    <span>{m.label}</span>
+                    {metricObj.icon}
+                    <span>{metricObj.label}</span>
                   </span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                  <Filter className="h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-full bg-card border-border/50">
+                {metrics.map((m) => (
+                  <DropdownMenuItem key={m.value} onSelect={() => setSelectedMetric(m.value)}>
+                    <span className="flex items-center space-x-2">
+                      {m.icon}
+                      <span>{m.label}</span>
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
 
         {/* View Type Toggle */}
         <div className="space-y-2">

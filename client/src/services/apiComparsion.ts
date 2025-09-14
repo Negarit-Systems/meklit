@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/axios";
+import type { AxiosResponse } from "axios";
 
 // Interfaces
 export interface Child {
@@ -33,8 +34,12 @@ export interface IncidentFrequency {
 }
 
 // Helper to safely extract data from API responses
-const extractData = <T>(response: any): T => {
-  return response.data?.data ?? response.data;
+const extractData = <T>(response: AxiosResponse<unknown>): T => {
+  const payload = response.data;
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return (payload as { data: T }).data;
+  }
+  return payload as T;
 };
 
 // ---------------- Children ----------------
@@ -143,6 +148,9 @@ export interface ReportSummaryItem {
   id: string;
   averageNapDuration: number;
   totalIncidents: number;
+  // Optional fields used for child comparison visualizations
+  totalMedications?: number;
+  totalNapDuration?: number;
 }
 
 export const fetchReportSummary = async (filters: {
@@ -204,4 +212,61 @@ export const fetchCenterComparison = async (filters: {
     params,
   });
   return extractData<ReportSummaryItem[]>(response);
+};
+
+// ---------------- Child Comparison ----------------
+
+export interface HealthEvent {
+  timestamp: string; // Transformed from { _seconds: number; _nanoseconds: number }
+  type: string;
+  detail: string;
+}
+
+export interface ChildComparisonData {
+  childId: string;
+  totalIncidents: number;
+  totalMedications: number;
+  totalNapDuration: number;
+  averageNapDuration: number;
+  healthEvents: HealthEvent[];
+}
+
+export const fetchChildComparison = async (filters: {
+  startDate?: string;
+  endDate?: string;
+  childId1: string;
+  childId2: string;
+}): Promise<ChildComparisonData[]> => {
+  const params: Record<string, string> = {
+    childId1: filters.childId1,
+    childId2: filters.childId2,
+  };
+  if (filters.startDate) params.startDate = filters.startDate;
+  if (filters.endDate) params.endDate = filters.endDate;
+
+  const response = await apiClient.get("/reports/child-comparison", {
+    params,
+  });
+
+  // Raw data type from the API
+  type RawHealthEvent = {
+    timestamp: { _seconds: number; _nanoseconds: number };
+    type: string;
+    detail: string;
+  };
+
+  type RawChildComparisonData = Omit<ChildComparisonData, "healthEvents"> & {
+    healthEvents: RawHealthEvent[];
+  };
+
+  // Extract and transform the data
+  const rawData = extractData<RawChildComparisonData[]>(response);
+
+  return rawData.map((childData) => ({
+    ...childData,
+    healthEvents: childData.healthEvents.map((event) => ({
+      ...event,
+      timestamp: new Date(event.timestamp._seconds * 1000).toISOString(),
+    })),
+  }));
 };

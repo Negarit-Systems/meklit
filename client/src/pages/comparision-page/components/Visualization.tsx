@@ -21,26 +21,28 @@ interface VisualizationProps {
     aggType: "average" | "total"
     icon: React.ReactNode
   }
+  comparisonLevel: "child" | "class" | "center"
 }
 
 const getColor = (index: number) => {
+  // Distinct, more vibrant palette for up to 4 metrics/entities
   const colors = [
-    "rgba(234, 88, 12, 0.8)",
-    "rgba(249, 115, 22, 0.8)",
-    "rgba(75, 85, 99, 0.8)",
-    "rgba(190, 18, 60, 0.8)",
-    "rgba(254, 252, 232, 0.8)",
+    "rgba(16, 185, 129, 0.8)", // emerald
+    "rgba(59, 130, 246, 0.8)", // blue
+    "rgba(234, 88, 12, 0.8)",  // orange
+    "rgba(217, 70, 239, 0.8)", // fuchsia
+    "rgba(75, 85, 99, 0.8)",   // gray fallback
   ]
   return colors[index % colors.length]
 }
 
 const getBorderColor = (index: number) => {
   const colors = [
-    "rgba(234, 88, 12, 1)",
-    "rgba(249, 115, 22, 1)",
-    "rgba(75, 85, 99, 1)",
-    "rgba(190, 18, 60, 1)",
-    "rgba(254, 252, 232, 1)",
+    "rgba(16, 185, 129, 1)", // emerald
+    "rgba(59, 130, 246, 1)", // blue
+    "rgba(234, 88, 12, 1)",  // orange
+    "rgba(217, 70, 239, 1)", // fuchsia
+    "rgba(75, 85, 99, 1)",   // gray fallback
   ]
   return colors[index % colors.length]
 }
@@ -55,6 +57,7 @@ export function Visualization({
   selectedMetric,
   getLabel,
   metricObj,
+  comparisonLevel,
 }: VisualizationProps) {
   const renderVisualizationContent = () => {
     if (loading) {
@@ -88,6 +91,7 @@ export function Visualization({
       )
     }
 
+    // For child comparison, show a richer table with all four metrics side-by-side
     if (viewType === "table") {
       return (
         <div className="overflow-hidden rounded-lg border border-border">
@@ -96,7 +100,14 @@ export function Visualization({
               <thead className="bg-muted/50">
                 <tr>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Entity</th>
-                  {selectedMetric === "both" ? (
+                  {comparisonLevel === "child" ? (
+                    <>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Avg Nap Duration</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Total Incidents</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Total Medications</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Total Nap Duration</th>
+                    </>
+                  ) : selectedMetric === "both" ? (
                     <>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Avg Nap Duration</th>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Total Incidents</th>
@@ -115,23 +126,49 @@ export function Visualization({
                         {getLabel(item.id)}
                       </div>
                     </td>
-                    {selectedMetric === "averageNapDuration" && (
+                    {comparisonLevel !== "child" && selectedMetric === "averageNapDuration" && (
                       <td className="px-6 py-4 text-card-foreground">
                         <Badge variant="secondary">{item.averageNapDuration.toFixed(2)} min</Badge>
                       </td>
                     )}
-                    {selectedMetric === "totalIncidents" && (
+                    {comparisonLevel !== "child" && selectedMetric === "totalIncidents" && (
                       <td className="px-6 py-4 text-card-foreground">
                         <Badge variant="outline">{item.totalIncidents}</Badge>
                       </td>
                     )}
-                    {selectedMetric === "both" && (
+                    {comparisonLevel !== "child" && selectedMetric === "totalMedications" && (
+                      <td className="px-6 py-4 text-card-foreground">
+                        <Badge variant="outline">{item.totalMedications ?? 0}</Badge>
+                      </td>
+                    )}
+                    {comparisonLevel !== "child" && selectedMetric === "totalNapDuration" && (
+                      <td className="px-6 py-4 text-card-foreground">
+                        <Badge variant="secondary">{item.totalNapDuration ?? 0} min</Badge>
+                      </td>
+                    )}
+                    {comparisonLevel !== "child" && selectedMetric === "both" && (
                       <>
                         <td className="px-6 py-4 text-card-foreground">
                           <Badge variant="secondary">{item.averageNapDuration.toFixed(2)} min</Badge>
                         </td>
                         <td className="px-6 py-4 text-card-foreground">
                           <Badge variant="outline">{item.totalIncidents}</Badge>
+                        </td>
+                      </>
+                    )}
+                    {comparisonLevel === "child" && (
+                      <>
+                        <td className="px-6 py-4 text-card-foreground">
+                          <Badge variant="secondary">{item.averageNapDuration.toFixed(2)} min</Badge>
+                        </td>
+                        <td className="px-6 py-4 text-card-foreground">
+                          <Badge variant="outline">{item.totalIncidents}</Badge>
+                        </td>
+                        <td className="px-6 py-4 text-card-foreground">
+                          <Badge variant="outline">{item.totalMedications ?? 0}</Badge>
+                        </td>
+                        <td className="px-6 py-4 text-card-foreground">
+                          <Badge variant="secondary">{item.totalNapDuration ?? 0} min</Badge>
                         </td>
                       </>
                     )}
@@ -144,7 +181,7 @@ export function Visualization({
       )
     }
 
-    const labels = data.map((item) => getLabel(item.id))
+  const labels = data.map((item) => getLabel(item.id))
 
     const datasets = () => {
       if (selectedMetric === "both") {
@@ -165,10 +202,12 @@ export function Visualization({
           },
         ]
       }
+      // Single metric mode; ensure numbers (fallback to 0 for optional child-only metrics)
+      const values = data.map((item) => Number(item[selectedMetric as keyof ReportSummaryItem] ?? 0))
       return [
         {
           label: metricObj.label,
-          data: data.map((item) => item[selectedMetric as keyof ReportSummaryItem]),
+          data: values,
           backgroundColor: data.map((_, idx) => getColor(idx)),
           borderColor: data.map((_, idx) => getBorderColor(idx)),
           borderWidth: 2,
@@ -178,7 +217,38 @@ export function Visualization({
 
     const chartData = {
       labels,
-      datasets: datasets(),
+      datasets: comparisonLevel === "child"
+        ? [
+            {
+              label: "Average Nap Duration",
+              data: data.map((item) => item.averageNapDuration),
+              backgroundColor: data.map(() => getColor(0)),
+              borderColor: data.map(() => getBorderColor(0)),
+              borderWidth: 2,
+            },
+            {
+              label: "Total Incidents",
+              data: data.map((item) => item.totalIncidents),
+              backgroundColor: data.map(() => getColor(1)),
+              borderColor: data.map(() => getBorderColor(1)),
+              borderWidth: 2,
+            },
+            {
+              label: "Total Medications",
+              data: data.map((item) => item.totalMedications ?? 0),
+              backgroundColor: data.map(() => getColor(2)),
+              borderColor: data.map(() => getBorderColor(2)),
+              borderWidth: 2,
+            },
+            {
+              label: "Total Nap Duration",
+              data: data.map((item) => item.totalNapDuration ?? 0),
+              backgroundColor: data.map(() => getColor(3)),
+              borderColor: data.map(() => getBorderColor(3)),
+              borderWidth: 2,
+            },
+          ]
+        : datasets(),
     }
 
     const ChartComponent = viewType === "aggregate" ? BarChart : LineChart
@@ -211,9 +281,9 @@ export function Visualization({
                       },
                     },
                   },
-                  title: {
+                    title: {
                     display: true,
-                    text: `${metricObj.label} Comparison`,
+                    text: comparisonLevel === "child" ? "Child Metrics Comparison" : `${metricObj.label} Comparison`,
                     font: {
                       size: 16,
                       weight: "bold",

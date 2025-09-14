@@ -230,15 +230,16 @@ export function ReportSummary() {
               <Button
                 onClick={() => handleFetchSummary()}
                 disabled={loading}
-                className="w-full h-11 bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+                aria-busy={loading}
+                className="w-full h-11 bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold shadow-md hover:shadow-lg transition-colors duration-200"
               >
                 {loading ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center w-[140px]">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Loading...
+                    <span>Loading...</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 justify-center w-[140px]">
                     <TrendingUp className="h-4 w-4" />
                     Get Summary
                   </div>
@@ -254,9 +255,10 @@ export function ReportSummary() {
             </div>
           )}
 
-          <div className="border rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border">
+          <div className="relative min-h-[256px]">
+            <div className="border rounded-xl overflow-hidden h-full">
+              <div className="overflow-x-auto h-full">
+                <table className="min-w-full divide-y divide-border">
                 <thead className="bg-muted/50">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-foreground uppercase tracking-wider">
@@ -336,7 +338,16 @@ export function ReportSummary() {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
+                <div className="flex items-center gap-3 text-muted-foreground">
+                  <div className="w-5 h-5 border-2 border-foreground/60 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm">Fetching summary…</span>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

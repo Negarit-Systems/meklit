@@ -13,16 +13,17 @@ import {
 } from "chart.js"
 import {
   fetchChildren,
-  fetchTrendOverTime,
   fetchClassComparison,
   fetchCenterComparison,
+  fetchChildComparison,
   type ReportSummaryItem,
 } from "@/services/apiComparsion"
 import { ReportSummary } from "./ReportSummary"
 import { Header } from "./components/Header"
 import { FilterBar } from "./components/FilterBar"
 import { Visualization } from "./components/Visualization"
-import { BarChart3, Table2, TrendingUp } from "lucide-react"
+import ChildEventsChart from "./components/ChildEventsChart"
+import { BarChart3, Table2, TrendingUp, Pill, Moon } from "lucide-react"
 import { AnimatePresence, motion } from "framer-motion"
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend)
@@ -34,12 +35,7 @@ interface Child {
   classId: string
 }
 
-interface TrendData {
-  date: string
-  averageNapDuration?: number
-  totalMeals?: number
-  totalIncidents?: number
-}
+// Removed unused TrendData interface since child comparison uses dedicated API
 
 interface MetricOption {
   value: string
@@ -65,6 +61,20 @@ const metrics: MetricOption[] = [
     icon: <BarChart3 className="h-4 w-4" />,
   },
   {
+    value: "totalMedications",
+    label: "Total Medications",
+    source: "health",
+    aggType: "total",
+    icon: <Pill className="h-4 w-4" />,
+  },
+  {
+    value: "totalNapDuration",
+    label: "Total Nap Duration",
+    source: "daily",
+    aggType: "total",
+    icon: <Moon className="h-4 w-4" />,
+  },
+  {
     value: "both",
     label: "Both Metrics",
     source: "daily",
@@ -77,7 +87,7 @@ export function Comparison() {
   const [children, setChildren] = useState<Child[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [comparisonLevel, setComparisonLevel] = useState<"child" | "class" | "center">("class")
+  const [comparisonLevel, setComparisonLevel] = useState<"child" | "class" | "center">("child")
   const [entity1, setEntity1] = useState<string | null>(null)
   const [entity2, setEntity2] = useState<string | null>(null)
   const [selectedMetric, setSelectedMetric] = useState<string>("both")
@@ -91,6 +101,9 @@ export function Comparison() {
   const [useEndDate, setUseEndDate] = useState(true);
   const [selectedCenter, setSelectedCenter] = useState<string>("");
   const [data, setData] = useState<ReportSummaryItem[] | null>(null);
+  const [childEventsData, setChildEventsData] = useState<
+    { childId: string; healthEvents: { type: string }[] }[] | null
+  >(null)
 
   // Animation variants
   const pageVariants = {
@@ -141,11 +154,25 @@ export function Comparison() {
 
   // Set default entities for class comparison
   useEffect(() => {
-    if (comparisonLevel === "class" && children.length > 0) {
-      const classes = [...new Set(children.map((c) => c.classId))].sort()
-      if (classes.length >= 2) {
-        setEntity1(classes[0])
-        setEntity2(classes[1])
+    if (children.length > 0) {
+      if (comparisonLevel === "class") {
+        const classes = [...new Set(children.map((c) => c.classId))].sort()
+        if (classes.length >= 2) {
+          setEntity1(classes[0])
+          setEntity2(classes[1])
+        }
+      } else if (comparisonLevel === "child") {
+        const uniqueChildren = [...new Set(children.map((c) => c.id))]
+        if (uniqueChildren.length >= 2) {
+          setEntity1(uniqueChildren[0])
+          setEntity2(uniqueChildren[1])
+        }
+      } else if (comparisonLevel === "center") {
+        const centers = [...new Set(children.map((c) => c.centerId))].sort()
+        if (centers.length >= 2) {
+          setEntity1(centers[0])
+          setEntity2(centers[1])
+        }
       }
     }
   }, [children, comparisonLevel])
@@ -195,31 +222,36 @@ export function Comparison() {
             classId1: entity1,
             classId2: entity2,
           })
+          setChildEventsData(null)
         } else if (comparisonLevel === "center") {
           comparisonData = await fetchCenterComparison({
             ...filters,
             centerId1: entity1,
             centerId2: entity2,
           })
+          setChildEventsData(null)
         } else {
-          // For child comparison, fetch data for each and format it like ReportSummaryItem
-          const [data1, data2] = await Promise.all([
-            fetchTrendOverTime({ ...filters, childId: entity1 }),
-            fetchTrendOverTime({ ...filters, childId: entity2 }),
-          ])
-
-          const aggregate = (d: TrendData[]) => ({
-            averageNapDuration: d.reduce((sum, i) => sum + (i.averageNapDuration || 0), 0) / d.length || 0,
-            totalIncidents: d.reduce((sum, i) => sum + (i.totalIncidents || 0), 0),
+          // Child comparison: use the dedicated endpoint and map to ReportSummaryItem[]
+          const childComparison = await fetchChildComparison({
+            ...filters,
+            childId1: entity1,
+            childId2: entity2,
           })
 
-          const agg1 = aggregate(data1)
-          const agg2 = aggregate(data2)
+          comparisonData = childComparison.map((c) => ({
+            id: c.childId,
+            averageNapDuration: c.averageNapDuration,
+            totalIncidents: c.totalIncidents,
+            totalMedications: c.totalMedications,
+            totalNapDuration: c.totalNapDuration,
+          }))
 
-          comparisonData = [
-            { id: entity1, ...agg1 },
-            { id: entity2, ...agg2 },
-          ]
+          setChildEventsData(
+            childComparison.map((c) => ({
+              childId: c.childId,
+              healthEvents: c.healthEvents.map((e) => ({ type: e.type })),
+            }))
+          )
         }
 
         setData(comparisonData)
@@ -310,9 +342,25 @@ export function Comparison() {
                 selectedMetric={selectedMetric}
                 getLabel={getLabel}
                 metricObj={metricObj}
+                comparisonLevel={comparisonLevel}
               />
             </motion.div>
           </AnimatePresence>
+
+          {comparisonLevel === "child" && entity1 && entity2 && childEventsData && (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`child-events-${entity1}-${entity2}-${considerDateRange ? `${dateRange.startDate}-${dateRange.endDate}` : "all"}`}
+                variants={sectionVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                layout
+              >
+                <ChildEventsChart childrenData={childEventsData} getLabel={getLabel} />
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </motion.div>
