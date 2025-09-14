@@ -13,7 +13,7 @@ Key highlights:
 - **Deployment**: The app is deployed on a VPS for production-like testing.
 - **Innovation**: Includes features like data comparison across children/classes, staff activity analysis, and mobile responsiveness.
 
-This project reflects our proficiency in UI/UX design, dynamic data handling, and full-stack development, aligning with the challenge's evaluation criteria (UI/UX 40%, Technical Proficiency 30%, Functionality 20%, Code Quality 10%).
+This project reflects our proficiency in UI/UX design, dynamic data handling, and full-stack development, aligning with the challenge's evaluation criteria.
 
 ## Project Structure
 
