@@ -131,12 +131,9 @@ export function SideBar({ className }: SidebarProps) {
         className="p-4 border-t border-sidebar-border"
       >
         <div className="flex items-center gap-3 group/profile cursor-pointer hover:scale-[1.02] transition-all duration-200">
-          <div className="h-9 w-9 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center shadow-lg">
-            <span className="text-xs font-semibold text-white">AD</span>
-          </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-sidebar-foreground truncate">user admin</p>
-            <p className="text-xs text-sidebar-foreground/70 truncate">admin@negarit.com</p>
+            <p className="text-sm font-semibold text-sidebar-foreground truncate">Mekit Dash</p>
+            <p className="text-[10px] text-sidebar-foreground/70 truncate">by negarit systems</p>
           </div>
         </div>
       </motion.div>

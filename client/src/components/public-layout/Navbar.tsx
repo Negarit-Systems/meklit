@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext, useMemo } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { User, Moon, Sun, Menu, X, LayoutDashboard, BarChart3, LogOut, FileText } from "lucide-react"
@@ -24,6 +24,8 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { ThemeContext } from "@/context/ThemeContext"
 import { useLogout } from "@/services/auth"
+import { tokenStore } from "@/lib/axios"
+import { parseJwt } from "@/lib/utils"
 
 interface NavbarProps {
   className?: string
@@ -64,6 +66,29 @@ export function Navbar({ className }: NavbarProps) {
   const handleLogout = async () => {
     logout()
   }
+
+  // Track token locally to compute email
+  const [token, setToken] = useState<string | null>(() => tokenStore.get())
+  useEffect(() => {
+    // Listen to storage changes in case other tabs modify the token
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === "accessToken") setToken(tokenStore.get())
+    }
+    window.addEventListener("storage", onStorage)
+    // Poll once after mount to capture any late token set by axios interceptors on initial render
+    const id = window.setTimeout(() => setToken(tokenStore.get()), 0)
+    return () => {
+      window.removeEventListener("storage", onStorage)
+      window.clearTimeout(id)
+    }
+  }, [])
+
+  // Derive email from access token
+  const email = useMemo(() => {
+    if (!token) return null
+    const payload = parseJwt<{ email?: string }>(token)
+    return payload?.email ?? null
+  }, [token])
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
@@ -110,19 +135,23 @@ export function Navbar({ className }: NavbarProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
-                  <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center">
-                    <span className="text-xs font-medium text-primary-foreground">AD</span>
-                  </div>
-                </Button>
+                {email ? (
+                  <Button variant="ghost" size="sm" className="h-9 px-3 max-w-[200px]"><span className="truncate text-sm font-medium" title={email}>{email}</span></Button>
+                ) : (
+                  <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+                    <div className="h-7 w-7 rounded-full bg-primary flex items-center justify-center">
+                      <span className="text-xs font-medium text-primary-foreground">AD</span>
+                    </div>
+                  </Button>
+                )}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span>My Account</span>
+                    {email && <span className="text-xs text-muted-foreground mt-1 truncate max-w-[240px]" title={email}>{email}</span>}
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
                   <DropdownMenuItem
