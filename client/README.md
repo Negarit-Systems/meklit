@@ -19,7 +19,6 @@ Key features:
 - Tanstack React Query for data fetching and caching.
 - Tanstack React Table for tabular data display.
 - Chart.js and React Chartjs-2 for visualizations.
-- Firebase for direct database interactions (if needed).
 - Axios for API requests.
 - Date-fns and React Day Picker for date handling.
 - Framer Motion for animations.
