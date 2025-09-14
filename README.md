@@ -43,7 +43,7 @@ This project reflects our proficiency in design, dynamic data handling, and full
 
 1. Clone the repository:
 ```bash
-git clone <https://github.com/Negarit-Systems/meklit.git>
+git clone https://github.com/Negarit-Systems/meklit.git
 cd meklit
 ```
 
@@ -62,7 +62,7 @@ cd server && npm run seed
 ```
 
 5. Run the backend:
-```
+```bash
 cd server && npm run start:dev
 ```
 
