@@ -1,10 +1,16 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Filter } from "lucide-react";
-import { ChartSection } from "./components/ChartSection";
-import { FilterPanel, type FilterState } from "./components/FilterPanel";
+import { Filter, Calendar, X, BarChart, PieChart } from "lucide-react";
+import { Doughnut, Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -19,8 +25,10 @@ import {
 } from "chart.js";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
+import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 import {
   fetchChildren,
@@ -38,15 +46,38 @@ ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title, Tool
 const FALLBACK_START_DATE = "2022-09-01";
 const FALLBACK_END_DATE = "2027-09-01";
 
+// Define interfaces
+interface FilterState {
+  centerId: string;
+  classId: string;
+  childId: string;
+  dateRange: [Date | undefined, Date | undefined];
+  dataTypes: string[];
+  isFilterOpen: boolean;
+}
+
+// Chart color palette
+const chartColors = {
+  blue: "rgb(75, 192, 192)",
+  red: "rgb(255, 99, 132)",
+  yellow: "rgb(255, 205, 86)",
+  green: "rgb(54, 162, 235)",
+  purple: "rgb(153, 102, 255)",
+  orange: "rgb(255, 159, 64)",
+};
 
 export function Dashboard() {
   const isMdUp = useMediaQuery("(min-width: 768px)");
+
+  const today = new Date();
+  const sevenDaysAgo = new Date(today);
+  sevenDaysAgo.setDate(today.getDate() - 7);
 
   const [filters, setFilters] = useState<FilterState>({
     centerId: "",
     classId: "",
     childId: "",
-    dateRange: [undefined, undefined],
+    dateRange: [sevenDaysAgo, today],
     dataTypes: ["Daily Logs", "Health Records", "Staff Performance"],
     isFilterOpen: isMdUp,
   });
@@ -132,6 +163,350 @@ export function Dashboard() {
     setFilters((prev) => ({ ...prev, isFilterOpen: !prev.isFilterOpen }));
   };
 
+  const FilterPanel = () => (
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        // Use themed tokens with a touch of transparency for smooth dark mode
+        "bg-card/70 dark:bg-card/60 border border-border rounded-xl p-6 shadow-lg transition-all duration-300 backdrop-blur-sm",
+        isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
+      )}
+    >
+      <div className="flex items-center justify-between mb-6 pb-4 border-b">
+        <h2 className="text-xl font-bold text-green-500 flex items-center">
+          <Filter className="h-6 w-6 mr-2" /> Filters
+        </h2>
+        <Button variant="ghost" size="sm" onClick={toggleFilterPanel} className="ml-2 p-1">
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Center</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between bg-background/70 dark:bg-background/50">
+                {filters.centerId || "All Centers"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-popover text-foreground border border-border">
+              <DropdownMenuItem onSelect={() => handleFilterChange({ centerId: "" })}>
+                All Centers
+              </DropdownMenuItem>
+              {centers.map((center) => (
+                <DropdownMenuItem key={center} onSelect={() => handleFilterChange({ centerId: center })}>
+                  {center}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Class</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-full justify-between bg-background/70 dark:bg-background/50" disabled={classes.length === 0}>
+                {filters.classId || "All Classes"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-popover text-foreground border border-border">
+              <DropdownMenuItem onSelect={() => handleFilterChange({ classId: "" })}>
+                All Classes
+              </DropdownMenuItem>
+              {classes.map((classId) => (
+                <DropdownMenuItem key={classId} onSelect={() => handleFilterChange({ classId })}>
+                  {classId}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Child</label>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between bg-background/70 dark:bg-background/50"
+                disabled={loadingChildren || filteredChildren.length === 0}
+              >
+                {loadingChildren
+                  ? "Loading..."
+                  : filters.childId
+                  ? filteredChildren.find((child) => child.id === filters.childId)?.firstName +
+                    " " +
+                    filteredChildren.find((child) => child.id === filters.childId)?.lastName
+                  : "All Children"}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-popover text-foreground border border-border">
+              <DropdownMenuItem onSelect={() => handleFilterChange({ childId: "" })}>
+                All Children
+              </DropdownMenuItem>
+              {filteredChildren.map((child: Child) => (
+                <DropdownMenuItem key={child.id} onSelect={() => handleFilterChange({ childId: child.id })}>
+                  {child.firstName} {child.lastName}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">Start Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between bg-background/70 dark:bg-background/50">
+                  <span className="flex items-center justify-between w-full">
+                    <span>
+                      {filters.dateRange[0] ? format(filters.dateRange[0], "PPP") : "Select Start Date"}
+                    </span>
+                    <Calendar className="h-4 w-4 opacity-50" />
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-popover text-foreground border border-border">
+                <DayPicker
+                  mode="single"
+                  selected={filters.dateRange[0]}
+                  onSelect={(date) => handleFilterChange({ dateRange: [date, filters.dateRange[1]] })}
+                  classNames={{
+                    caption: "text-foreground",
+                    caption_label: "text-foreground",
+                    head_cell: "text-muted-foreground",
+                    day: "text-foreground",
+                    day_selected: "bg-primary text-primary-foreground",
+                    nav_button: "text-foreground",
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">End Date</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between bg-background/70 dark:bg-background/50">
+                  <span className="flex items-center justify-between w-full">
+                    <span>
+                      {filters.dateRange[1] ? format(filters.dateRange[1], "PPP") : "Select End Date"}
+                    </span>
+                    <Calendar className="h-4 w-4 opacity-50" />
+                  </span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-popover text-foreground border border-border">
+                <DayPicker
+                  mode="single"
+                  selected={filters.dateRange[1]}
+                  onSelect={(date) => handleFilterChange({ dateRange: [filters.dateRange[0], date] })}
+                  classNames={{
+                    caption: "text-foreground",
+                    caption_label: "text-foreground",
+                    head_cell: "text-muted-foreground",
+                    day: "text-foreground",
+                    day_selected: "bg-primary text-primary-foreground",
+                    nav_button: "text-foreground",
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Data Types</label>
+          <div className="space-y-2">
+            {["Daily Logs", "Health Records", "Staff Performance"].map((type) => (
+              <div key={type} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={type}
+                  checked={filters.dataTypes.includes(type)}
+                  onChange={(e) => {
+                    const newTypes = e.target.checked
+                      ? [...filters.dataTypes, type]
+                      : filters.dataTypes.filter((dt) => dt !== type);
+                    handleFilterChange({ dataTypes: newTypes });
+                  }}
+                  className="h-4 w-4 text-primary border-input rounded focus:ring-primary"
+                />
+                <label htmlFor={type} className="text-sm font-medium text-foreground">
+                  {type}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="flex justify-end pt-2">
+          <Button variant="ghost" onClick={clearFilters} className="text-sm text-muted-foreground">
+            Reset Filters
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  // Safeguard for staffData
+  const safeStaffData = Array.isArray(staffData) ? staffData : [];
+  const staffChartData = {
+    labels: safeStaffData.map((item) => item.staffId),
+    datasets: [
+      {
+        label: "Total Logs",
+        data: safeStaffData.map((item) => item.totalLogs),
+        backgroundColor: safeStaffData.map(() => chartColors.green),
+        borderColor: safeStaffData.map(() => "rgb(54, 162, 235, 1)"),
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const incidentDoughnutData = {
+    labels: incidentData.map((item) => item.type),
+    datasets: [
+      {
+        data: incidentData.map((item) => item.count),
+        backgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
+        hoverBackgroundColor: [chartColors.blue, chartColors.red, chartColors.yellow, chartColors.purple],
+        borderWidth: 2,
+      },
+    ],
+  };
+  
+  const ChartSection = () => {
+    const showDailyLogs = filters.dataTypes.includes("Daily Logs");
+    const showHealthRecords = filters.dataTypes.includes("Health Records");
+    const showStaffPerformance = filters.dataTypes.includes("Staff Performance");
+    const hasData =
+      (showDailyLogs && trendData.length > 0) ||
+      (showStaffPerformance && staffData.length > 0) ||
+      (showHealthRecords && incidentData.length > 0);
+
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center h-96">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-400"
+          />
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <div className="flex flex-col items-center justify-center h-96 text-red-600 bg-card rounded-lg p-4 shadow-md">
+          <X className="h-12 w-12 mb-4" />
+          <p>Error fetching data: {error.message}. Please try again.</p>
+        </div>
+      );
+    }
+    if (!hasData) {
+      return (
+        <div className="flex items-center justify-center h-96 text-muted-foreground bg-card rounded-lg p-4 shadow-md">
+          No data available for the selected filters.
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-8">
+        {showDailyLogs && trendData.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-500">
+                  <Calendar className="h-6 w-6 mr-2" />
+                  Daily Logs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-96 overflow-y-auto pr-2">
+                  {trendData.map((log, index) => {
+                  const rawDate = (log as TrendData).date as unknown;
+                  let date: Date | null = null;
+                  if (
+                    rawDate &&
+                    typeof rawDate === "object" &&
+                    "_seconds" in (rawDate as Record<string, unknown>) &&
+                    typeof (rawDate as Record<string, unknown>)._seconds === "number"
+                  ) {
+                    date = new Date((rawDate as { _seconds: number })._seconds * 1000);
+                  } else if (typeof rawDate === "string") {
+                    const parsed = new Date(rawDate);
+                    date = isValid(parsed) ? parsed : null;
+                  }
+
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                    >
+                      <Card className="transition-transform hover:scale-105 bg-background/50">
+                        <CardHeader>
+                          <p className="font-semibold text-blue-500">
+                            {date && isValid(date) ? format(date, "MMM dd, yyyy") : "Invalid Date"}
+                          </p>
+                        </CardHeader>
+                        <CardContent className="text-sm text-muted-foreground space-y-1">
+                          <p>
+                            <strong>Avg Nap:</strong> {log.averageNapDuration?.toFixed(0) ?? "N/A"} min
+                          </p>
+                          <p>
+                            <strong>Meals:</strong> {log.totalMeals ?? "N/A"}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {showStaffPerformance && staffData.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-green-500">
+                  <BarChart className="h-6 w-6 mr-2" />
+                  Staff Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96">
+                  <Bar data={staffChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+        {showHealthRecords && incidentData.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-blue-500">
+                  <PieChart className="h-6 w-6 mr-2" />
+                  Incident Frequency
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-96 flex items-center justify-center">
+                  <Doughnut data={incidentDoughnutData} options={{ responsive: true, maintainAspectRatio: false, cutout: "70%" }} />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-8 font-sans">
@@ -159,17 +534,7 @@ export function Dashboard() {
 
         {isMdUp && filters.isFilterOpen && (
           <div className="col-span-1">
-            <FilterPanel
-              isMdUp={isMdUp}
-              filters={filters}
-              centers={centers}
-              classes={classes}
-              filteredChildren={filteredChildren}
-              loadingChildren={loadingChildren}
-              onToggle={toggleFilterPanel}
-              onChange={handleFilterChange}
-              onReset={clearFilters}
-            />
+            <FilterPanel />
           </div>
         )}
 
@@ -182,30 +547,13 @@ export function Dashboard() {
           >
             Analytics Dashboard
           </motion.h1>
-          <ChartSection
-            loading={loading}
-            error={error as Error | undefined}
-            filters={filters}
-            trendData={trendData}
-            staffData={staffData}
-            incidentData={incidentData}
-          />
+          <ChartSection />
         </div>
       </div>
 
       {!isMdUp && filters.isFilterOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 dark:bg-background/80 backdrop-blur-sm flex items-start justify-center p-4">
-          <FilterPanel
-            isMdUp={isMdUp}
-            filters={filters}
-            centers={centers}
-            classes={classes}
-            filteredChildren={filteredChildren}
-            loadingChildren={loadingChildren}
-            onToggle={toggleFilterPanel}
-            onChange={handleFilterChange}
-            onReset={clearFilters}
-          />
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 bg-background/80 backdrop-blur-sm">
+          <FilterPanel />
         </div>
       )}
     </div>
