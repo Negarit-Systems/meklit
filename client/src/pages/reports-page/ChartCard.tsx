@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +8,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
+import { Doughnut } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
 import type { ChartData } from "./types";
+
+// Register Chart.js components
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 interface ChartCardProps {
   data: ChartData[];
@@ -32,6 +42,30 @@ const ChartCard: React.FC<ChartCardProps> = ({
   chartType = 'bar',
 }) => {
   const maxValue = Math.max(...data.map((d) => d.value));
+  const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  
+  // Chart.js data for pie chart
+  const pieChartData = {
+    labels: data.map((item) => item.name),
+    datasets: [
+      {
+        data: data.map((item) => item.value),
+        backgroundColor: [
+          'hsl(210, 100%, 50%)', // Sky Blue
+          'hsl(120, 60%, 50%)',  // Forest Green
+          'hsl(30, 80%, 60%)',   // Warm Orange
+          'hsl(280, 60%, 60%)',  // Soft Purple
+          'hsl(0, 70%, 60%)',    // Rose Red
+          'hsl(60, 70%, 60%)',   // Soft Yellow
+          'hsl(180, 60%, 50%)',  // Ocean Teal
+          'hsl(320, 60%, 60%)',  // Pink
+        ],
+        borderWidth: 2,
+        borderColor: '#fff',
+      },
+    ],
+  };
 
   return (
     <Card className="h-full">
@@ -62,86 +96,10 @@ const ChartCard: React.FC<ChartCardProps> = ({
             </div>
           </div>
         ) : chartType === 'pie' ? (
-          <div className="h-full flex flex-col">
-            {/* Full-size Pie Chart */}
-            <div className="flex-1 flex items-center justify-center p-4">
-              <div className="relative w-full h-full max-w-sm max-h-sm">
-                <svg className="w-full h-full" viewBox="0 0 100 100">
-                  {/* Background circle */}
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    fill="hsl(var(--muted))"
-                    opacity="0.1"
-                  />
-                  {/* Pie slices */}
-                  {data.map((item, index) => {
-                    const total = data.reduce((sum, d) => sum + d.value, 0);
-                    const percentage = (item.value / total) * 100;
-                    const angle = (percentage / 100) * 360;
-                    const prevAngle = data.slice(0, index).reduce((sum, d) => sum + (d.value / total) * 360, 0);
-
-                    const colors = [
-                      'hsl(210, 100%, 50%)', // Sky Blue
-                      'hsl(120, 60%, 50%)',  // Forest Green
-                      'hsl(30, 80%, 60%)',   // Warm Orange
-                      'hsl(280, 60%, 60%)',  // Soft Purple
-                      'hsl(0, 70%, 60%)',    // Rose Red
-                      'hsl(60, 70%, 60%)',   // Soft Yellow
-                      'hsl(180, 60%, 50%)',  // Ocean Teal
-                      'hsl(320, 60%, 60%)',  // Pink
-                    ];
-
-                    // Calculate path for pie slice
-                    const startAngle = prevAngle - 90; // Start from top
-                    const endAngle = startAngle + angle;
-
-                    const startAngleRad = (startAngle * Math.PI) / 180;
-                    const endAngleRad = (endAngle * Math.PI) / 180;
-
-                    const x1 = 50 + 40 * Math.cos(startAngleRad);
-                    const y1 = 50 + 40 * Math.sin(startAngleRad);
-                    const x2 = 50 + 40 * Math.cos(endAngleRad);
-                    const y2 = 50 + 40 * Math.sin(endAngleRad);
-
-                    const largeArcFlag = angle > 180 ? 1 : 0;
-
-                    const pathData = [
-                      `M 50 50`,
-                      `L ${x1} ${y1}`,
-                      `A 40 40 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                      `Z`
-                    ].join(' ');
-
-                    return (
-                      <path
-                        key={index}
-                        d={pathData}
-                        fill={colors[index % colors.length]}
-                        className="transition-all duration-1500 ease-out drop-shadow-sm"
-                        style={{
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                        }}
-                      />
-                    );
-                  })}
-                </svg>
-                {/* Center content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="text-4xl font-bold text-foreground">
-                    {data.reduce((sum, d) => sum + d.value, 0)}
-                  </div>
-                  <div className="text-sm text-foreground/70 font-medium">Actions</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Compact Legend */}
-            <div className="grid grid-cols-2 gap-2 p-4 pt-0">
+          <div className="space-y-4 relative">
+            {/* Custom Legend - Two Columns Above Chart */}
+            <div className="grid grid-cols-2 gap-2">
               {data.map((item, index) => {
-                const total = data.reduce((sum, d) => sum + d.value, 0);
-                const percentage = ((item.value / total) * 100).toFixed(1);
                 const colors = [
                   'hsl(210, 100%, 50%)', // Sky Blue
                   'hsl(120, 60%, 50%)',  // Forest Green
@@ -152,21 +110,79 @@ const ChartCard: React.FC<ChartCardProps> = ({
                   'hsl(180, 60%, 50%)',  // Ocean Teal
                   'hsl(320, 60%, 60%)',  // Pink
                 ];
-
+                
                 return (
                   <div key={index} className="flex items-center space-x-2 p-2 rounded bg-muted/20">
-                    <div
-                      className="w-3 h-3 rounded-full shadow-sm flex-shrink-0"
+                    <div 
+                      className="w-3 h-3 rounded-full shadow-sm flex-shrink-0" 
                       style={{ backgroundColor: colors[index % colors.length] }}
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-xs truncate">{item.name}</div>
-                      <div className="text-xs text-muted-foreground">{percentage}%</div>
+                      <div 
+                        className="font-medium text-xs truncate cursor-help relative" 
+                        onMouseEnter={(e) => {
+                          setHoveredLabel(item.name);
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltipPosition({
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          });
+                        }}
+                        onMouseLeave={() => setHoveredLabel(null)}
+                      >
+                        {item.name}
+                      </div>
                     </div>
-                    <div className="text-xs font-bold">{item.value}</div>
                   </div>
                 );
               })}
+            </div>
+            
+            {/* Custom Tooltip */}
+            {hoveredLabel && (
+              <div 
+                className="fixed z-50 bg-background border border-border rounded-lg shadow-lg px-3 py-2 text-sm font-medium pointer-events-none"
+                style={{
+                  left: `${tooltipPosition.x}px`,
+                  top: `${tooltipPosition.y}px`,
+                  transform: 'translate(-50%, -100%)'
+                }}
+              >
+                {hoveredLabel}
+              </div>
+            )}
+            
+            {/* Pie Chart */}
+            <div className="h-80 flex items-center justify-center">
+              <Doughnut 
+                data={pieChartData} 
+                options={{ 
+                  responsive: true, 
+                  maintainAspectRatio: false, 
+                  cutout: "70%",
+                  plugins: {
+                    legend: {
+                      display: false
+                    },
+                    tooltip: {
+                      backgroundColor: 'hsl(var(--background))',
+                      titleColor: 'hsl(var(--foreground))',
+                      bodyColor: 'hsl(var(--foreground))',
+                      borderColor: 'hsl(var(--border))',
+                      borderWidth: 1,
+                      callbacks: {
+                        label: function(context) {
+                          const label = context.label || '';
+                          const value = context.parsed;
+                          const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+                          const percentage = ((value / total) * 100).toFixed(1);
+                          return `${label}: ${value} (${percentage}%)`;
+                        }
+                      }
+                    }
+                  }
+                }} 
+              />
             </div>
           </div>
         ) : (
