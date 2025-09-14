@@ -151,15 +151,15 @@ export function Visualization({
           {
             label: "Average Nap Duration",
             data: data.map((item) => item.averageNapDuration),
-            backgroundColor: getColor(0),
-            borderColor: getBorderColor(0),
+            backgroundColor: data.map(() => getColor(0)),
+            borderColor: data.map(() => getBorderColor(0)),
             borderWidth: 2,
           },
           {
             label: "Total Incidents",
             data: data.map((item) => item.totalIncidents),
-            backgroundColor: getColor(1),
-            borderColor: getBorderColor(1),
+            backgroundColor: data.map(() => getColor(1)),
+            borderColor: data.map(() => getBorderColor(1)),
             borderWidth: 2,
           },
         ]

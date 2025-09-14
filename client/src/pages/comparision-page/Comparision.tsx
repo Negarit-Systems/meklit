@@ -76,10 +76,10 @@ export function Comparison() {
   const [children, setChildren] = useState<Child[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [comparisonLevel, setComparisonLevel] = useState<"child" | "class" | "center">("child")
+  const [comparisonLevel, setComparisonLevel] = useState<"child" | "class" | "center">("class")
   const [entity1, setEntity1] = useState<string | null>(null)
   const [entity2, setEntity2] = useState<string | null>(null)
-  const [selectedMetric, setSelectedMetric] = useState<string>("averageNapDuration")
+  const [selectedMetric, setSelectedMetric] = useState<string>("both")
   const [viewType, setViewType] = useState<"aggregate" | "table">("aggregate")
   const [dateRange, setDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
@@ -113,6 +113,17 @@ export function Comparison() {
     }
     fetchChildrenData()
   }, [])
+
+  // Set default entities for class comparison
+  useEffect(() => {
+    if (comparisonLevel === "class" && children.length > 0) {
+      const classes = [...new Set(children.map((c) => c.classId))].sort()
+      if (classes.length >= 2) {
+        setEntity1(classes[0])
+        setEntity2(classes[1])
+      }
+    }
+  }, [children, comparisonLevel])
 
   // Get unique lists
   const uniqueCenters = [...new Set(children.map((c) => c.centerId))].sort()
