@@ -42,34 +42,40 @@ This project reflects our proficiency in design, dynamic data handling, and full
 ## Setup and Running Locally
 
 1. Clone the repository:
+```bash
 git clone <https://github.com/Negarit-Systems/meklit.git>
 cd meklit
-
+```
 
 2. Install dependencies for both frontend and backend:
+```bash
 cd client && npm install
 cd ../server && npm install
-
+```
 
 3. Configure environment variables:
 - Create `.env` files in `/client` and `/server` (see sub-READMEs for required keys, e.g., Firebase credentials).
 
 4. Seed the database (from backend):
+```bash
 cd server && npm run seed
-
+```
 
 5. Run the backend:
+```
 cd server && npm run start:dev
-
+```
 
 6. Run the frontend:
+```bash
 cd client && npm run dev
+```
 
 7. Access the app at `http://localhost:5173` (frontend) and `http://localhost:5000` (backend API).
 
 ## Deployment
 
-The application is deployed on a VPS 
+The application is deployed on a VPS
 
 ## API Documentation
 
@@ -78,6 +84,7 @@ Swagger UI is integrated. After starting the backend, access docs at `http://loc
 ## Team
 
 Developed by **Negarit Systems**. For questions or collaboration, contact us at negarit.system.tech@gmail.com.
+
 ## 🔗 Live Demo
 The app is deployed on our VPS and can be accessed here:  
 👉 [Meklit App – Reports & Analytics Dashboard](https://meklit.negaritsystems.com.et/)
