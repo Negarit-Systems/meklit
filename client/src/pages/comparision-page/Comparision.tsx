@@ -102,7 +102,7 @@ export function Comparison() {
   const [selectedCenter, setSelectedCenter] = useState<string>("");
   const [data, setData] = useState<ReportSummaryItem[] | null>(null);
   const [childEventsData, setChildEventsData] = useState<
-    { childId: string; healthEvents: { type: string }[] }[] | null
+    { childId: string; healthEvents: { type: string; detail?: string }[] }[] | null
   >(null)
 
   // Animation variants
@@ -249,7 +249,7 @@ export function Comparison() {
           setChildEventsData(
             childComparison.map((c) => ({
               childId: c.childId,
-              healthEvents: c.healthEvents.map((e) => ({ type: e.type })),
+              healthEvents: c.healthEvents.map((e) => ({ type: e.type, detail: e.detail })),
             }))
           )
         }

@@ -105,7 +105,7 @@ export function FilterBar({
   const metricObj = metrics.find((m) => m.value === selectedMetric)!
 
   const getComparisonIcon = () => {
-    const iconClass = "h-5 w-5 text-green-500"
+    const iconClass = "h-5 w-5 text-primary"
     switch (comparisonLevel) {
       case "child":
         return <Users className={iconClass} />
@@ -121,7 +121,7 @@ export function FilterBar({
   return (
     <Card className="sticky top-6 bg-card/50 dark:bg-card/20 border-border/50">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center space-x-2 text-green-500">
+        <CardTitle className="flex items-center space-x-2 text-primary">
           <Filter className="h-5 w-5" />
           <span>Comparison Filters</span>
         </CardTitle>
@@ -148,15 +148,15 @@ export function FilterBar({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-full bg-card border-border/50">
               <DropdownMenuItem onSelect={() => setComparisonLevel("child")}>
-                <Users className="h-4 w-4 mr-2 text-green-500" />
+                <Users className="h-4 w-4 mr-2 text-primary" />
                 Children
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setComparisonLevel("class")}>
-                <GraduationCap className="h-4 w-4 mr-2 text-green-500" />
+                <GraduationCap className="h-4 w-4 mr-2 text-primary" />
                 Classes
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setComparisonLevel("center")}>
-                <Building2 className="h-4 w-4 mr-2 text-green-500" />
+                <Building2 className="h-4 w-4 mr-2 text-primary" />
                 Centers
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -167,7 +167,7 @@ export function FilterBar({
         {comparisonLevel === "class" && metricObj.source === "health" && (
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground flex items-center space-x-2">
-              <Building2 className="h-4 w-4 text-green-500" />
+              <Building2 className="h-4 w-4 text-primary" />
               <span>Center</span>
             </label>
             <DropdownMenu>
@@ -183,7 +183,7 @@ export function FilterBar({
               <DropdownMenuContent align="start" className="w-full bg-card border-border/50">
                 {uniqueCenters.map((ce) => (
                   <DropdownMenuItem key={ce} onSelect={() => setSelectedCenter(ce)}>
-                    <Building2 className="h-4 w-4 mr-2 text-green-500" />
+                    <Building2 className="h-4 w-4 mr-2 text-primary" />
                     {ce}
                   </DropdownMenuItem>
                 ))}
@@ -295,7 +295,7 @@ export function FilterBar({
             <Button
               variant={viewType === "aggregate" ? "default" : "outline"}
               onClick={() => setViewType("aggregate")}
-              className="flex-1 h-10 bg-green-500 text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700"
+              className="flex-1 h-10 bg-primary text-white hover:bg-primary/80 dark:bg-primary/80 dark:hover:bg-primary/70"
               size="sm"
             >
               <BarChart3 className="h-4 w-4 mr-2" />
@@ -318,7 +318,7 @@ export function FilterBar({
         {/* Date Range */}
         <div className="space-y-3">
           <label className="text-sm font-medium text-foreground flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-green-500" />
+            <Calendar className="h-4 w-4 text-primary" />
             <span>Date Range</span>
           </label>
           <div className="flex items-center justify-between">

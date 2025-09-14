@@ -13,6 +13,7 @@ ChartJS.register(ArcElement, Tooltip, Legend)
 
 export interface HealthEventItem {
   type: string
+  detail?: string
 }
 
 export interface ChildEventsInput {
@@ -39,30 +40,35 @@ const paletteBorder = palette.map((c) => c.replace("0.8", "1"))
 
 function buildCounts(events: HealthEventItem[]): Record<string, number> {
   return events.reduce((acc, e) => {
-    acc[e.type] = (acc[e.type] ?? 0) + 1
+    const key = (e.detail && e.detail.trim()) || e.type
+    acc[key] = (acc[key] ?? 0) + 1
     return acc
   }, {} as Record<string, number>)
 }
 
 export function ChildEventsChart({ childrenData, getLabel }: ChildEventsChartProps) {
-  // Union of event types across both children to keep labels consistent
-  const allTypes = Array.from(
-    new Set(childrenData.flatMap((c) => c.healthEvents.map((e) => e.type)))
+  // Union of event labels (prefer detail, fallback to type) across both children to keep labels consistent
+  const allLabels = Array.from(
+    new Set(
+      childrenData.flatMap((c) =>
+        c.healthEvents.map((e) => (e.detail && e.detail.trim()) || e.type)
+      )
+    )
   )
 
   const charts = childrenData.map((c) => {
     const counts = buildCounts(c.healthEvents)
-    const data = allTypes.map((t) => counts[t] ?? 0)
+    const data = allLabels.map((label) => counts[label] ?? 0)
     return {
       childId: c.childId,
       data: {
-        labels: allTypes,
+        labels: allLabels,
         datasets: [
           {
             label: "Events",
             data,
-            backgroundColor: allTypes.map((_, i) => palette[i % palette.length]),
-            borderColor: allTypes.map((_, i) => paletteBorder[i % paletteBorder.length]),
+            backgroundColor: allLabels.map((_, i) => palette[i % palette.length]),
+            borderColor: allLabels.map((_, i) => paletteBorder[i % paletteBorder.length]),
             borderWidth: 1,
           },
         ],
@@ -70,14 +76,14 @@ export function ChildEventsChart({ childrenData, getLabel }: ChildEventsChartPro
     }
   })
 
-  const noEvents = allTypes.length === 0
+  const noEvents = allLabels.length === 0
 
   return (
     <Card>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center space-x-2">
           <PieChartIcon className="h-5 w-5 text-primary" />
-          <span>Health Events Distribution</span>
+          <span>Health Events Distribution (by Detail)</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
