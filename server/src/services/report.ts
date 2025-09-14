@@ -317,10 +317,10 @@ export class ClassReportService {
         childId,
         totalIncidents: stats.totalIncidents,
         totalMedications: stats.totalMedications,
-        totalNapDuration: stats.totalNapDuration,
+        totalNapDuration: stats.totalNapDuration / 60,
         averageNapDuration:
           stats.napCount > 0
-            ? stats.totalNapDuration / stats.napCount
+            ? stats.totalNapDuration / stats.napCount / 60
             : 0,
         healthEvents: stats.healthEvents,
       };

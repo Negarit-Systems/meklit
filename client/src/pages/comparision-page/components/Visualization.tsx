@@ -159,7 +159,7 @@ export function Visualization({
                     {comparisonLevel === "child" && (
                       <>
                         <td className="px-6 py-4 text-card-foreground">
-                          <Badge variant="secondary">{item.averageNapDuration.toFixed(2)} min</Badge>
+                          <Badge variant="secondary">{item.averageNapDuration.toFixed(2)} Hrs </Badge>
                         </td>
                         <td className="px-6 py-4 text-card-foreground">
                           <Badge variant="outline">{item.totalIncidents}</Badge>
@@ -168,7 +168,7 @@ export function Visualization({
                           <Badge variant="outline">{item.totalMedications ?? 0}</Badge>
                         </td>
                         <td className="px-6 py-4 text-card-foreground">
-                          <Badge variant="secondary">{item.totalNapDuration ?? 0} min</Badge>
+                          <Badge variant="secondary">{item.totalNapDuration ?? 0} Hrs </Badge>
                         </td>
                       </>
                     )}
