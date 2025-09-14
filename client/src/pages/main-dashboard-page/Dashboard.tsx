@@ -169,7 +169,7 @@ export function Dashboard() {
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "bg-card/50 dark:bg-card/20 border rounded-xl p-6 shadow-md transition-all duration-300",
+        "bg-card border border-border rounded-xl p-6 shadow-md transition-all duration-300",
         isMdUp ? "min-h-[calc(100vh-4rem)] sticky top-8" : "fixed inset-0 z-50 p-4 overflow-y-auto"
       )}
     >
@@ -190,7 +190,7 @@ export function Dashboard() {
                 {filters.centerId || "All Centers"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-card">
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-card border border-border">
               <DropdownMenuItem onSelect={() => handleFilterChange({ centerId: "" })}>
                 All Centers
               </DropdownMenuItem>
@@ -210,7 +210,7 @@ export function Dashboard() {
                 {filters.classId || "All Classes"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-card">
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-card border border-border">
               <DropdownMenuItem onSelect={() => handleFilterChange({ classId: "" })}>
                 All Classes
               </DropdownMenuItem>
@@ -240,7 +240,7 @@ export function Dashboard() {
                   : "All Children"}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-card">
+            <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-card border border-border">
               <DropdownMenuItem onSelect={() => handleFilterChange({ childId: "" })}>
                 All Children
               </DropdownMenuItem>
@@ -266,8 +266,9 @@ export function Dashboard() {
                   </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-card">
+              <PopoverContent className="w-auto p-0 bg-card border border-border">
                 <DayPicker
+                  className="bg-card text-foreground"
                   mode="single"
                   selected={filters.dateRange[0]}
                   onSelect={(date) => handleFilterChange({ dateRange: [date, filters.dateRange[1]] })}
@@ -288,8 +289,9 @@ export function Dashboard() {
                   </span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-card">
+              <PopoverContent className="w-auto p-0 bg-card border border-border">
                 <DayPicker
+                  className="bg-card text-foreground"
                   mode="single"
                   selected={filters.dateRange[1]}
                   onSelect={(date) => handleFilterChange({ dateRange: [filters.dateRange[0], date] })}
@@ -313,7 +315,7 @@ export function Dashboard() {
                       : filters.dataTypes.filter((dt) => dt !== type);
                     handleFilterChange({ dataTypes: newTypes });
                   }}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="h-4 w-4 text-blue-600 bg-background border border-border rounded focus:ring-2 focus:ring-ring focus:ring-offset-0"
                 />
                 <label htmlFor={type} className="text-sm font-medium text-foreground">
                   {type}
@@ -529,7 +531,7 @@ export function Dashboard() {
       </div>
 
       {!isMdUp && filters.isFilterOpen && (
-        <div className="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-start justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-background/80 dark:bg-background/80 backdrop-blur-sm flex items-start justify-center p-4">
           <FilterPanel />
         </div>
       )}
