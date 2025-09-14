@@ -11,9 +11,13 @@ export interface Child {
 
 export interface TrendData {
   date: { _seconds: number };
-  averageNapDuration?: number;
-  totalMeals?: number;
-  type?: string;
+  averageNapDuration: number;
+  napCount: number;
+  mealStatusCounts: Record<string, number>;
+  totalMeals: number;
+  moodCounts: Record<string, number>;
+  totalMoods: number;
+  otherTypeCounts: Record<string, number>;
 }
 
 export interface StaffPerformance {
@@ -57,7 +61,9 @@ export const fetchTrendOverTime = async (filters: {
   if (filters.classId) params.classId = filters.classId;
   if (filters.childId) params.childId = filters.childId;
 
-  const response = await apiClient.get("/daily-logs/trend-over-time", { params });
+  const response = await apiClient.get("/daily-logs/trend-over-time", {
+    params,
+  });
   return extractData<TrendData[]>(response);
 };
 
@@ -74,7 +80,9 @@ export const fetchStaffPerformance = async (filters: {
   };
   if (filters.centerId) params.centerId = filters.centerId;
 
-  const response = await apiClient.get("/daily-logs/staff-performance", { params });
+  const response = await apiClient.get("/daily-logs/staff-performance", {
+    params,
+  });
   return extractData<StaffPerformance[]>(response);
 };
 
@@ -91,6 +99,8 @@ export const fetchIncidentFrequency = async (filters: {
   };
   if (filters.centerId) params.centerId = filters.centerId;
 
-  const response = await apiClient.get("/health-records/incident-frequency", { params });
+  const response = await apiClient.get("/health-records/incident-frequency", {
+    params,
+  });
   return extractData<IncidentFrequency[]>(response);
 };
