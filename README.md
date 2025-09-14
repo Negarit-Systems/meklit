@@ -66,4 +66,4 @@ Swagger UI is integrated. After starting the backend, access docs at `http://loc
 
 ## Team
 
-Developed by **Negarit Systems**. For questions or collaboration, contact us at [your-email@example.com].
+Developed by **Negarit Systems**. For questions or collaboration, contact us at [negarit.system.tech@gmail.com].
