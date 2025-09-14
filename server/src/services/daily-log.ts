@@ -176,6 +176,7 @@ export class DailyLogService extends EntityCrudService<DailyLog> {
     centerId?: string,
   ): Promise<StaffPerformance[]> {
     let q: FirebaseFirestore.Query = this.dailyLogsRef;
+    q = q.orderBy('staffId');
 
     if (startDate) {
       q = q.where('timestamp', '>=', new Date(startDate));

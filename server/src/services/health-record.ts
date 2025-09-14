@@ -264,6 +264,7 @@ export class HealthRecordService extends EntityCrudService<HealthRecordEntry> {
     centerId?: string,
   ): Promise<StaffAnalysis[]> {
     let q: FirebaseFirestore.Query = this.healthRecordRef;
+    q = q.orderBy('recordedByUserId');
 
     if (startDate) {
       q = q.where('timestamp', '>=', new Date(startDate));

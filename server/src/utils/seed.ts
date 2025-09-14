@@ -59,19 +59,20 @@ const classIds = [
 ];
 
 const staff = [
-  'Staff 1',
-  'Staff 2',
-  'Staff 3',
-  'Staff 4',
-  'Staff 5',
-  'Staff 6',
-  'Staff 7',
-  'Staff 8',
-  'Staff 9',
-  'Staff 10',
-  'Staff 11',
-  'Staff 12',
+  'Amanuel Bekele',
+  'Sofia Teshome',
+  'Robel Yilma',
+  'Hanna Fikadu',
+  'Dawit Abebe',
+  'Liya Mengistu',
+  'Samuel Girma',
+  'Betelhem Alemu',
+  'Yonas Tesfaye',
+  'Marta Wolde',
+  'Kidus Demissie',
+  'Selam Mulat',
 ];
+
 const mealStatuses = ['Ate all', 'Ate half', 'Ate little', 'Refused'];
 const sleepDurations = [30, 45, 60, 90, 120];
 const engagementLevels = ['High', 'Moderate', 'Low'];
