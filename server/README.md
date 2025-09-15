@@ -48,7 +48,7 @@ npm install
 - `REFRESH_TOKEN_SECRET=nfjkajhejerksldkk234ndsjijo34]kkd`
 - `NODE_ENV=development`
 - `FIREBASE_SERVICE_ACCOUNT_PATH= path to your serviceAccountKey.json`
-- `N8N_WEBHOOK_URL= webhook_url_for_email_service_built_with_n8n`
+- `N8N_WEBHOOK_URL= webhook_url_for_email_service_built_with_n8n` [view email n8n workflow [here](https://i.postimg.cc/ZRxyj33X/Screenshot-from-2025-09-15-09-58-41.png)]
 - `MAX_AGE= max_age_for_refreshtoken_in_number`
 - `CLIENT_URL=https://your-url.com`
 
@@ -64,6 +64,7 @@ npm run start:dev
 
 6. Run in production mode:
 ```bash
-npm run build
+npm run buildhttps://i.postimg.cc/ZRxyj33X/Screenshot-from-2025-09-15-09-58-41.png
 npm run start
 ```
+
