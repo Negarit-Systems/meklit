@@ -41,7 +41,7 @@ Dev tools: TypeScript, ESLint, SWC plugin for Vite.
 
 
 3. Create a `.env` file with required variables:
-- `VITE_API_URL=http://localhost:3000` (backend API base URL).
+- `VITE_API_URL=http://localhost:5000` (backend API base URL).
 
 
 4. Run in development mode:
