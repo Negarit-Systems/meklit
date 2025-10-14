@@ -1,23 +1,17 @@
 import admin from 'firebase-admin';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { config } from './config.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const { firebaseServiceAccountPath } = config();
+const { firebaseServiceAccountJson } = config();
 
-if (!firebaseServiceAccountPath) {
+// Throw if JSON is not defined
+if (!firebaseServiceAccountJson) {
   throw new Error(
-    'FIREBASE_SERVICE_ACCOUNT_PATH is not defined in environment variables',
+    'FIREBASE_SERVICE_ACCOUNT_JSON is not defined in environment variables'
   );
 }
 
-const serviceAccountPath = path.resolve(
-  __dirname,
-  '..',
-  firebaseServiceAccountPath,
-);
+// Parse the JSON from environment variable
+const serviceAccount = JSON.parse(firebaseServiceAccountJson);
 
 // Conditionally configure Firestore emulator for development
 if (process.env.NODE_ENV === 'development') {
@@ -27,7 +21,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccountPath),
+  credential: admin.credential.cert(serviceAccount),
 });
 
 const db = admin.firestore();
