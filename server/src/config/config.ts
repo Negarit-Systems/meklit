@@ -7,8 +7,8 @@ export const config = () => {
     port: process.env.PORT || 4001,
     jwtSecret: process.env.JWT_SECRET!,
     refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET!,
-    firebaseServiceAccountPath:
-      process.env.FIREBASE_SERVICE_ACCOUNT_PATH!,
+    firebaseServiceAccountJson:
+      process.env.FIREBASE_SERVICE_ACCOUNT_JSON!,
     n8nWebHookURL: process.env.N8N_WEBHOOK_URL!,
     maxAge: process.env.MAX_AGE,
     nodeEnv: process.env.NODE_ENV || 'development',
