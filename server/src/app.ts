@@ -13,6 +13,7 @@ app.use(
       'http://localhost:5000',
       'https://meklit-api.negaritsystems.com.et',
       'https://meklit.negaritsystems.com.et',
+      'https://meklit.vercel.app'
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
